@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+asr/checkpoints/
+asr/checkpoints_v2/onnx/
+nmt/checkpoints/
+tts/
+*.onnx
+*.onnx.data
+*.pt
+*.ckpt
