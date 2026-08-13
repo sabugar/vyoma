@@ -4,7 +4,7 @@ __pycache__/
 asr/checkpoints/
 asr/checkpoints_v2/onnx/
 nmt/checkpoints/
-tts/
+tts/flite/
 *.onnx
 *.onnx.data
 *.pt
