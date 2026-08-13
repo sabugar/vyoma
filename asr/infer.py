@@ -25,13 +25,12 @@ class ASRInference:
             map_location="cpu"
         ).eval()
 
-        print("Loading ASR ONNX sessions...")
-        self.sessions = {
-            "ta": ort.InferenceSession(
-                f"{checkpoint_dir}/ta-conformer.onnx",
-                providers=['CUDAExecutionProvider', 'CPUExecutionProvider']
-            ),
-        }
+        # Tamil (~485MB) is lazy-loaded on first actual 'ta' request instead of
+        # eagerly here - this deployment's demo/testing is Hindi-only, and
+        # every MB matters on an 8GB device already holding the LLM + Hindi
+        # ASR + Hindi TTS models.
+        self._checkpoint_dir = checkpoint_dir
+        self.sessions = {}
 
         # Hindi uses a separate, larger (600M param, int8-quantized) model -
         # the original hi-conformer.onnx's hardcoded 89-token vocab was missing
@@ -196,8 +195,15 @@ class ASRInference:
                 "processing_time_sec": round(time.time() - start_time, 3)
             }
 
-        if language not in self.sessions:
+        if language != "ta":
             raise ValueError(f"Unsupported language: {language}")
+
+        if "ta" not in self.sessions:
+            print("Lazy-loading Tamil ASR ONNX session...")
+            self.sessions["ta"] = ort.InferenceSession(
+                f"{self._checkpoint_dir}/ta-conformer.onnx",
+                providers=['CUDAExecutionProvider', 'CPUExecutionProvider']
+            )
 
         vocab = self.VOCAB_TA
 

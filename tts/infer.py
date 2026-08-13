@@ -39,11 +39,21 @@ class TTSInference:
         print("Loading Hindi neural TTS (VITS) model...")
         self.hi_tokenizer = VitsTokenizer.from_pretrained(HI_VITS_DIR)
         self.hi_model = VitsModel.from_pretrained(HI_VITS_DIR)
+        # VITS on CPU takes 8-17s per short response (measured live) - the
+        # single biggest latency bottleneck in the whole pipeline. The venv's
+        # torch 2.11.0 has CUDA available on this Jetson, so move the model
+        # there; if CUDA ever goes away the from_pretrained default stays CPU
+        # and it still works, just slower.
+        if torch.cuda.is_available():
+            self.hi_device = torch.device("cuda")
+            self.hi_model = self.hi_model.to(self.hi_device)
+        else:
+            self.hi_device = torch.device("cpu")
         self.hi_model.eval()
         # Warm up: onnx/torch first-call overhead is real (~20s cold), pay it
         # once at startup rather than on the first user request.
         with torch.no_grad():
-            self.hi_model(**self.hi_tokenizer(text="नमस्ते", return_tensors="pt"))
+            self.hi_model(**self.hi_tokenizer(text="नमस्ते", return_tensors="pt").to(self.hi_device))
 
         # -------------------------------------------------
         # LANGUAGE → VOICE MAP (Flite languages other than Hindi)
@@ -83,11 +93,13 @@ class TTSInference:
     # Hindi neural (VITS) synthesis
     # -----------------------------------------------------
     def _synthesize_hi_vits(self, text: str) -> bytes:
-        inputs = self.hi_tokenizer(text=text, return_tensors="pt")
+        inputs = self.hi_tokenizer(text=text, return_tensors="pt").to(self.hi_device)
         set_seed(42)
         with torch.no_grad():
-            outputs = self.hi_model(**inputs)
-        waveform = outputs.waveform[0].numpy().astype(np.float32)
+            # speaking_rate < 1.0 stretches predicted phoneme durations
+            # (length_scale = 1/speaking_rate), slowing playback for clarity.
+            outputs = self.hi_model(**inputs, speaking_rate=0.8)
+        waveform = outputs.waveform[0].cpu().numpy().astype(np.float32)
         pcm16 = (np.clip(waveform, -1.0, 1.0) * 32767).astype(np.int16)
 
         import wave
