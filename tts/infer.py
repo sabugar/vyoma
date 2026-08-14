@@ -10,6 +10,8 @@ import unicodedata
 import numpy as np
 import onnxruntime as ort
 
+from tts.hindi_numbers import spell_out_numbers
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -108,6 +110,7 @@ class TTSInference:
         return ids
 
     def _synthesize_hi_vits(self, text: str) -> bytes:
+        text = spell_out_numbers(text)
         ids = self._tokenize_hi(text)
         if len(ids) <= 1:
             raise ValueError("No speakable characters after tokenization")
