@@ -1,13 +1,14 @@
 import base64
 import io
+import json
 import subprocess
 import os
 import tempfile
 import time
+import unicodedata
 
 import numpy as np
-import torch
-from transformers import VitsTokenizer, VitsModel, set_seed
+import onnxruntime as ort
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -16,9 +17,18 @@ FLITE_BIN = os.path.join(BASE_DIR, "flite", "bin", "flite")
 VOICES_DIR = os.path.join(BASE_DIR, "flite", "voices")
 
 # Hindi previously used Flite's cmu_indic_hin_ab voice - old diphone-concatenation
-# synthesis, sounds dated/robotic. Replaced with a lightweight neural VITS model
-# (fine-tuned female voice) for Hindi specifically; other languages keep Flite.
+# synthesis, sounds dated/robotic. Replaced with a neural VITS model (fine-tuned
+# female voice), exported to ONNX (model_sr0p8.onnx, speaking_rate=0.8 baked in
+# during export for clearer, slower playback).
+#
+# Why ONNX instead of PyTorch: torch+transformers added ~1.5GB to this service's
+# memory footprint. On the 8GB Jetson (LLM + 600M ASR already resident) that
+# caused swap thrash, OOM kills of this service, and device hangs. onnxruntime
+# is already loaded here for ASR, so the TTS model now costs only its own
+# ~114MB. Measured: 3s synthesis (torch CPU took 8-17s).
 HI_VITS_DIR = os.path.join(BASE_DIR, "hi_female_vits")
+HI_VITS_ONNX = os.path.join(HI_VITS_DIR, "model_sr0p8.onnx")
+HI_SAMPLE_RATE = 16000  # from hi_female_vits/config.json
 
 
 class TTSInference:
@@ -36,24 +46,15 @@ class TTSInference:
                 f"Voices directory not found: {VOICES_DIR}"
             )
 
-        print("Loading Hindi neural TTS (VITS) model...")
-        self.hi_tokenizer = VitsTokenizer.from_pretrained(HI_VITS_DIR)
-        self.hi_model = VitsModel.from_pretrained(HI_VITS_DIR)
-        # VITS on CPU takes 8-17s per short response (measured live) - the
-        # single biggest latency bottleneck in the whole pipeline. The venv's
-        # torch 2.11.0 has CUDA available on this Jetson, so move the model
-        # there; if CUDA ever goes away the from_pretrained default stays CPU
-        # and it still works, just slower.
-        if torch.cuda.is_available():
-            self.hi_device = torch.device("cuda")
-            self.hi_model = self.hi_model.to(self.hi_device)
-        else:
-            self.hi_device = torch.device("cpu")
-        self.hi_model.eval()
-        # Warm up: onnx/torch first-call overhead is real (~20s cold), pay it
-        # once at startup rather than on the first user request.
-        with torch.no_grad():
-            self.hi_model(**self.hi_tokenizer(text="नमस्ते", return_tensors="pt").to(self.hi_device))
+        print("Loading Hindi neural TTS (VITS ONNX) model...")
+        with open(os.path.join(HI_VITS_DIR, "vocab.json"), encoding="utf-8") as f:
+            self.hi_vocab = json.load(f)
+        self.hi_sess = ort.InferenceSession(
+            HI_VITS_ONNX, providers=['CPUExecutionProvider']
+        )
+        # Warm up: first-call graph optimizations are paid once at startup,
+        # not on the first user request.
+        self._synthesize_hi_vits("नमस्ते")
 
         # -------------------------------------------------
         # LANGUAGE → VOICE MAP (Flite languages other than Hindi)
@@ -90,16 +91,31 @@ class TTSInference:
         print("TTS Engine initialized successfully.")
 
     # -----------------------------------------------------
-    # Hindi neural (VITS) synthesis
+    # Hindi neural (VITS ONNX) synthesis
     # -----------------------------------------------------
+    def _tokenize_hi(self, text: str):
+        '''Pure-Python equivalent of transformers.VitsTokenizer for this model
+        (verified byte-identical input_ids): NFC-normalize, map each char via
+        vocab.json, drop chars not in vocab (e.g. '।', '.', '?', ','),
+        and insert blank token 0 before/after every token (add_blank=True).'''
+        text = unicodedata.normalize('NFC', text)
+        ids = [0]
+        for ch in text:
+            tok = self.hi_vocab.get(ch)
+            if tok is not None:
+                ids.append(tok)
+                ids.append(0)
+        return ids
+
     def _synthesize_hi_vits(self, text: str) -> bytes:
-        inputs = self.hi_tokenizer(text=text, return_tensors="pt").to(self.hi_device)
-        set_seed(42)
-        with torch.no_grad():
-            # speaking_rate < 1.0 stretches predicted phoneme durations
-            # (length_scale = 1/speaking_rate), slowing playback for clarity.
-            outputs = self.hi_model(**inputs, speaking_rate=0.8)
-        waveform = outputs.waveform[0].cpu().numpy().astype(np.float32)
+        ids = self._tokenize_hi(text)
+        if len(ids) <= 1:
+            raise ValueError("No speakable characters after tokenization")
+        x = np.array([ids], dtype=np.int64)
+        mask = np.ones_like(x)
+        waveform = self.hi_sess.run(
+            None, {'input_ids': x, 'attention_mask': mask}
+        )[0].reshape(-1).astype(np.float32)
         pcm16 = (np.clip(waveform, -1.0, 1.0) * 32767).astype(np.int16)
 
         import wave
@@ -107,7 +123,7 @@ class TTSInference:
         with wave.open(buf, "wb") as wf:
             wf.setnchannels(1)
             wf.setsampwidth(2)
-            wf.setframerate(self.hi_model.config.sampling_rate)
+            wf.setframerate(HI_SAMPLE_RATE)
             wf.writeframes(pcm16.tobytes())
         return buf.getvalue()
 

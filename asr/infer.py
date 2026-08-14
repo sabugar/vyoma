@@ -4,7 +4,6 @@ import json
 import os
 import time
 import librosa
-import torch
 import numpy as np
 import onnxruntime as ort
 
@@ -19,16 +18,11 @@ class ASRInference:
     # -----------------------------
     def __init__(self, checkpoint_dir="checkpoints"):
 
-        print("Loading ASR preprocessor...")
-        self.preprocessor = torch.jit.load(
-            f"{checkpoint_dir}/hi-conformer_preprocess.pt",
-            map_location="cpu"
-        ).eval()
-
-        # Tamil (~485MB) is lazy-loaded on first actual 'ta' request instead of
-        # eagerly here - this deployment's demo/testing is Hindi-only, and
-        # every MB matters on an 8GB device already holding the LLM + Hindi
-        # ASR + Hindi TTS models.
+        # torch preprocessor + Tamil model are lazy-loaded on first actual
+        # 'ta' request. This deployment is Hindi-only, and importing torch
+        # costs ~1GB of RAM the 8GB board does not have spare - the Hindi v2
+        # path below is pure librosa+numpy+onnxruntime.
+        self.preprocessor = None
         self._checkpoint_dir = checkpoint_dir
         self.sessions = {}
 
@@ -116,6 +110,8 @@ class ASRInference:
     # -----------------------------
     def load_audio(self, audio_base64):
 
+        import torch  # lazy: Tamil path only - see __init__ note
+
         audio_bytes = base64.b64decode(audio_base64)
 
         signal_np, _ = librosa.load(
@@ -199,18 +195,25 @@ class ASRInference:
             raise ValueError(f"Unsupported language: {language}")
 
         if "ta" not in self.sessions:
-            print("Lazy-loading Tamil ASR ONNX session...")
+            import torch  # lazy: Tamil path only
+            print("Lazy-loading Tamil ASR ONNX session + preprocessor...")
             self.sessions["ta"] = ort.InferenceSession(
                 f"{self._checkpoint_dir}/ta-conformer.onnx",
                 providers=['CUDAExecutionProvider', 'CPUExecutionProvider']
             )
+            self.preprocessor = torch.jit.load(
+                f"{self._checkpoint_dir}/hi-conformer_preprocess.pt",
+                map_location="cpu"
+            ).eval()
 
         vocab = self.VOCAB_TA
 
         # Audio
         signal, length = self.load_audio(audio_base64)
 
-        # Preprocess
+        # Preprocess (torch was already imported in the lazy-load block above
+        # or inside load_audio - re-import is a no-op and keeps it local)
+        import torch
         with torch.no_grad():
             feats, feat_len = self.preprocessor(signal, length)
 
