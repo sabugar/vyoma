@@ -3,6 +3,7 @@ import io
 import json
 import os
 import time
+import wave
 import librosa
 import numpy as np
 import onnxruntime as ort
@@ -52,22 +53,23 @@ class ASRInference:
         # onnxruntime pays a one-time cost (CUDA graph/kernel selection) on the
         # first real inference call - pay it now during service startup instead
         # of on the first user request (measured ~19s cold vs <2s once warm).
-        print("Warming up Hindi ASR v2 (one-time CUDA kernel selection)...")
-        # Use a length representative of a real utterance (~5s of audio at this
-        # model's frame rate) - onnxruntime's CUDA provider re-optimizes per
-        # input shape, so a too-short dummy doesn't warm up realistic lengths.
-        dummy_feats = np.zeros((1, 80, 500), dtype=np.float32)
-        dummy_length = np.array([500], dtype=np.int64)
-        enc_inputs = self.hi_encoder_sess.get_inputs()
-        enc_dict = {enc_inputs[0].name: dummy_feats}
-        if len(enc_inputs) > 1:
-            enc_dict[enc_inputs[1].name] = dummy_length
-        enc_out = self.hi_encoder_sess.run(None, enc_dict)[0]
-        ctc_inputs = self.hi_ctc_sess.get_inputs()
-        ctc_dict = {ctc_inputs[0].name: enc_out}
-        if len(ctc_inputs) > 1:
-            ctc_dict[ctc_inputs[1].name] = dummy_length
-        self.hi_ctc_sess.run(None, ctc_dict)
+        print("Warming up Hindi ASR v2 (full inference path)...")
+        # Warm through the SAME entry point real requests use, not just the
+        # ONNX sessions: the first call also pays librosa/numba JIT compilation
+        # and CUDA kernel selection. Warming only the sessions left a ~6-8s
+        # penalty on the very first real question (vs ~0.7s once warm) - the
+        # worst possible moment for it. One bucket length is enough to trigger
+        # the one-time costs; the per-shape work is small by comparison.
+        silence = np.zeros(4 * SAMPLE_RATE, dtype=np.float32)
+        buf = io.BytesIO()
+        with wave.open(buf, "wb") as wf:
+            wf.setnchannels(1)
+            wf.setsampwidth(2)
+            wf.setframerate(SAMPLE_RATE)
+            wf.writeframes((silence * 32767).astype(np.int16).tobytes())
+        warm_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+        for _ in range(2):
+            self._infer_hi_v2(warm_b64)
 
         print("ASR Models loaded successfully.")
 
@@ -132,11 +134,34 @@ class ASRInference:
     # Hindi v2: mel-spectrogram preprocessing (matches the model's own
     # training config: 16kHz, n_fft=512, win=400, hop=160, 80 mel bins)
     # -----------------------------
+    # Pad every utterance up to the next 2-second boundary before feature
+    # extraction. onnxruntime's CUDA provider re-tunes kernels for each new
+    # input shape (measured: 6-8s on a first-seen length vs ~0.7s once warm),
+    # and real speech lengths are effectively continuous - so without this,
+    # roughly every question pays that penalty at least once. Bucketing means
+    # only BUCKET_FRAMES distinct shapes ever reach the model, and __init__
+    # warms all of them. Padding is done on the waveform (true digital
+    # silence) rather than on the mel features, so the extra frames look like
+    # real silence to the model and CTC simply emits blanks for them.
+    BUCKET_SECONDS = 2
+    MAX_SECONDS = 16
+    # librosa's melspectrogram runs with center=True, so N samples at
+    # hop_length=160 yield 1 + N//160 frames - hence the +1 (a 2s bucket is
+    # 201 frames, not 200). Warming the wrong count would defeat the whole
+    # point, so derive it rather than hardcoding.
+    BUCKET_FRAMES = tuple(
+        1 + (secs * SAMPLE_RATE) // 160
+        for secs in range(BUCKET_SECONDS, MAX_SECONDS + 1, BUCKET_SECONDS)
+    )
+
     def _preprocess_hi_v2(self, audio_base64):
         audio_bytes = base64.b64decode(audio_base64)
         wav, _ = librosa.load(io.BytesIO(audio_bytes), sr=SAMPLE_RATE, mono=True)
         if wav.size == 0:
             raise ValueError("Empty audio")
+        max_samples = self.MAX_SECONDS * SAMPLE_RATE
+        if wav.size > max_samples:
+            wav = wav[:max_samples]
         mel = librosa.feature.melspectrogram(
             y=wav, sr=SAMPLE_RATE, n_fft=512, win_length=400, hop_length=160,
             fmin=0.0, fmax=8000.0, n_mels=80, window="hann", power=2.0,
@@ -149,7 +174,25 @@ class ASRInference:
 
     def _infer_hi_v2(self, audio_base64):
         feats = self._preprocess_hi_v2(audio_base64)
-        length = np.array([feats.shape[1]], dtype=np.int64)
+        # True (unpadded) length - this is what the model is told, so its own
+        # masking ignores whatever padding we add below. Normalization in
+        # _preprocess_hi_v2 has already been computed on the real audio only;
+        # padding the waveform before that step skewed the per-bin mean/std
+        # and measurably corrupted transcriptions ("टीके कब लगवाने चाहिए" came
+        # back as "ीकक लगवाी चाहिए"), so the padding must happen here instead.
+        real_frames = feats.shape[1]
+        length = np.array([real_frames], dtype=np.int64)
+        target = next(
+            (b for b in self.BUCKET_FRAMES if b >= real_frames),
+            self.BUCKET_FRAMES[-1],
+        )
+        if target > real_frames:
+            # Zeros are the post-normalization mean, i.e. neutral input; the
+            # length above keeps the model from attending to them anyway.
+            feats = np.pad(feats, ((0, 0), (0, target - real_frames)))
+        elif real_frames > target:
+            feats = feats[:, :target]
+            length = np.array([target], dtype=np.int64)
         feats = np.expand_dims(feats, axis=0)
 
         enc_inputs = self.hi_encoder_sess.get_inputs()

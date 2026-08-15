@@ -51,8 +51,14 @@ class TTSInference:
         print("Loading Hindi neural TTS (VITS ONNX) model...")
         with open(os.path.join(HI_VITS_DIR, "vocab.json"), encoding="utf-8") as f:
             self.hi_vocab = json.load(f)
+        # CUDA first: TTS was the single biggest stage in the pipeline at
+        # 4.3s on CPU (vs ~1.5s for everything else combined), and the ASR
+        # sessions in this same process already pay for the process's CUDA
+        # context - so putting this ~114MB model on GPU too is nearly free
+        # memory-wise. Falls back to CPU automatically if CUDA is unavailable.
         self.hi_sess = ort.InferenceSession(
-            HI_VITS_ONNX, providers=['CPUExecutionProvider']
+            HI_VITS_ONNX,
+            providers=['CUDAExecutionProvider', 'CPUExecutionProvider']
         )
         # Warm up: first-call graph optimizations are paid once at startup,
         # not on the first user request.
