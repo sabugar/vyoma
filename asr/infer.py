@@ -134,25 +134,15 @@ class ASRInference:
     # Hindi v2: mel-spectrogram preprocessing (matches the model's own
     # training config: 16kHz, n_fft=512, win=400, hop=160, 80 mel bins)
     # -----------------------------
-    # Pad every utterance up to the next 2-second boundary before feature
-    # extraction. onnxruntime's CUDA provider re-tunes kernels for each new
-    # input shape (measured: 6-8s on a first-seen length vs ~0.7s once warm),
-    # and real speech lengths are effectively continuous - so without this,
-    # roughly every question pays that penalty at least once. Bucketing means
-    # only BUCKET_FRAMES distinct shapes ever reach the model, and __init__
-    # warms all of them. Padding is done on the waveform (true digital
-    # silence) rather than on the mel features, so the extra frames look like
-    # real silence to the model and CTC simply emits blanks for them.
-    BUCKET_SECONDS = 2
-    MAX_SECONDS = 16
-    # librosa's melspectrogram runs with center=True, so N samples at
-    # hop_length=160 yield 1 + N//160 frames - hence the +1 (a 2s bucket is
-    # 201 frames, not 200). Warming the wrong count would defeat the whole
-    # point, so derive it rather than hardcoding.
-    BUCKET_FRAMES = tuple(
-        1 + (secs * SAMPLE_RATE) // 160
-        for secs in range(BUCKET_SECONDS, MAX_SECONDS + 1, BUCKET_SECONDS)
-    )
+    # Safety bound only - a stuck/held button shouldn't be able to feed an
+    # unbounded clip into the model. Deliberately generous: real questions
+    # here are scenario-style and run 20s+ ("एक परिवार बच्चे को जन्म के एक घंटे
+    # बाद नहलाने की तैयारी कर रहा है..."), and a 16s cap silently truncated
+    # them mid-sentence, which then produced a confidently wrong answer to
+    # half a question. Variable input shapes are fine: the first-question
+    # latency spike turned out to be librosa/numba JIT (fixed by warming the
+    # real inference path in __init__), not per-shape CUDA tuning.
+    MAX_SECONDS = 45
 
     def _preprocess_hi_v2(self, audio_base64):
         audio_bytes = base64.b64decode(audio_base64)
@@ -174,25 +164,7 @@ class ASRInference:
 
     def _infer_hi_v2(self, audio_base64):
         feats = self._preprocess_hi_v2(audio_base64)
-        # True (unpadded) length - this is what the model is told, so its own
-        # masking ignores whatever padding we add below. Normalization in
-        # _preprocess_hi_v2 has already been computed on the real audio only;
-        # padding the waveform before that step skewed the per-bin mean/std
-        # and measurably corrupted transcriptions ("टीके कब लगवाने चाहिए" came
-        # back as "ीकक लगवाी चाहिए"), so the padding must happen here instead.
-        real_frames = feats.shape[1]
-        length = np.array([real_frames], dtype=np.int64)
-        target = next(
-            (b for b in self.BUCKET_FRAMES if b >= real_frames),
-            self.BUCKET_FRAMES[-1],
-        )
-        if target > real_frames:
-            # Zeros are the post-normalization mean, i.e. neutral input; the
-            # length above keeps the model from attending to them anyway.
-            feats = np.pad(feats, ((0, 0), (0, target - real_frames)))
-        elif real_frames > target:
-            feats = feats[:, :target]
-            length = np.array([target], dtype=np.int64)
+        length = np.array([feats.shape[1]], dtype=np.int64)
         feats = np.expand_dims(feats, axis=0)
 
         enc_inputs = self.hi_encoder_sess.get_inputs()

@@ -10,3 +10,5 @@ tts/flite/
 *.pt
 *.ckpt
 tts/hi_female_vits/*.safetensors
+*.bak
+*.bak.*
