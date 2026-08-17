@@ -1,0 +1,110 @@
+import ollama
+import logging
+from subprocess import check_output
+import requests
+
+
+class Ollama:
+    def __init__(self, model_name: str):
+        self.logger = logging.getLogger(__name__)
+        self.model_name = model_name
+        #TODO execute curl http://localhost:11434/api/generate -d '{"model": model_name, "keep_alive": -1}'
+
+    def chat(self, messages: list) -> ollama.ChatResponse:
+        return ollama.chat(model=self.model_name, messages=messages)
+
+    # qwen3-vl emits a <think> block by default. Neither the API-level think=False
+    # flag nor the /no_think prompt token reliably suppress it on this ollama build -
+    # both still let the model burn its whole num_predict budget on hidden reasoning
+    # and return empty on confusing input (measured ~1 in 3 with a garbled query).
+    # The reliable fix (this is a known upstream Ollama bug, ollama/ollama#14798:
+    # qwen3-vl's chat template ignores think:false) is raw=True with the assistant
+    # turn pre-filled with an empty think block, forcing the model straight past
+    # the reasoning phase. Measured 3/3 success (vs ~1 in 3 failure before) and
+    # ~5-10x faster (no reasoning tokens generated at all). Only usable now that
+    # the app is text-only (no images) - raw mode + images previously 400'd.
+    THINK_PREFILL = "\n<think>\n\n</think>\n\n"
+    # Answers target 1-2 informative sentences (~35-40 words). 300 let a
+    # rambling/meta-commentary response ("Let me scan through the relevant
+    # sections...") burn the full budget - measured 17s of pure LLM
+    # generation for one query, blowing the pipeline's 8s target on its own.
+    # 90 gives room for a fuller, knowledge-base-grounded answer while still
+    # hard-bounding worst-case generation time to ~3s at this model's
+    # measured ~29 tok/s - TTS alone already costs 3-6s of the 5-8s target,
+    # so this is close to the max LLM can afford without blowing the budget.
+    NUM_PREDICT = 90
+    NUM_CTX = 2048
+    KEEP_ALIVE = -1
+    # Default temp (1.0) made RAG answers non-deterministic: the exact same
+    # question+context sometimes gave a good extractive answer, sometimes
+    # the "I do not have this information" fallback - live-observed on the
+    # same context two runs apart. RAG here is closer to extraction than
+    # creative writing, so a low temperature favors the model's single most
+    # likely (best-supported-by-context) continuation reliably instead of
+    # sampling into the fallback path by chance.
+    TEMPERATURE = 0.2
+    # Retry as a safety net for any residual failures raw+prefill doesn't catch.
+    MAX_ATTEMPTS = 3
+
+    def generate(self, images, prompt):
+        full_prompt = prompt + self.THINK_PREFILL
+        for attempt in range(1, self.MAX_ATTEMPTS + 1):
+            resp = ollama.generate(
+                model=self.model_name,
+                images=images,
+                prompt=full_prompt,
+                raw=True,
+                keep_alive=self.KEEP_ALIVE,
+                options={
+                    "num_predict": self.NUM_PREDICT,
+                    "num_ctx": self.NUM_CTX,
+                    "temperature": self.TEMPERATURE,
+                },
+            )
+            if getattr(resp, "done_reason", None) == "length":
+                self.logger.warning(
+                    "LLM hit num_predict=%d cap (truncated). eval_count=%s",
+                    self.NUM_PREDICT, getattr(resp, "eval_count", "?"))
+            if (resp.response or "").strip():
+                return resp
+            self.logger.error(
+                "LLM returned empty response on attempt %d/%d (done_reason=%s, eval_count=%s)",
+                attempt, self.MAX_ATTEMPTS, getattr(resp, "done_reason", "?"),
+                getattr(resp, "eval_count", "?"))
+        return resp
+
+    def restart(self):
+        print(check_output('systemctl restart ollama', shell=True))
+        requests.post('http://localhost:11434/api/generate', json={'model': self.model_name, 'keep_alive': -1})
+    
+    @classmethod
+    def verify(cls, args):
+        try:
+            ret = ollama.list()
+            for model in ret.models:
+                if model.model == args["model_name"]:
+                    # Must match generate()'s options exactly. A warm-up call with
+                    # different options (e.g. no num_ctx here vs num_ctx=2048 in
+                    # generate()) makes Ollama reload the model on the first real
+                    # request, silently discarding this warm-up's GPU placement and
+                    # re-deciding it fresh - often under worse memory conditions.
+                    requests.post('http://localhost:11434/api/generate', json={
+                        'model': args['model_name'],
+                        'keep_alive': -1,
+                        'options': {'num_ctx': cls.NUM_CTX},
+                    })
+                    return True, "Ollama service is available."
+            return False, f"Model '{args['model_name']}' not found."
+        except Exception as e:
+            return False, str(e)
+
+    @classmethod
+    def update(cls, args):
+        # Ollama models are managed by the Ollama service itself.
+        # This method can be used to pull the latest model if needed.
+        # TODO - ensure ollama service is running
+        try:
+            logging.info(f"Pulling Ollama model '{args['model_name']}'")
+            ollama.pull(model=args["model_name"])
+        except Exception as e:
+            raise RuntimeError(f"Failed to update Ollama model '{args['model_name']}': {str(e)}")
