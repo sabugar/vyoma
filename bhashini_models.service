@@ -1,0 +1,14 @@
+[Unit]
+Description=Bhashini Models Service
+After=network.target
+
+[Service]
+Group=ubuntu
+User=ubuntu
+WorkingDirectory=/home/ubuntu/bhashini_models
+ExecStart=/home/ubuntu/bhashini_models/venv/bin/python /home/ubuntu/bhashini_models/main.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

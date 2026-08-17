@@ -29,7 +29,12 @@ VOICES_DIR = os.path.join(BASE_DIR, "flite", "voices")
 # is already loaded here for ASR, so the TTS model now costs only its own
 # ~114MB. Measured: 3s synthesis (torch CPU took 8-17s).
 HI_VITS_DIR = os.path.join(BASE_DIR, "hi_female_vits")
-HI_VITS_ONNX = os.path.join(HI_VITS_DIR, "model_sr0p8.onnx")
+# speaking_rate=0.8 and noise_scale=0.30 are baked in at export time. VITS's
+# default noise_scale of 0.667 makes the model sample more freely, which
+# slurred consonants enough that a listener had to concentrate to follow a
+# sentence - not acceptable when the content is health guidance. 0.30 is
+# noticeably crisper at the cost of some expressiveness.
+HI_VITS_ONNX = os.path.join(HI_VITS_DIR, "model_sr0p8_ns0p3.onnx")
 HI_SAMPLE_RATE = 16000  # from hi_female_vits/config.json
 
 
@@ -125,6 +130,14 @@ class TTSInference:
         waveform = self.hi_sess.run(
             None, {'input_ids': x, 'attention_mask': mask}
         )[0].reshape(-1).astype(np.float32)
+        # Peak-normalise before quantising. The model's raw output peaks around
+        # 0.62-0.66, so a straight conversion threw away a third of the dynamic
+        # range and came out quiet on the device's small speaker - which reads
+        # as "hard to make out" just as much as poor articulation does.
+        # 0.95 rather than 1.0 leaves headroom so nothing clips.
+        peak = float(np.abs(waveform).max())
+        if peak > 0:
+            waveform = waveform / peak * 0.95
         pcm16 = (np.clip(waveform, -1.0, 1.0) * 32767).astype(np.int16)
 
         import wave

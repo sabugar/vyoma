@@ -1,0 +1,12 @@
+numpy 
+regex
+sentencepiece
+indic-nlp-library
+mosestokenizer
+nltk
+sacremoses
+ctranslate2==4.6.3
+onnxruntime-gpu
+librosa
+torch
+flask
