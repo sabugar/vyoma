@@ -12,3 +12,4 @@ tts/flite/
 tts/hi_female_vits/*.safetensors
 *.bak
 *.bak.*
+tts/piper_hi/*.onnx
