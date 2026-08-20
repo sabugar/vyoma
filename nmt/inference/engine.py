@@ -186,7 +186,14 @@ class Model:
             max_batch_size=1,
             batch_type="examples",
             max_input_length=160,
-            max_decoding_length=64,
+            # 64 truncated real answers mid-sentence: "...that requires
+            # immediate intervention." came back as "...जिसके लिए तत्काल
+            # हस्तक्षेप" with the verb missing, so the spoken reply simply
+            # stopped partway through the instruction. Hindi needs noticeably
+            # more tokens than the English it comes from, and a 40-word
+            # sentence overruns 64 easily. Greedy decoding (beam_size=1) means
+            # a higher cap costs nothing unless the output actually runs long.
+            max_decoding_length=192,
             beam_size=1,
         )
         translations = [" ".join(x.hypotheses[0]) for x in translations]

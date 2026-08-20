@@ -144,14 +144,44 @@ class ASRInference:
     # real inference path in __init__), not per-shape CUDA tuning.
     MAX_SECONDS = 45
 
-    def _preprocess_hi_v2(self, audio_base64):
-        audio_bytes = base64.b64decode(audio_base64)
-        wav, _ = librosa.load(io.BytesIO(audio_bytes), sr=SAMPLE_RATE, mono=True)
-        if wav.size == 0:
-            raise ValueError("Empty audio")
-        max_samples = self.MAX_SECONDS * SAMPLE_RATE
-        if wav.size > max_samples:
-            wav = wav[:max_samples]
+    # This conformer was trained on short utterances and does not hold together
+    # over long ones: transcription accuracy falls off a cliff with duration
+    # (measured against known text - 11.0s: 95% of the characters, 20.2s: 70%,
+    # 28.6s: 52%, 38.2s: 42%), and the tail degenerates into nonsense rather
+    # than simply stopping. Nothing in the ONNX graph is fixed-size - every
+    # axis is dynamic - so this is the model's attention losing coherence, not
+    # a shape limit. Long audio is therefore split into chunks around this
+    # length and transcribed piecewise.
+    CHUNK_SECONDS = 12.0
+    # Cutting mid-word costs a word at each seam, so the split point is nudged
+    # to the quietest spot within this window of the nominal boundary.
+    CHUNK_SEARCH_S = 1.5
+
+    def _split_points(self, wav):
+        """Sample offsets to cut long audio at, biased toward quiet moments."""
+        chunk = int(self.CHUNK_SECONDS * SAMPLE_RATE)
+        if wav.size <= chunk:
+            return []
+        search = int(self.CHUNK_SEARCH_S * SAMPLE_RATE)
+        win = int(0.05 * SAMPLE_RATE)  # 50ms energy window
+        points = []
+        pos = chunk
+        while pos < wav.size - int(1.0 * SAMPLE_RATE):
+            lo = max(points[-1] + win if points else 0, pos - search)
+            hi = min(wav.size - win, pos + search)
+            if hi <= lo:
+                points.append(pos)
+            else:
+                seg = wav[lo:hi]
+                # RMS per window; the minimum is the most likely word gap.
+                n = max(1, (hi - lo) // win)
+                rms = [float(np.sqrt(np.mean(seg[i * win:(i + 1) * win] ** 2)) + 1e-12)
+                       for i in range(n)]
+                points.append(lo + int(np.argmin(rms)) * win)
+            pos = points[-1] + chunk
+        return points
+
+    def _preprocess_wav(self, wav):
         mel = librosa.feature.melspectrogram(
             y=wav, sr=SAMPLE_RATE, n_fft=512, win_length=400, hop_length=160,
             fmin=0.0, fmax=8000.0, n_mels=80, window="hann", power=2.0,
@@ -162,8 +192,8 @@ class ASRInference:
         feats = (feats - mean) / std
         return feats.astype(np.float32)
 
-    def _infer_hi_v2(self, audio_base64):
-        feats = self._preprocess_hi_v2(audio_base64)
+    def _transcribe_wav(self, wav):
+        feats = self._preprocess_wav(wav)
         length = np.array([feats.shape[1]], dtype=np.int64)
         feats = np.expand_dims(feats, axis=0)
 
@@ -189,7 +219,34 @@ class ASRInference:
             if idx != prev and idx != 256 and idx < len(self.hi_vocab):
                 tokens.append(self.hi_vocab[idx])
             prev = idx
-        return "".join(tokens).replace("▁", " ").strip()
+        return "".join(tokens).replace("\u2581", " ").strip()
+
+    def _infer_hi_v2(self, audio_base64):
+        audio_bytes = base64.b64decode(audio_base64)
+        wav, _ = librosa.load(io.BytesIO(audio_bytes), sr=SAMPLE_RATE, mono=True)
+        if wav.size == 0:
+            raise ValueError("Empty audio")
+        max_samples = int(self.MAX_SECONDS * SAMPLE_RATE)
+        if wav.size > max_samples:
+            wav = wav[:max_samples]
+
+        points = self._split_points(wav)
+        if not points:
+            return self._transcribe_wav(wav)
+
+        # Each chunk is normalised and decoded independently, which is the
+        # whole point: per-chunk mel statistics and a short attention span are
+        # what the model was trained for.
+        pieces = []
+        bounds = [0] + points + [wav.size]
+        for a, b in zip(bounds, bounds[1:]):
+            segment = wav[a:b]
+            if segment.size < int(0.2 * SAMPLE_RATE):
+                continue
+            text = self._transcribe_wav(segment)
+            if text:
+                pieces.append(text)
+        return " ".join(pieces).strip()
 
     # -----------------------------
     # Main Inference
