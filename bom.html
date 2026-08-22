@@ -1,0 +1,351 @@
+<meta charset="utf-8">
+<title>ASHA Sahayak Bill of Materials</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  /* Same tokens as the architecture sheet and the business plan - one submission. */
+  :root {
+    --ground:#FFFFFF; --panel:#F1F5F9; --ink:#14203A; --ink-soft:#52607A;
+    --rule:#C6CEDB; --accent:#0E6E5C; --accent-b:#E4F0EC; --signal:#A85410;
+    --sans:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif, "Lohit Devanagari";
+    --cond:"IBM Plex Sans Condensed","IBM Plex Sans", ui-sans-serif, sans-serif, "Lohit Devanagari";
+    --mono:"IBM Plex Mono", ui-monospace,"SF Mono", Menlo, monospace, "Lohit Devanagari";
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--ground); color:var(--ink);
+         font-family:var(--sans); font-size:8.3pt; line-height:1.35; }
+
+  .doc { max-width:182mm; margin:0 auto; padding:8mm 0; }
+  .doc > * + * { margin-top:3.2mm; }
+
+  .masthead { display:grid; grid-template-columns:1fr auto; align-items:end; gap:8mm;
+              border-bottom:2px solid var(--ink); padding-bottom:1.8mm; }
+  h1 { font-family:var(--cond); font-size:18pt; font-weight:700; letter-spacing:-0.01em; margin:0; }
+  .sub { font-family:var(--cond); font-size:9pt; font-weight:500; color:var(--accent); margin:1mm 0 0; }
+  .spec { font-family:var(--mono); font-size:6.8pt; color:var(--ink-soft);
+          text-align:right; line-height:1.5; white-space:nowrap; }
+  .spec b { color:var(--ink); font-weight:600; }
+
+  h2 { font-family:var(--cond); font-size:10pt; font-weight:600; margin:0 0 1.3mm;
+       padding-bottom:0.8mm; border-bottom:1px solid var(--rule); }
+  h2 .n { font-family:var(--mono); font-size:7.2pt; font-weight:500; color:var(--accent); margin-right:2mm; }
+  p { margin:0 0 1.3mm; }
+  p:last-child { margin-bottom:0; }
+  .lede { font-size:8.6pt; color:var(--ink-soft); }
+
+  table { width:100%; border-collapse:collapse; font-size:7.6pt; }
+  th { font-family:var(--cond); font-size:6.8pt; font-weight:600; text-transform:uppercase;
+       letter-spacing:0.06em; color:var(--ink-soft); text-align:left;
+       padding:0 2.6mm 0.9mm 0; border-bottom:1px solid var(--rule); }
+  td { padding:1.15mm 2.6mm 1.15mm 0; border-bottom:1px solid var(--panel); vertical-align:top; }
+  th.r, td.r { text-align:right; padding-right:2.6mm; }
+  th.c, td.c { text-align:center; padding-right:2.6mm; }
+  tr.total td { border-top:1.4px solid var(--ink); border-bottom:none;
+                padding-top:1.5mm; font-weight:600; }
+  .num { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .pn  { font-family:var(--mono); font-size:7pt; white-space:nowrap; }
+  .key { font-weight:600; }
+  .note { color:var(--ink-soft); }
+
+  .tag { font-family:var(--mono); font-size:6.3pt; font-weight:500; letter-spacing:0.04em;
+         padding:0.5mm 1.3mm; border-radius:1mm; white-space:nowrap; }
+  .ots { background:var(--panel); color:var(--ink-soft); }
+  .cst { background:var(--accent-b); color:var(--accent); }
+
+  .callout { background:var(--accent-b); border-left:3px solid var(--accent); padding:2.4mm 3mm; }
+  .callout .hd { font-family:var(--cond); font-size:9.4pt; font-weight:700; color:var(--accent); margin:0 0 1.1mm; }
+  .callout p { font-size:8.1pt; }
+
+  ul { margin:0; padding-left:3.6mm; }
+  li { margin-bottom:0.8mm; }
+  li:last-child { margin-bottom:0; }
+
+  @page {
+    size:A4; margin:10mm 14mm 8mm;
+    @bottom-left { content:"ASHA Sahayak \00b7 bill of materials";
+                   font-family:var(--mono); font-size:6.5pt; color:#52607A; }
+    @bottom-right { content:"Page " counter(page) " of " counter(pages);
+                    font-family:var(--mono); font-size:6.5pt; color:#52607A; }
+  }
+  @media print { .doc { max-width:none; padding:0; margin:0; }
+                 tr, .callout { page-break-inside:avoid; } h2 { page-break-after:avoid; }
+                 /* Keep each BOM table whole - a costed table that breaks two rows
+                    in is harder to check than one that starts on a fresh page. */
+                 #production { page-break-before:always; } }
+</style>
+
+<div class="doc">
+
+  <header class="masthead">
+    <div>
+      <h1>Bill of Materials</h1>
+      <p class="sub">ASHA Sahayak &mdash; offline Hindi voice assistant, prototype unit</p>
+    </div>
+    <div class="spec">
+      <b>Build of record &middot; 20 August 2026</b><br>
+      Quantities are per one assembled unit<br>
+      Costs in <b>&#8377; INR, inclusive of 18% GST</b>
+    </div>
+  </header>
+
+  <p class="lede">
+    The prototype contains <span class="key">no custom hardware</span>. Every part is an off-the-shelf
+    module bought from a distributor and joined with jumper leads &mdash; a deliberate choice, so the
+    engineering effort went into the software stack rather than into a board spin we would have had to
+    redo once the software settled. The custom items are listed separately as the production step.
+  </p>
+
+  <section>
+    <h2><span class="n">01</span>Prototype unit &mdash; as built and measured</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:19%">Item</th>
+          <th style="width:15%">Part number</th>
+          <th class="c" style="width:4%">Qty</th>
+          <th class="r" style="width:9%">Unit cost</th>
+          <th class="c" style="width:7%">Type</th>
+          <th>Function in this build</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="key">Jetson Orin Nano Super Developer Kit, 8&nbsp;GB</td>
+          <td class="pn">945-13766-0000-000</td>
+          <td class="c num">1</td>
+          <td class="r num">37,712</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>Compute. Bundles the Orin Nano 8&nbsp;GB module (P3767), the reference carrier board
+              (699-13768) and a 19&nbsp;V / 45&nbsp;W supply. Runs every model on the device; 8&nbsp;GB
+              unified memory is the binding constraint the software was built around.</td>
+        </tr>
+        <tr>
+          <td class="key">microSDXC card, 128&nbsp;GB UHS-I</td>
+          <td class="pn">SanDisk SK128 &middot; manfid 0x03</td>
+          <td class="c num">1</td>
+          <td class="r num">1,200</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>Boot and root filesystem. Holds JetPack 6.2.1 plus 5.2&nbsp;GB of model weights. Identifiers
+              are as reported by the installed card; any A2-rated 128&nbsp;GB card substitutes, and the
+              A2 rating is what keeps model load time at boot reasonable.</td>
+        </tr>
+        <tr>
+          <td class="key">Arducam 8&nbsp;MP autofocus USB camera with microphone</td>
+          <td class="pn">B0197 &middot; succ. B0447</td>
+          <td class="c num">1</td>
+          <td class="r num">4,800</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td><span class="key">Microphone today, sensor tomorrow.</span> The shipping build is voice-only,
+              so the IMX179 sensor is idle &mdash; but it is the sensor the planned screening trial
+              (neonatal jaundice first, under MoH / ICMR protocol) depends on. The capability is
+              already paid for in this build; only the approval is outstanding.</td>
+        </tr>
+        <tr>
+          <td class="key">USB speaker, UAC&nbsp;1.0 class-compliant</td>
+          <td class="pn">Jieli UACDemoV1.0 &middot; 4c4a:4155</td>
+          <td class="c num">1</td>
+          <td class="r num">700</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>Answer playback at 22&nbsp;kHz. Class-compliant, so no driver and no vendor lock &mdash;
+              any UAC device substitutes.</td>
+        </tr>
+        <tr>
+          <td class="key">Powered USB 3.0 hub, 4-port</td>
+          <td class="pn">Realtek RTS5411 &middot; 0bda:0489</td>
+          <td class="c num">1</td>
+          <td class="r num">600</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>Fans out the carrier's USB to camera, speaker and service port without browning out the
+              audio device under load.</td>
+        </tr>
+        <tr>
+          <td class="key">2.8&#8243; SPI TFT display, 320&times;240, with resistive touch</td>
+          <td class="pn">ILI9341 + XPT2046</td>
+          <td class="c num">1</td>
+          <td class="r num">800</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>Shows the question and answer in Devanagari. Driven over SPI from the 40-pin header;
+              text is shaped with HarfBuzz because bitmap fonts cannot render Hindi conjuncts.</td>
+        </tr>
+        <tr>
+          <td class="key">Momentary push button, 16&nbsp;mm panel mount, NO</td>
+          <td class="pn">generic 16&nbsp;mm NO</td>
+          <td class="c num">1</td>
+          <td class="r num">120</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>The single control. Wired to header pin 7 (GP167): one press starts recording, the next
+              ends it, and 3.5&nbsp;s of silence ends it anyway if she forgets. The design does not depend
+              on the pin reporting a sustained press, so it works with any momentary contact.</td>
+        </tr>
+        <tr>
+          <td class="key">Jumper leads, female&ndash;female 20&nbsp;cm</td>
+          <td class="pn">generic Dupont 2.54&nbsp;mm</td>
+          <td class="c num">1 set</td>
+          <td class="r num">100</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>Header wiring for the button and the display. Replaced by the custom carrier in production.</td>
+        </tr>
+        <tr>
+          <td class="key">Enclosure, ABS project box</td>
+          <td class="pn">generic 158&times;90&times;60&nbsp;mm</td>
+          <td class="c num">1</td>
+          <td class="r num">450</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>Holds the assembly, the button and the display face. Not field-rated &mdash; a moulded,
+              sealed case is a production item.</td>
+        </tr>
+        <tr class="total">
+          <td colspan="3">Prototype unit total &mdash; 9 line items, all off-the-shelf</td>
+          <td class="r num">46,482</td>
+          <td class="c"></td>
+          <td class="note">Single-unit distributor pricing, India, inclusive of 18% GST.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="callout">
+    <p class="hd">Why nothing here is custom yet</p>
+    <p>
+      A custom carrier board designed before the software was finished would have been wrong twice: the
+      voice build does not need the camera for capture, and the trigger pin turned out to need input
+      conditioning the reference carrier does not provide &mdash; it cannot hold a sustained press, which
+      is why recording is a toggle rather than hold-to-talk. Both were found by running the real
+      workload on off-the-shelf parts. The production board below is specified
+      <span class="key">because</span> those answers are now known &mdash; it fixes the pull-down in the
+      pinmux, integrates an audio path that is currently three separate USB devices, and
+      <span class="key">keeps a camera interface</span> so the screening SKU is a populate option rather than
+      a second board.
+    </p>
+  </div>
+
+  <section id="production">
+    <h2><span class="n">02</span>Production unit &mdash; target at 10,000 units</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:19%">Item</th>
+          <th style="width:15%">Part number</th>
+          <th class="c" style="width:4%">Qty</th>
+          <th class="r" style="width:9%">Unit cost</th>
+          <th class="c" style="width:7%">Type</th>
+          <th>Change from prototype</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="key">8&nbsp;GB ARM system-on-module</td>
+          <td class="pn">P3767-0005 or equivalent</td>
+          <td class="c num">1</td>
+          <td class="r num">7,000</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>Module only, no developer carrier. The stack needs 4.2&nbsp;GB and 5.1&nbsp;W and has no
+              CUDA-only dependency, so a commodity 8&nbsp;GB ARM SoM is a port, not a rewrite &mdash;
+              which is what takes this line from &#8377;37,712 to &#8377;7,000.</td>
+        </tr>
+        <tr>
+          <td class="key">Carrier board, 4-layer</td>
+          <td class="pn">AS-CB-01 <span class="note">(to design)</span></td>
+          <td class="c num">1</td>
+          <td class="r num">1,400</td>
+          <td class="c"><span class="tag cst">CUSTOM</span></td>
+          <td>SoM connector, codec, button with a proper pull-down, display FPC, power. Removes the hub
+              and all jumper wiring.</td>
+        </tr>
+        <tr>
+          <td class="key">Enclosure, injection moulded, IP54</td>
+          <td class="pn">AS-EN-01 <span class="note">(to tool)</span></td>
+          <td class="c num">1</td>
+          <td class="r num">700</td>
+          <td class="c"><span class="tag cst">CUSTOM</span></td>
+          <td>Field-rated case with speaker grille and sealed button. Tooling is a one-time cost
+              amortised across the run, not in this unit price.</td>
+        </tr>
+        <tr>
+          <td class="key">MEMS microphone board</td>
+          <td class="pn">generic I2S MEMS</td>
+          <td class="c num">1</td>
+          <td class="r num">180</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>Takes over audio capture from the camera module at 4% of its cost. The camera itself
+              becomes an option rather than a requirement &mdash; see the vision SKU note below.</td>
+        </tr>
+        <tr>
+          <td class="key">Speaker driver, 2&nbsp;W 8&nbsp;&#937;, with amplifier</td>
+          <td class="pn">generic + PAM8302</td>
+          <td class="c num">1</td>
+          <td class="r num">220</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>On-board audio out; retires the USB speaker and one hub port.</td>
+        </tr>
+        <tr>
+          <td class="key">2.8&#8243; SPI TFT display, 320&times;240</td>
+          <td class="pn">ILI9341, FPC mount</td>
+          <td class="c num">1</td>
+          <td class="r num">600</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>Same panel, ribbon-mounted to the carrier instead of jumpered.</td>
+        </tr>
+        <tr>
+          <td class="key">eMMC storage, 64&nbsp;GB</td>
+          <td class="pn">on-module eMMC</td>
+          <td class="c num">1</td>
+          <td class="r num">750</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>Replaces the microSD card. 5.2&nbsp;GB of weights plus the OS fits comfortably; removes the
+              commonest field failure on SD-booted devices.</td>
+        </tr>
+        <tr>
+          <td class="key">Battery, 3.7&nbsp;V 10,000&nbsp;mAh, with 2&nbsp;A charge controller</td>
+          <td class="pn">generic Li-ion + 2&nbsp;A charger IC</td>
+          <td class="c num">1</td>
+          <td class="r num">900</td>
+          <td class="c"><span class="tag ots">OTS</span></td>
+          <td>New in production; the prototype has no battery and runs from the barrel jack.
+              37&nbsp;Wh gives about <span class="key">6 hours of continuous querying</span> at 5.1&nbsp;W, and a
+              full shift at a realistic duty cycle, since the board idles at 3.4&nbsp;W. A 2&nbsp;A charger
+              is specified so it refills overnight &mdash; a 1&nbsp;A part would need more than ten hours.</td>
+        </tr>
+        <tr>
+          <td class="key">Assembly, test and pack</td>
+          <td class="pn">&mdash;</td>
+          <td class="c num">1</td>
+          <td class="r num">250</td>
+          <td class="c"><span class="tag cst">CUSTOM</span></td>
+          <td>Includes flashing the image, loading the knowledge base and running the fixed
+              ten-question accuracy check on every unit before it ships.</td>
+        </tr>
+        <tr class="total">
+          <td colspan="3">Production unit total &mdash; 3 custom items, 6 off-the-shelf</td>
+          <td class="r num">12,000</td>
+          <td class="c"></td>
+          <td class="note">Target at 10,000 units; excludes one-time tooling and NRE.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="n">03</span>Notes</h2>
+    <ul>
+      <li><span class="key">No radio is used.</span> The developer kit's M.2 Wi-Fi/Bluetooth card is present
+          and enumerates, but the application never opens a socket and the device is airplane-mode
+          capable by construction. The production carrier omits the M.2 slot entirely.</li>
+      <li><span class="key">Vision SKU.</span> The production carrier retains a camera interface.
+          Populating it with an 8&nbsp;MP autofocus module adds roughly &#8377;900 at volume. It is deliberately
+          <span class="key">not</span> in the &#8377;12,000 base: no camera ships until a screening aid has cleared
+          Ministry of Health and ICMR validation, and the device presents any such result as a reason to
+          refer, never as a diagnosis.</li>
+      <li><span class="key">Prices</span> are single-unit Indian distributor prices as of August 2026,
+          inclusive of 18% GST; the Jetson kit is listed at &#8377;31,959 ex-GST. Production figures are
+          targets based on component pricing at 10,000 units, not quotations.</li>
+      <li><span class="key">Nothing in the software is tied to this hardware.</span> Speech, translation and
+          synthesis run through ONNX Runtime and CTranslate2, and the language model through llama.cpp
+          &mdash; all with working CPU paths. That is what makes the SoM line above substitutable, and it
+          is the single largest lever on unit cost.</li>
+    </ul>
+  </section>
+
+</div>

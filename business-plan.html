@@ -1,0 +1,302 @@
+<meta charset="utf-8">
+<title>ASHA Sahayak Business Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  /* Same tokens as the technical architecture sheet - the two documents are
+     read side by side and should register as one submission. */
+  :root {
+    --ground:   #FFFFFF;
+    --panel:    #F1F5F9;
+    --ink:      #14203A;
+    --ink-soft: #52607A;
+    --rule:     #C6CEDB;
+    --accent:   #0E6E5C;
+    --accent-b: #E4F0EC;
+    --signal:   #A85410;
+
+    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif, "Lohit Devanagari";
+    --cond: "IBM Plex Sans Condensed", "IBM Plex Sans", ui-sans-serif, sans-serif, "Lohit Devanagari";
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace, "Lohit Devanagari";
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 7.8pt; line-height: 1.29;
+  }
+
+  .doc { max-width: 182mm; margin: 0 auto; padding: 8mm 0; }
+  .doc > * + * { margin-top: 2.2mm; }
+
+  .masthead {
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: end; gap: 8mm;
+    border-bottom: 2px solid var(--ink); padding-bottom: 1.8mm;
+  }
+  h1 { font-family: var(--cond); font-size: 18pt; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+  .sub { font-family: var(--cond); font-size: 9pt; font-weight: 500; color: var(--accent); margin: 1mm 0 0; }
+  .spec { font-family: var(--mono); font-size: 6.7pt; color: var(--ink-soft); text-align: right; line-height: 1.5; white-space: nowrap; }
+  .spec b { color: var(--ink); font-weight: 600; }
+
+  h2 {
+    font-family: var(--cond); font-size: 10pt; font-weight: 600;
+    margin: 0 0 1.2mm; padding-bottom: 0.8mm; border-bottom: 1px solid var(--rule);
+  }
+  h2 .n { font-family: var(--mono); font-size: 7.2pt; font-weight: 500; color: var(--accent); margin-right: 2mm; }
+  p { margin: 0 0 1.2mm; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ---- the reach band: the one place this page raises its voice ---- */
+  .reach { background: var(--accent-b); border-left: 3px solid var(--accent); padding: 2.4mm 3mm; }
+  .reach .hd {
+    font-family: var(--cond); font-size: 10.5pt; font-weight: 700;
+    color: var(--accent); margin: 0 0 1.4mm;
+  }
+  .reach .body { font-size: 8.1pt; color: var(--ink); margin: 0 0 2.2mm; }
+  .reachnums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3.5mm; }
+  .reachnums > div { border-left: 1px solid var(--accent); padding-left: 2.4mm; }
+  .reachnums .v {
+    font-family: var(--mono); font-size: 13.5pt; font-weight: 600;
+    line-height: 1.0; color: var(--accent); font-variant-numeric: tabular-nums;
+  }
+  .reachnums .k {
+    font-family: var(--cond); font-size: 6.8pt; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--ink-soft); margin-top: 0.9mm; line-height: 1.25;
+  }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3.6mm; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 7.7pt; }
+  th {
+    font-family: var(--cond); font-size: 6.9pt; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-soft);
+    text-align: left; padding: 0 2.4mm 0.9mm 0; border-bottom: 1px solid var(--rule);
+  }
+  td { padding: 1mm 2.4mm 1mm 0; border-bottom: 1px solid var(--panel); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  /* Right-aligned figures still need a gutter, or they butt straight into
+     the next cell's prose ("₹12,000Today it is a developer kit"). */
+  th.r, td.r { text-align: right; padding-right: 3.6mm; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .key { font-weight: 600; }
+  .win { color: var(--signal); font-weight: 600; }
+
+  .person { border-left: 2px solid var(--accent); padding-left: 2.4mm; }
+  .person .nm { font-family: var(--cond); font-size: 8.8pt; font-weight: 600; }
+  .person .rl {
+    font-family: var(--mono); font-size: 6.5pt; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--accent); margin: 0.4mm 0 0.8mm;
+  }
+  .person p { font-size: 7.5pt; color: var(--ink-soft); }
+
+  .matrix td { font-size:7.3pt; }
+  .matrix .ax {
+    font-family:var(--cond); font-weight:600; font-size:8.3pt; color:var(--accent);
+    border-left:2px solid var(--accent); padding-left:2.2mm;
+  }
+  .phase { background: var(--panel); padding: 2.2mm 2.4mm; border-left: 2px solid var(--accent); }
+  .phase .when { font-family: var(--mono); font-size: 6.5pt; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent); }
+  .phase .what { font-family: var(--cond); font-size: 8.6pt; font-weight: 600; margin: 0.5mm 0 0.8mm; }
+  .phase p { font-size: 7.4pt; color: var(--ink-soft); }
+
+  ul { margin: 0; padding-left: 3.4mm; }
+  li { margin-bottom: 0.8mm; }
+  li:last-child { margin-bottom: 0; }
+
+  @page {
+    size: A4; margin: 10mm 14mm 8mm;
+    @bottom-left {
+      content: "ASHA Sahayak \00b7 business plan";
+      font-family: var(--mono); font-size: 6.5pt; color: #52607A;
+    }
+    @bottom-right {
+      content: "VYOMA Innovation Challenge \00b7 BHASHINI \00d7 Current AI";
+      font-family: var(--mono); font-size: 6.5pt; color: #52607A;
+    }
+  }
+  @media print { .doc { max-width: none; padding: 0; margin: 0; } }
+</style>
+
+<div class="doc">
+
+  <header class="masthead">
+    <div>
+      <h1>ASHA Sahayak</h1>
+      <p class="sub">Offline Hindi voice assistant for community health workers &mdash; business plan</p>
+    </div>
+    <div class="spec">
+      <b>Working prototype on Jetson Orin Nano 8&nbsp;GB</b><br>
+      10/10 text &middot; 8/10 spoken accuracy &middot; 6.7&ndash;7.6&nbsp;s reply<br>
+      5.1&nbsp;W under load &middot; <b>no network at run time</b>
+    </div>
+  </header>
+
+  <div class="reach">
+    <p class="hd">Every pregnant woman and every newborn in India is in scope</p>
+    <p class="body">
+      This does not serve all 147 crore Indians, and we do not claim it does. Today's scope is maternal
+      and newborn care, so the people it reaches are <span class="key">mothers and their children</span> &mdash;
+      about <span class="key">2.3 crore births a year</span>, and the women carrying them. An ASHA is the first
+      and often the only health worker present at the home for most of those births. Maternal mortality
+      is 88 per lakh live births (SRS 2021&ndash;23) and neonatal mortality 19 per 1,000 (SRS 2023):
+      <span class="key">roughly 20,000 mothers and 4.4 lakh newborns a year</span>. Most newborn deaths fall in
+      the first 48 hours &mdash; exactly when an ASHA is in the home, the decision is hers, and her only
+      reference is a book she cannot search. That is the scope today, and it is also the entry point:
+      the same device at the same &#8377;0 per question is how basic medical knowledge eventually reaches
+      every Indian in their own language.
+    </p>
+    <div class="reachnums">
+      <div><div class="v">2.3 cr</div><div class="k">Births a year, all in an ASHA's catchment</div></div>
+      <div><div class="v">~4.6 cr</div><div class="k">Mothers and newborns in scope each year</div></div>
+      <div><div class="v">10.2 lakh</div><div class="k">ASHA workers under NHM</div></div>
+      <div><div class="v">&#8377;0</div><div class="k">Marginal cost per question asked</div></div>
+    </div>
+  </div>
+
+  <section>
+    <h2><span class="n">01</span>Team</h2>
+    <div class="grid3">
+      <div class="person">
+        <div class="nm">Sueb Sabugar</div>
+        <div class="rl">Engineering</div>
+        <p>Built the on-device stack end to end &mdash; speech, translation, retrieval, language model,
+           and the memory work behind it.</p>
+      </div>
+      <div class="person">
+        <div class="nm">Saleha Shaikh</div>
+        <div class="rl">Health content &amp; validation</div>
+        <p>Owns the knowledge base, the scored question set, and review of every answer it may give.</p>
+      </div>
+      <div class="person">
+        <div class="nm">Mubeen Pothigara</div>
+        <div class="rl">Deployment &amp; partnerships</div>
+        <p>Runs pilot logistics and the district health and NGO relationships a deployment needs.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <section>
+      <h2><span class="n">02</span>Target market</h2>
+      <p>Three parties, deliberately distinct: <span class="key">NHM or the district health society buys</span>,
+         <span class="key">the ASHA uses</span>, <span class="key">the mother and newborn benefit</span>. About 9 in 10
+         of the 10.2 lakh ASHAs work rural blocks, where a cloud assistant is not an option at all.</p>
+      <p><span class="key">It assists the ASHA; it replaces neither her nor what is already deployed.</span>
+         Frontline apps such as Gujarat's TeCHO+ schedule the visit and capture the data &mdash; they tell
+         her <em>who</em> to see. This answers the clinical question at the doorstep: <em>what to do</em>
+         once she is there.</p>
+      <p><span class="key">One device covers all of India.</span> Each unit carries one language pack, and
+         BHASHINI already publishes ASR, translation and speech for every scheduled language. A new
+         state is a model swap on the same hardware &mdash; not a new build.</p>
+    </section>
+
+    <section>
+      <h2><span class="n">03</span>Revenue model</h2>
+      <p><span class="key">Government procurement through NHM.</span> ASHAs are an existing cadre with a budget
+         line for kits and training; the device is sold into that line, in two parts:</p>
+      <ul>
+        <li><span class="key">Device sale</span> &mdash; one-time, per unit, to the state or district health society.</li>
+        <li><span class="key">Annual content &amp; support</span> &mdash; revisions, new protocols, replacement.
+            Recurring, and what keeps answers correct as guidelines change.</li>
+      </ul>
+      <p>NGO and CSR-funded deployments are the same product on a different purchase order &mdash; how the
+         first pilots get paid for.</p>
+    </section>
+  </div>
+
+  <section>
+    <h2><span class="n">04</span>Cost structure</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:24%">Line</th>
+          <th class="r" style="width:11%">Today</th>
+          <th class="r" style="width:11%">At volume</th>
+          <th>What drives it</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="key">Hardware per unit</td>
+          <td class="r num">&#8377;46,482</td>
+          <td class="r num win">&#8377;12,000</td>
+          <td>Today it is a developer kit. The stack needs 4.2&nbsp;GB and 5.1&nbsp;W and nothing is
+              CUDA-only, so a commodity 8&nbsp;GB ARM board is a port, not a rewrite.</td>
+        </tr>
+        <tr>
+          <td class="key">Cloud inference, connectivity, model licensing</td>
+          <td class="r num">&#8377;0</td>
+          <td class="r num">&#8377;0</td>
+          <td>All three are structurally zero. A cloud assistant pays per query forever; this one does
+              not. There is no SIM, no data plan and nothing to reimburse &mdash; which also removes the
+              largest cause of field failure. Weights are open throughout, with one exception to close
+              before sale: the Hindi voice is CC-BY-NC-SA and must be swapped.</td>
+        </tr>
+        <tr>
+          <td class="key">Content &amp; support / unit / yr</td>
+          <td class="r num">&mdash;</td>
+          <td class="r num">&#8377;800</td>
+          <td>Revisions, protocol updates, support, replacement. Scales with units, not questions.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="n">05</span>Path to scale</h2>
+    <p style="margin-bottom:1.4mm">
+      Three things scale independently on the same device &mdash; <span class="key">what it knows</span>,
+      <span class="key">what it can sense</span>, <span class="key">what language it speaks</span>. None needs new
+      hardware: the production carrier already carries a camera interface (populating it is a &#8377;900
+      option) and the language packs already exist at BHASHINI. The camera path is gated on approval, not on our own confidence &mdash; we do not intend to
+      choose the conditions ourselves, and nothing visual ships as a health claim until it clears the
+      Ministry of Health and ICMR route. It will always present a reason to refer, never a result.
+    </p>
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th style="width:12%">Axis</th>
+          <th style="width:29%">Phase 1 &middot; 0&ndash;6 months</th>
+          <th style="width:29%">Phase 2 &middot; 6&ndash;18 months</th>
+          <th>Phase 3 &middot; 18&ndash;36 months</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="ax">Knowledge</td>
+          <td>All seven ASHA training modules (Book No. 1&ndash;7) on the device, not the single module
+              the prototype carries today.</td>
+          <td>State protocols, immunisation schedules, and NHM's yearly revisions.</td>
+          <td>General primary-care reference &mdash; what any household asks.</td>
+        </tr>
+        <tr>
+          <td class="ax">Capability</td>
+          <td>Voice question, voice answer, refusal when the manual does not cover it.</td>
+          <td><span class="key">Camera screening trial</span> under MoH / ICMR protocol, starting with neonatal
+              jaundice &mdash; smartphone screening reached 100% sensitivity against serum bilirubin in a
+              546-neonate study (<em>JAMA Netw Open</em>, 2024).</td>
+          <td>Whichever screening aids the Ministry prioritises. Jaundice is our first candidate, not
+              the limit.</td>
+        </tr>
+        <tr>
+          <td class="ax">Language</td>
+          <td>Hindi &mdash; the language every accuracy number here was measured in.</td>
+          <td>Two more BHASHINI languages, proving the swap is configuration.</td>
+          <td>Any scheduled language on request; the application does not change.</td>
+        </tr>
+        <tr>
+          <td class="ax">Deployment</td>
+          <td>25 devices, one district, one full quarter of real use.</td>
+          <td>2,000&ndash;5,000 units on an NHM Programme Implementation Plan line.</td>
+          <td>50,000+ units, multi-state, at &#8377;12,000 per unit.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+</div>

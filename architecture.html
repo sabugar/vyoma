@@ -1,0 +1,522 @@
+<meta charset="utf-8">
+<title>ASHA Sahayak Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --ground:   #FFFFFF;
+    --panel:    #F1F5F9;
+    --ink:      #14203A;
+    --ink-soft: #52607A;
+    --rule:     #C6CEDB;
+    --accent:   #0E6E5C;
+    --signal:   #A85410;
+
+    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif, "Lohit Devanagari";
+    --cond: "IBM Plex Sans Condensed", "IBM Plex Sans", ui-sans-serif, sans-serif, "Lohit Devanagari";
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace, "Lohit Devanagari";
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 9pt;
+    line-height: 1.40;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Natural flow rather than fixed-height pages: a flex column pinned to
+     297mm fought the printer over a few millimetres and pushed the footer
+     onto a page of its own. */
+  /* Block flow, not flex: WeasyPrint's column-flex layout inflated the
+     figure's section by ~110pt of empty box, leaving a dead gap on page 1. */
+  .doc {
+    max-width: 182mm;
+    margin: 0 auto;
+    padding: 9mm 0;
+  }
+  .doc > * + * { margin-top: 5mm; }
+
+  /* ---- masthead ---- */
+  .masthead {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 8mm;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 2.2mm;
+  }
+  h1 {
+    font-family: var(--cond);
+    font-size: 21pt;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .sub {
+    font-family: var(--cond);
+    font-size: 10pt;
+    font-weight: 500;
+    color: var(--accent);
+    margin: 1.5mm 0 0;
+  }
+  .spec {
+    font-family: var(--mono);
+    font-size: 7.3pt;
+    color: var(--ink-soft);
+    text-align: right;
+    line-height: 1.55;
+    white-space: nowrap;
+  }
+  .spec b { color: var(--ink); font-weight: 600; }
+
+  h2 {
+    font-family: var(--cond);
+    font-size: 11.5pt;
+    font-weight: 600;
+    margin: 0 0 2mm;
+    padding-bottom: 1.2mm;
+    border-bottom: 1px solid var(--rule);
+    letter-spacing: 0.005em;
+  }
+  h2 .n {
+    font-family: var(--mono);
+    font-size: 8pt;
+    font-weight: 500;
+    color: var(--accent);
+    margin-right: 2.5mm;
+  }
+  h3 {
+    font-family: var(--cond);
+    font-size: 9.3pt;
+    font-weight: 600;
+    margin: 0 0 1mm;
+  }
+  p { margin: 0 0 1.8mm; }
+  p:last-child { margin-bottom: 0; }
+
+  .lede {
+    font-size: 9.6pt;
+    color: var(--ink-soft);
+    max-width: 62em;
+  }
+
+  /* ---- figure ---- */
+  figure { margin: 0; }
+  figure svg { width: 100%; height: auto; display: block; color: var(--ink); }
+  figcaption {
+    font-size: 7.8pt;
+    color: var(--ink-soft);
+    margin-top: 1.5mm;
+    padding-left: 2.5mm;
+    border-left: 2px solid var(--accent);
+  }
+
+  /* ---- data tables ---- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.3pt;
+  }
+  th {
+    font-family: var(--cond);
+    font-size: 7.6pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    text-align: left;
+    padding: 0 2.5mm 1.2mm 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  td {
+    padding: 1.5mm 2.5mm 1.5mm 0;
+    border-bottom: 1px solid var(--panel);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .win { color: var(--signal); font-weight: 600; }
+  .key { font-weight: 600; }
+  td.tight { width: 1%; white-space: nowrap; }
+
+  /* ---- panels ---- */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3.5mm; }
+
+  .stat {
+    background: var(--panel);
+    padding: 2.8mm 3mm;
+    border-left: 2px solid var(--accent);
+  }
+  .stat .v {
+    font-family: var(--mono);
+    font-size: 14pt;
+    font-weight: 600;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .k {
+    font-family: var(--cond);
+    font-size: 7.4pt;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    margin-top: 1.2mm;
+  }
+  .stat .note { font-size: 7.4pt; color: var(--ink-soft); margin-top: 0.8mm; }
+
+  ul { margin: 0; padding-left: 4mm; }
+  li { margin-bottom: 1.2mm; }
+  li:last-child { margin-bottom: 0; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    color: var(--accent);
+  }
+
+  @page {
+    size: A4;
+    margin: 11mm 14mm 9mm;
+    @bottom-left {
+      content: "ASHA Sahayak \00b7 technical architecture";
+      font-family: var(--mono); font-size: 7pt; color: var(--ink-soft);
+    }
+    @bottom-right {
+      content: "Page " counter(page) " of " counter(pages);
+      font-family: var(--mono); font-size: 7pt; color: var(--ink-soft);
+    }
+  }
+  @media print {
+    .doc { max-width: none; padding: 0; margin: 0; }
+    figure, tr { page-break-inside: avoid; }
+    h2 { page-break-after: avoid; }
+  }
+</style>
+
+<div class="doc">
+
+  <header class="masthead">
+    <div>
+      <h1>ASHA Sahayak</h1>
+      <p class="sub">Offline Hindi voice assistant for community health workers</p>
+    </div>
+    <div class="spec">
+      <b>NVIDIA Jetson Orin Nano 8&nbsp;GB</b><br>
+      Carrier 699-13768 &middot; JetPack L4T R36.4.7<br>
+      15&nbsp;W power mode &middot; <b>no network at run time</b>
+    </div>
+  </header>
+
+  <p class="lede">
+    An ASHA worker presses one button, asks a question in Hindi, and hears an answer
+    grounded in her own training manual &mdash; with no SIM, no Wi-Fi and no cloud call.
+    Every figure on these two pages was measured on the device described above.
+  </p>
+
+  <section>
+    <h2><span class="n">01</span>Pipeline</h2>
+    <figure>
+      <svg viewBox="0 0 980 232" role="img"
+           aria-label="Speech pipeline: microphone to ASR to Hindi-English translation to retrieval and language model, back through translation to speech synthesis and speaker, all inside the device with no network, with measured per-stage latency.">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+          </marker>
+          <marker id="ar-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#0E6E5C"/>
+          </marker>
+        </defs>
+
+        <!-- device boundary -->
+        <rect x="8" y="8" width="964" height="176" rx="4" fill="none"
+              stroke="currentColor" stroke-width="1.2" stroke-dasharray="6 4" stroke-opacity="0.45"/>
+        <text x="20" y="25" font-family="IBM Plex Mono, monospace" font-size="11"
+              fill="currentColor" fill-opacity="0.6">on-device boundary &mdash; nothing leaves the board</text>
+
+        <!-- NOTE: alpha here is fill-opacity / stroke-opacity, never plain
+             opacity. WeasyPrint renders an SVG element with `opacity` through a
+             transparency group whose clip box is computed before text-anchor
+             shifts the run left, so centred text lost every glyph left of its
+             anchor - "IndicConformer 600M" printed as "rmer 600M". -->
+        <!-- stage boxes -->
+        <g font-family="IBM Plex Sans Condensed, sans-serif" font-size="13" fill="currentColor">
+          <rect x="24" y="62" width="104" height="52" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"/>
+          <text x="76" y="83" text-anchor="middle" font-weight="600">Mic</text>
+          <text x="76" y="100" text-anchor="middle" font-size="11" fill-opacity="0.7">start &middot; speak &middot; stop</text>
+
+          <rect x="168" y="62" width="128" height="52" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"/>
+          <text x="232" y="83" text-anchor="middle" font-weight="600">ASR</text>
+          <text x="232" y="100" text-anchor="middle" font-size="11" fill-opacity="0.7">IndicConformer 600M</text>
+
+          <rect x="336" y="62" width="120" height="52" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"/>
+          <text x="396" y="83" text-anchor="middle" font-weight="600">NMT hi&rarr;en</text>
+          <text x="396" y="100" text-anchor="middle" font-size="11" fill-opacity="0.7">IndicTrans2 int8</text>
+
+          <rect x="496" y="62" width="132" height="52" rx="3" fill="none" stroke="#0E6E5C" stroke-width="1.8"/>
+          <text x="562" y="83" text-anchor="middle" font-weight="600" fill="#0E6E5C">LLM + RAG</text>
+          <text x="562" y="100" text-anchor="middle" font-size="11" fill="#0E6E5C" fill-opacity="0.85">qwen3:1.7b</text>
+
+          <rect x="668" y="62" width="120" height="52" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"/>
+          <text x="728" y="83" text-anchor="middle" font-weight="600">NMT en&rarr;hi</text>
+          <text x="728" y="100" text-anchor="middle" font-size="11" fill-opacity="0.7">IndicTrans2 int8</text>
+
+          <rect x="828" y="62" width="120" height="52" rx="3" fill="none" stroke="currentColor" stroke-width="1.4"/>
+          <text x="888" y="83" text-anchor="middle" font-weight="600">TTS</text>
+          <text x="888" y="100" text-anchor="middle" font-size="11" fill-opacity="0.7">Piper 22 kHz</text>
+        </g>
+
+        <!-- flow arrows with measured latency -->
+        <g stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)">
+          <line x1="128" y1="88" x2="164" y2="88"/>
+          <line x1="296" y1="88" x2="332" y2="88"/>
+          <line x1="456" y1="88" x2="492" y2="88"/>
+          <line x1="628" y1="88" x2="664" y2="88"/>
+          <line x1="788" y1="88" x2="824" y2="88"/>
+        </g>
+        <g font-family="IBM Plex Mono, monospace" font-size="11" fill="currentColor"
+           text-anchor="middle" fill-opacity="0.75">
+          <text x="232" y="130">0.7 s</text>
+          <text x="396" y="130">0.6 s</text>
+          <text x="562" y="130">3.6 s</text>
+          <text x="728" y="130">0.9 s</text>
+          <text x="888" y="130">0.9 s</text>
+        </g>
+
+        <!-- knowledge store feeding the LLM -->
+        <g>
+          <rect x="486" y="18" width="152" height="30" rx="3" fill="none" stroke="#0E6E5C" stroke-width="1.4"/>
+          <text x="562" y="38" text-anchor="middle" font-family="IBM Plex Sans Condensed, sans-serif"
+                font-size="12" fill="#0E6E5C" font-weight="600">ASHA manual &middot; 76 pages</text>
+          <line x1="562" y1="48" x2="562" y2="58" stroke="#0E6E5C" stroke-width="1.4" marker-end="url(#ar-a)"/>
+          <text x="650" y="56" font-family="IBM Plex Mono, monospace" font-size="10.5"
+                fill="#0E6E5C">retrieves 3 pages</text>
+        </g>
+
+        <!-- speaker return -->
+        <g>
+          <line x1="936" y1="114" x2="936" y2="150" stroke="currentColor" stroke-width="1.4"/>
+          <line x1="936" y1="150" x2="80" y2="150" stroke="currentColor" stroke-width="1.4"/>
+          <line x1="80" y1="150" x2="80" y2="118" stroke="currentColor" stroke-width="1.4" marker-end="url(#ar)"/>
+          <text x="484" y="145" text-anchor="middle" font-family="IBM Plex Mono, monospace"
+                font-size="11" fill="currentColor" fill-opacity="0.75">spoken Hindi answer &rarr; speaker</text>
+        </g>
+
+        <!-- total -->
+        <text x="8" y="212" font-family="IBM Plex Sans Condensed, sans-serif" font-size="14"
+              font-weight="600" fill="currentColor">End to end</text>
+        <text x="112" y="212" font-family="IBM Plex Mono, monospace" font-size="14"
+              font-weight="600" fill="#0E6E5C">6.7 &ndash; 7.6 s</text>
+        <text x="238" y="212" font-family="IBM Plex Sans, sans-serif" font-size="12"
+              fill="currentColor" fill-opacity="0.7">second button press to first audio &middot; challenge target 5&ndash;8 s</text>
+      </svg>
+      <figcaption>
+        Hindi is understood and spoken at the edges; the reasoning core works in English, where
+        the 1.7 B model is strongest. Retrieval sits between them, so the model answers only from
+        the manual &mdash; when nothing matches, the language model is never called at all. Timings are
+        measured from the second button press; ending on the silence timeout instead adds that
+        <span class="num">3.5 s</span> window to the total.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2><span class="n">02</span>Key design choices</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:20%">Choice</th>
+          <th style="width:44%">Why, and what it cost or saved</th>
+          <th style="width:36%">Measured</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="key">Text-only 1.7 B model,<br>not a vision model</td>
+          <td>The shipping build does not use the camera, yet the vision model still loaded a CLIP tower and
+              reserved a 322 MB vision compute buffer on every start. Its text-only sibling
+              is the same family and reasoning behaviour.</td>
+          <td class="num">3084 MB &rarr; <span class="win">921 MB</span> resident</td>
+        </tr>
+        <tr>
+          <td class="key">Model chosen on safety,<br>not on size</td>
+          <td>Smaller candidates were not merely weaker. With the rule <em>&ldquo;do not bathe a
+              baby until 2000 gm&rdquo;</em> present verbatim in the retrieved page, a 1.5 B model
+              answered <em>&ldquo;should be bathed daily until 2000 grams&rdquo;</em> &mdash; the negation
+              inverted, on health guidance.</td>
+          <td>qwen2.5:1.5b inverted the rule;<br>qwen3:1.7b answered correctly</td>
+        </tr>
+        <tr>
+          <td class="key">Retrieval before the model, and refusal without it</td>
+          <td>Answers are grounded in the manual page, not model memory. If retrieval matches
+              nothing the device says so instead of inventing &mdash; an unaided model happily
+              answered &ldquo;capital of France&rdquo; and offered engine-repair advice.</td>
+          <td>Out-of-scope questions refused,<br>no LLM call made</td>
+        </tr>
+        <tr>
+          <td class="key">Long speech transcribed<br>in chunks</td>
+          <td>The conformer was trained on short utterances and loses coherence over long ones,
+              degrading into nonsense rather than stopping. Audio is split near 12 s at the
+              quietest point so seams fall in word gaps.</td>
+          <td class="num">38 s clip: 42% &rarr; <span class="win">95%</span> of words</td>
+        </tr>
+        <tr>
+          <td class="key">Prompt cache capped</td>
+          <td>Every RAG prompt is unique, so llama.cpp&rsquo;s 8 GB-limit prompt cache never hit and
+              only grew &mdash; the real cause of the swap thrashing that stalled the board, not
+              model size.</td>
+          <td class="num">60 queries: +592 MB &rarr; <span class="win">+3 MB</span> swap</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+
+  <section>
+    <h2><span class="n">03</span>Accuracy testing</h2>
+    <div class="grid2">
+      <div>
+        <p>Answers were being judged one question at a time, which cannot tell an improvement from
+           a trade &mdash; a retrieval change that helped scenario questions had already been seen
+           to break factual ones. So correctness is measured, not argued.</p>
+        <p>A fixed set of ten questions is drawn from the manual. Each carries the fact its answer
+           must contain (<code>2000</code> for the bathing rule, <code>gauze</code> for the
+           airway step), plus one deliberately out-of-scope question that must be refused. Any
+           change is re-scored in about a minute.</p>
+        <p>The gap between the two rows is entirely speech and translation noise: when the question
+           reaches the reasoning core intact, the answer is right every time. That is what directed
+           the remaining engineering effort at the input path rather than at the prompt.</p>
+      </div>
+      <div>
+        <table>
+          <thead>
+            <tr><th>Path under test</th><th class="tight">Score</th><th>Failure mode</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Text in &rarr; answer<br><span style="color:var(--ink-soft)">retrieval, model, prompt</span></td>
+              <td class="num tight"><b>10 / 10</b></td>
+              <td>&mdash;</td>
+            </tr>
+            <tr>
+              <td>Speech in &rarr; answer<br><span style="color:var(--ink-soft)">full pipeline</span></td>
+              <td class="num tight"><b>8 / 10</b></td>
+              <td>Mis-heard word, or a trailing clause lost in translation</td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="margin-top:2.5mm; font-size:8.2pt; color:var(--ink-soft)">
+          The harness found two real defects the eye had missed: a retrieval stemmer under which
+          the question&rsquo;s <code>weighed</code> could never match the manual&rsquo;s
+          <code>weigh</code> &mdash; making the one page that answers it unreachable &mdash; and an
+          over-narrow test assertion that had been failing a correct answer.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">04</span>Latency</h2>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:22%">Stage</th>
+          <th class="tight">Typical</th>
+          <th style="width:58%">What sets it, and what was done about it</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Speech &rarr; text</td><td class="num tight">0.7 s</td>
+            <td>First question once cost 6&ndash;8 s: the warm-up exercised the ONNX sessions but not
+                librosa&rsquo;s JIT. Warming the real inference path moved that cost to boot.</td></tr>
+        <tr><td>Translate hi&rarr;en</td><td class="num tight">0.6 s</td>
+            <td>Two direction models resident; the third (indic&harr;indic, 326 MB) is lazy-loaded and
+                never touched, as every route goes through English.</td></tr>
+        <tr><td>Retrieve + answer</td><td class="num tight">3.6 s</td>
+            <td>The budget&rsquo;s largest item. Capped at 90 new tokens after a rambling answer once
+                burned 17 s on its own; retrieval itself is under 10 ms.</td></tr>
+        <tr><td>Translate en&rarr;hi</td><td class="num tight">0.9 s</td>
+            <td>Decode limit raised 64 &rarr; 192 tokens; at 64 a spoken answer stopped mid-instruction,
+                dropping the verb from &ldquo;requires immediate intervention&rdquo;.</td></tr>
+        <tr><td>Text &rarr; speech</td><td class="num tight">0.9 s</td>
+            <td>Piper at 22 kHz. Numbers are spelled out before synthesis &mdash; a bare
+                &ldquo;20&rdquo; is not reliably voiced as <span lang="hi">बीस</span>, and dosages and
+                weeks are what these answers turn on.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2><span class="n">05</span>Power efficiency</h2>
+    <div class="grid3">
+      <div class="stat">
+        <div class="v">3.4 W</div>
+        <div class="k">Idle, models resident</div>
+        <div class="note">Board stays ready; nothing reloads between questions.</div>
+      </div>
+      <div class="stat">
+        <div class="v">5.1 W</div>
+        <div class="k">Average during a query</div>
+        <div class="note">Peak 9.7 W for roughly one second at generation.</div>
+      </div>
+      <div class="stat">
+        <div class="v">15 W</div>
+        <div class="k">Enforced power mode</div>
+        <div class="note">Chosen over 25 W: the higher cap browned the board out under load.</div>
+      </div>
+    </div>
+    <p style="margin-top:2.5mm">
+      Memory is the binding constraint on this board, and power follows it. Steady state is
+      <span class="num">4.2 GB of 7.4 GB</span> &mdash; OS 1715 MB, language model 921 MB, speech and
+      translation service 1593 MB &mdash; leaving headroom that stays flat across sustained use:
+      60 consecutive queries moved swap by <span class="num win">3 MB</span>.
+    </p>
+  </section>
+
+  <section>
+    <h2><span class="n">06</span>Engineering quality &amp; code</h2>
+    <div class="grid2">
+      <div>
+        <h3>How the work is structured</h3>
+        <ul>
+          <li>Two repositories, <span class="num">23</span> reviewed commits, each recording the
+              measurement that motivated it &mdash; a later reader can tell why a constant is 3.5
+              and not 2.0.</li>
+          <li>Four systemd units in dependency order. Load order matters: the language model must
+              claim GPU memory before the speech service, or it silently splits across CPU and
+              runs many times slower.</li>
+          <li>Every model runs from local disk. The device is airplane-mode capable by
+              construction, not by configuration.</li>
+          <li>Superseded models are kept in place so a voice or checkpoint can be rolled back
+              without a re-download.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Failures designed for</h3>
+        <ul>
+          <li>Recording is ended explicitly. The trigger pin cannot report a sustained press &mdash; it
+              drops after <span class="num">7.8 s</span> while the button is still held &mdash; so
+              hold-to-talk was cutting questions mid-sentence, losing a
+              <span lang="hi">नहीं</span> and inverting the answer with it. One press now starts the
+              recording and the next ends it, with a <span class="num">3.5 s</span> silence timeout as
+              fallback.</li>
+          <li>Empty or unintelligible speech is answered with a spoken Hindi prompt to repeat,
+              never with a guess.</li>
+          <li>Every stage that calls another service retries and reports, so one slow subsystem
+              cannot wedge the interaction loop.</li>
+          <li>Freed memory is returned to the OS after each interaction; on a board with no
+              spare RAM, &ldquo;free it later&rdquo; is the same as leaking it.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</div>
