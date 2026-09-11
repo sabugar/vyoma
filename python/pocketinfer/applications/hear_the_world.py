@@ -173,10 +173,58 @@ class HearTheWorld(BaseApplication):
             return "".join(word[i] for i in range(0, len(word), 2))
         return word
 
+    # Two more artefacts from the same extraction, both audited across all 76
+    # pages. The running head "ASHA Module 7" is set vertically in the margin
+    # and comes out reversed, as "7 eludoM AHSA", on 78 occurrences; and the
+    # bullet glyph in the danger-sign lists comes out as a bare letter u, so
+    # the manual's "u Any child who is underweight" reaches the model looking
+    # like a typo. Neither reaches the index - the stemmer drops one-letter
+    # tokens and no question produces "eludom" - but both are noise in the
+    # context the model reads, and the second one sits in exactly the danger
+    # sign lists that matter most.
+    _REVERSED_HEAD = re.compile(r'\d*\s*eludoM\s+AHSA\s*', re.I)
+    _U_BULLET = re.compile(r'(?<=[\s])u(?=\s+[A-Z])')
+
+    # Four pages came out reversed end to end - the home-visit checklist forms,
+    # which are set rotated in the PDF, so the extractor walked them backwards:
+    # "fo noitanimaxE( mrof tisiv emoH" for "Home visit form (Examination of".
+    # 794 words of newborn follow-up guidance that no question could reach and
+    # the model could not read. Reversing the characters restores both the
+    # spelling and the word order, because both were reversed together.
+    _COMMON = frozenset("the and for with that this from have been are was not "
+                        "you your will can has".split())
+
+    @classmethod
+    def _looks_reversed(cls, text):
+        words = re.findall(r'[a-z]{2,}', text.lower())
+        if len(words) < 25:
+            return False
+        fwd = sum(1 for w in words if w in cls._COMMON)
+        rev = sum(1 for w in re.findall(r'[a-z]{2,}', text[::-1].lower())
+                  if w in cls._COMMON)
+        # Needs to be both better backwards and convincingly so, or a page of
+        # tables and numbers could flip itself on a one-word margin.
+        return rev > fwd and rev >= 5
+
+    # The last four pages of the module are the supervisor's home-visit
+    # checklists - forms to tick, not guidance to read. Once un-reversed they
+    # started competing in retrieval, and because their text is a flattened
+    # table ("All limbs limp ... Yes/No Yes/No Yes/No") they crowded the clean
+    # sign list on page 57 out of the context: the sepsis answer lost two of
+    # its five signs and the eval went 9/10 to 8/10. They are the only pages in
+    # the manual carrying repeated Yes/No boxes, which is what identifies them.
+    @staticmethod
+    def _is_form(text):
+        return len(re.findall(r'Yes\s*/\s*No', text, re.I)) >= 5
+
     @classmethod
     def _repair_extraction(cls, text):
-        return re.sub(r'[A-Za-z]{6,}',
-                      lambda m: cls._undouble(m.group(0)), text)
+        if cls._looks_reversed(text):
+            text = text[::-1]
+        text = re.sub(r'[A-Za-z]{6,}', lambda m: cls._undouble(m.group(0)), text)
+        text = cls._REVERSED_HEAD.sub('', text)
+        text = cls._U_BULLET.sub('\u2022', text)
+        return text
 
     def _load_knowledge_chunks(self, chunks_dir='/home/ubuntu/asha_knowledge/chunks'):
         '''Load pre-chunked ASHA Module-7 text and build a TF-IDF index.'''
@@ -189,6 +237,8 @@ class HearTheWorld(BaseApplication):
                 if fname.endswith('.txt'):
                     with open(os.path.join(chunks_dir, fname), 'r', encoding='utf-8') as f:
                         text = self._repair_extraction(f.read())
+                    if self._is_form(text):
+                        continue
                     terms = self._terms(text)
                     tf = {}
                     for t in terms:
