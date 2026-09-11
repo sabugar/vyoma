@@ -279,6 +279,34 @@ class HearTheWorld(BaseApplication):
         r'^\s*(the\s+answer\s+is|answer|according to the (context|guidance|text)|'
         r'based on the (context|text))\s*[:,]?\s*', re.I)
 
+    # Telling the model not to repeat the question back does not stop it - it
+    # still opens with a restatement in about one answer in four. That is not
+    # merely untidy: spoken Hindi runs about 0.08s per character through this
+    # voice, so an 85-character echo of the question is seven seconds of audio
+    # that says nothing, before the ASHA hears a word of the answer. Dropped
+    # here when the opening sentence is mostly the question's own words and
+    # there is a real answer behind it.
+    @classmethod
+    def _strip_restatement(cls, answer, query):
+        parts = [p.strip() for p in re.split(r'(?<=[.!?])\s+', answer or '') if p.strip()]
+        if len(parts) < 2:
+            return answer
+        q_terms = set(cls._terms(query))
+        first = set(cls._terms(parts[0]))
+        if not first or not q_terms:
+            return answer
+        # Never drop a sentence carrying a figure. The model often answers by
+        # restating the situation and appending the rule in the same breath -
+        # "the baby is very small in weight, so do not bathe it until its
+        # weight is 2000 gm" - and an overlap test alone reads that as an echo
+        # and deletes the only number in the answer. Measured: dropping it took
+        # the bathing question from pass to fail.
+        if re.search(r'\d', parts[0]):
+            return answer
+        if len(first & q_terms) / len(first) >= 0.7:
+            return " ".join(parts[1:])
+        return answer
+
     @classmethod
     def _strip_lead_in(cls, text):
         cleaned = cls._LEAD_IN.sub('', text or '', count=1).lstrip()
@@ -297,6 +325,15 @@ class HearTheWorld(BaseApplication):
         eval was reporting 9/10 for a prompt the device no longer used. Both
         call this now, so a prompt change is measured by the next eval run
         rather than going unnoticed.
+
+        The wording asking for 1-2 sentences is load-bearing and the obvious
+        addition - telling the model not to repeat the question - is
+        deliberately absent. Measured over the nine answerable eval questions
+        with the full context: this wording scores 8/9; adding "do not repeat
+        the question back" drops it to 7/9, and so does widening the budget to
+        1-3 sentences. Both make the model reach for a general action instead
+        of the manual's own number, so the bathing answer stops saying 2000 gm.
+        The echo is removed after generation instead, by _strip_restatement.
 
         The refusal rule comes first on purpose. It used to sit at the end,
         after an instruction to make the answer "sound informed, not vague" -
@@ -458,7 +495,13 @@ class HearTheWorld(BaseApplication):
     # starts roughly 2.5s earlier. Set POCKETINFER_STREAM=0 to fall back to the
     # single-shot path.
     STREAM_ANSWER = os.environ.get('POCKETINFER_STREAM', '1') == '1'
-    MAX_ANSWER_SENTENCES = 2
+    # Three, not two. The model opens by restating the question in about one
+    # answer in four, and at two sentences that left only one for the answer
+    # itself: asked what to do when a newborn will not breathe, it gave suction
+    # of the throat and then the nose and stopped, losing "ventilate with bag
+    # and mask" - the step that matters most. The prompt now forbids restating
+    # as well, but the budget should not depend on the model obeying it.
+    MAX_ANSWER_SENTENCES = 3
 
     @staticmethod
     def _join_wavs(chunks):
@@ -495,7 +538,9 @@ class HearTheWorld(BaseApplication):
             try:
                 for sent in self.ollama.generate_sentences(
                         llm_prompt, max_sentences=self.MAX_ANSWER_SENTENCES):
-                    sent = self._strip_lead_in(sent) if not english else sent
+                    if not english:
+                        sent = self._strip_restatement(
+                            self._strip_lead_in(sent), query)
                     if self.NO_ANSWER_SENTINEL in sent.upper():
                         # Caught before synthesis, so nothing of it is spoken.
                         # Leaving english empty makes the caller fall back to
@@ -642,7 +687,8 @@ class HearTheWorld(BaseApplication):
                     else:
                         streamed = None
                         resp = self.ollama.generate(images=[], prompt=llm_prompt)
-                        result = self._strip_lead_in(resp.response.strip())
+                        result = self._strip_restatement(
+                            self._strip_lead_in(resp.response.strip()), query)
                         if self.NO_ANSWER_SENTINEL in result.upper():
                             result = ""
                 else:

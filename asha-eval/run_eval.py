@@ -71,6 +71,10 @@ def main():
                             "num_ctx": Ollama.NUM_CTX,
                             "temperature": Ollama.TEMPERATURE}}, timeout=300).json()
             answer = resp.get("response", "").strip()
+            # Same post-processing the device applies before speaking, so the
+            # score reflects what the ASHA actually hears.
+            answer = HearTheWorld._strip_restatement(
+                HearTheWorld._strip_lead_in(answer), english)
             if HearTheWorld.NO_ANSWER_SENTINEL in answer.upper():
                 # The device speaks its fixed out-of-scope reply here.
                 answer = REFUSAL
