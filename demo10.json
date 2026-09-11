@@ -1,0 +1,142 @@
+[
+ {
+  "title": "Baby does not breathe at birth",
+  "hi": "बच्चा पैदा होने के बाद रो नहीं रहा है और साँस भी नहीं ले रहा तो क्या करें",
+  "en": "What to do if the baby is not crying and not even breathing after birth",
+  "why": "Birth asphyxia is the single commonest cause of newborn death in the first minutes of life. The window to act is about a minute, and the ASHA is usually the only person present.",
+  "pages": [
+   "55",
+   "54",
+   "31"
+  ],
+  "ans_en": "If the baby is not crying and not even breathing after birth, immediately suction the throat with a mucus extractor. If the baby still doesn’t breathe, suction the nose with a mucus extractor. If the baby still doesn’t cry, perform ventilation with a bag and mask.",
+  "ans_hi": "यदि बच्चा रो नहीं रहा है और जन्म के बाद सांस भी नहीं ले रहा है, तो तुरंत एक बलगम निकालने वाले से गले को चूसें। यदि बच्चा अभी भी सांस नहीं लेता है, तो श्लेष्मा निकालने वाले से नाक को चूसो। यदि बच्चा अभी भी नहीं रोता है, तो एक थैले और मास्क के साथ वेंटिलेशन करें।",
+  "secs": 4.9
+ },
+ {
+  "title": "Meconium-stained liquor",
+  "hi": "प्रसव के समय पानी पीला और गाढ़ा है और बच्चे का सिर दिख रहा है",
+  "en": "The water at the time of delivery is yellow and thick and the baby's head is visible.",
+  "why": "Yellow, thick liquor means the baby has passed meconium in the womb. If it is inhaled at the first breath it blocks the airway, so the mouth must be cleared before the chest delivers.",
+  "pages": [
+   "55",
+   "54",
+   "51"
+  ],
+  "ans_en": "The baby's head is visible, and the water is yellow and thick. The ASHA should clear the mouth of the baby with gauze as soon as the head is seen.",
+  "ans_hi": "बच्चे का सिर दिखाई देता है, और पानी पीला और मोटा होता है। आशा को सिर देखते ही बच्चे के मुंह को जाली से साफ करना चाहिए।",
+  "secs": 3.3
+ },
+ {
+  "title": "Danger signs of newborn sepsis",
+  "hi": "नवजात में सेप्सिस के क्या लक्षण होते हैं",
+  "en": "What are the symptoms of sepsis in a newborn?",
+  "why": "One newborn in ten develops sepsis in rural India and it is the commonest killer in the first month. Untreated most die; treated most recover completely, so recognition is the whole battle.",
+  "pages": [
+   "56",
+   "57",
+   "54"
+  ],
+  "ans_en": "The symptoms of sepsis in a newborn include limbs becoming limp, stopping feeding, chest indrawing, fever, and being cold to touch.",
+  "ans_hi": "नवजात शिशु में सेप्सिस के लक्षणों में अंग लंगड़े होना, खाना खाना बंद करना, छाती में दर्द, बुखार और छूने में ठंड शामिल है।",
+  "secs": 3.2
+ },
+ {
+  "title": "When to refer a newborn at once",
+  "hi": "नवजात को कब तुरंत अस्पताल भेजना चाहिए",
+  "en": "When should a newborn be sent to the hospital immediately?",
+  "why": "Knowing the signs is useless without knowing the threshold to act on them. This is the decision an ASHA has to make alone, at night, far from a facility.",
+  "pages": [
+   "57",
+   "54",
+   "56"
+  ],
+  "ans_en": "The newborn should be sent to the hospital immediately if any of the following signs develop: limbs become limp, stops feeding, has chest indrawing, has fever, or is cold to touch.",
+  "ans_hi": "यदि निम्नलिखित में से कोई भी संकेत विकसित होता हैः अंग लंगड़े हो जाते हैं, खाना बंद कर देते हैं, छाती में दर्द होता है, बुखार होता है, या छूने में सर्दी होती है तो नवजात को तुरंत अस्पताल भेजा जाना चाहिए।",
+  "secs": 3.8
+ },
+ {
+  "title": "Maternal infection after delivery",
+  "hi": "डिलीवरी के दस दिन बाद महिला को तेज बुखार है और बदबूदार रक्तस्राव हो रहा है",
+  "en": "Ten days after delivery, the woman has a high fever and is bleeding foul smelling.",
+  "why": "Puerperal sepsis is a leading cause of maternal death and it appears days after everyone has gone home, when no clinician is watching.",
+  "pages": [
+   "39",
+   "43",
+   "64"
+  ],
+  "ans_en": "The woman has a high fever and foul-smelling discharge 10 days after delivery, which are warning signs for immediate referral.",
+  "ans_hi": "महिला को प्रसव के 10 दिन बाद तेज बुखार और दुर्गंध का स्राव होता है, जो तत्काल रेफरल के लिए चेतावनी संकेत हैं।",
+  "secs": 3.3
+ },
+ {
+  "title": "General danger signs in a sick child",
+  "hi": "बीमार बच्चे में खतरे के लक्षण कौन कौन से हैं",
+  "en": "What are the danger signs in a sick child?",
+  "why": "These four signs decide whether a child is treated at home or sent urgently. They are the entry point of the whole IMNCI algorithm.",
+  "pages": [
+   "22",
+   "23",
+   "32"
+  ],
+  "ans_en": "The danger signs in a sick child include not being able to drink or breastfeed, vomiting everything, having convulsions, or being lethargic or unconscious.",
+  "ans_hi": "बीमार बच्चे में खतरे के संकेतों में पीने या स्तनपान न करना, सब कुछ उल्टी करना, ऐंठन होना, या सुस्ती या बेहोशी होना शामिल है।",
+  "secs": 3.3
+ },
+ {
+  "title": "High fever with a stiff neck",
+  "hi": "बच्चे को तेज बुखार है और गर्दन अकड़ गई है",
+  "en": "The child has a high fever and a stiff neck.",
+  "why": "Fever with neck stiffness is meningitis until proved otherwise. Hours matter, and the temptation to treat a fever at home is exactly what costs the time.",
+  "pages": [
+   "24",
+   "25",
+   "62"
+  ],
+  "ans_en": "Give first dose of anti-malarial, after making a smear. Give one dose of paracetamol to bring the high fever down. Referral to hospital.",
+  "ans_hi": "स्मीयर बनाने के बाद मलेरिया रोधी दवा की पहली खुराक दें। तेज बुखार को कम करने के लिए पेरासिटामोल की एक खुराक दें। अस्पताल में रेफरल।",
+  "secs": 3.5
+ },
+ {
+  "title": "Bathing a low birth weight newborn",
+  "hi": "बच्चे का वजन बहुत कम है और परिवार उसे जन्म के तुरंत बाद नहलाना चाहता है",
+  "en": "The baby is very light weight and the family wants to bathe him immediately after birth.",
+  "why": "Bathing a newborn immediately is a widespread custom. In a small baby it causes hypothermia, which leads to sepsis. The ASHA has to overrule the family with a number, not an opinion.",
+  "pages": [
+   "52",
+   "55",
+   "51"
+  ],
+  "ans_en": "The baby is very light weight and the family wants to bathe him immediately after birth. According to the guidance, do not bathe a baby until its weight is 2000 gm. Therefore, the family should wait until the baby reaches this weight before bathing.",
+  "ans_hi": "बच्चा बहुत हल्का है और परिवार उसे जन्म के तुरंत बाद नहलाना चाहता है। मार्गदर्शन के अनुसार, बच्चे को तब तक नहलाना न चाहिए जब तक कि उसका वजन 2000 ग्राम न हो जाए। इसलिए, परिवार को नहाने से पहले बच्चे के इस वजन तक पहुंचने तक इंतजार करना चाहिए।",
+  "secs": 4.4
+ },
+ {
+  "title": "Dehydration in a child with diarrhoea",
+  "hi": "दस्त से पीड़ित बच्चे में पानी की कमी के लक्षण क्या हैं",
+  "en": "What are the symptoms of dehydration in a child with diarrhea?",
+  "why": "Diarrhoea kills through dehydration, not infection. The signs are physical and checkable at the doorstep, and they decide between ORS at home and urgent referral.",
+  "pages": [
+   "27",
+   "30",
+   "26"
+  ],
+  "ans_en": "The symptoms of dehydration in a child with diarrhea include lethargy, unconsciousness, sunken eyes, not being able to drink or drinking poorly, and the skin pinch going back very slowly.",
+  "ans_hi": "दस्त वाले बच्चे में निर्जलीकरण के लक्षणों में सुस्ती, बेहोशी, आंखें डूबना, पीने या खराब तरीके से पीने में सक्षम नहीं होना और त्वचा बहुत धीरे-धीरे वापस चली जाती है।",
+  "secs": 3.8
+ },
+ {
+  "title": "Feeding a low birth weight baby",
+  "hi": "कम वजन वाले नवजात को दूध कैसे पिलाना चाहिए",
+  "en": "How to breastfeed a low-weight newborn",
+  "why": "A small baby who feeds poorly loses weight, gets cold and becomes septic. Feeding support in the first days is what breaks that chain.",
+  "pages": [
+   "51",
+   "53",
+   "5"
+  ],
+  "ans_en": "Express milk every 2-3 hours to keep the milk supply up, and put the baby to breast as often as possible once she is able to suckle.",
+  "ans_hi": "दूध की आपूर्ति को बनाए रखने के लिए हर 2-3 घंटे में दूध का प्रयोग करें, और चूसने में सक्षम होने के बाद बच्चे को जितनी बार हो सके स्तन में डालें।",
+  "secs": 3.6
+ }
+]

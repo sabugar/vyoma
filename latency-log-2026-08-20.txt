@@ -1,0 +1,27 @@
+ASHA Sahayak - measured latency log
+Source: journald, bhashini_models.service + pocketinfer.service
+Session: 20 August 2026, 17:39-17:45 IST   Device: Jetson Orin Nano 8 GB, 15 W mode
+
+Each stage is the wall-clock gap between one service returning and the next.
+The clock starts when ASR returns text, so ASR's own time is not included here;
+it is measured separately at 0.7 s once warm.
+
+#   start     NMT hi>en  LLM+RAG NMT en>hi      TTS   subtotal
+--------------------------------------------------------------
+1   17:39:32.7     0.73s     3.58s     0.75s     1.41s      6.47s
+2   17:40:39.1     0.58s     6.05s     0.86s     1.87s      9.35s
+3   17:43:12.1     0.60s     3.75s     0.83s     1.60s      6.77s
+4   17:44:16.5     0.58s     3.97s     0.84s     1.76s      7.16s
+--------------------------------------------------------------
+average           0.63s     4.34s     0.82s     1.66s      7.44s
+min               0.58s     3.58s     0.75s     1.41s      6.47s
+max               0.73s     6.05s     0.86s     1.87s      9.35s
+
+Adding ASR (0.7 s warm), end to end from the stop press to audio:
+   best  7.2 s    average  8.1 s    worst  10.1 s
+
+Questions asked in this session:
+   1. बच्चे की नाभी से पीप निकल रहा है और उसकी नाभी लाल हो गई है
+   2. आठ महीने की गर्भवती महिला को पेट में बच्चे की किसी भी तरह 
+   3. तुरंत जन्मे बच्चे को परिवार वाले नहलाना चाहते हैं तो क्या 
+   4. डिलीवरी के दस दिन बाद भी महिला को रक्तस््राव बहुत हो रहा ह

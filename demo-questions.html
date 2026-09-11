@@ -1,0 +1,191 @@
+<meta charset="utf-8">
+<title>Ten Critical Questions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{--ground:#FFFFFF;--panel:#F1F5F9;--ink:#14203A;--ink-soft:#52607A;--rule:#C6CEDB;
+        --accent:#0E6E5C;--accent-b:#E4F0EC;--signal:#A85410;
+        --sans:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif,"Lohit Devanagari";
+        --cond:"IBM Plex Sans Condensed","IBM Plex Sans",ui-sans-serif,sans-serif,"Lohit Devanagari";
+        --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace,"Lohit Devanagari";
+        --deva:"Lohit Devanagari","Noto Sans Devanagari",serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:8.6pt;line-height:1.4}
+  .doc{max-width:182mm;margin:0 auto;padding:9mm 0}
+  .doc>*+*{margin-top:4mm}
+  .masthead{display:grid;grid-template-columns:1fr auto;align-items:end;gap:8mm;
+            border-bottom:2px solid var(--ink);padding-bottom:2mm}
+  h1{font-family:var(--cond);font-size:19pt;font-weight:700;letter-spacing:-.01em;margin:0}
+  .sub{font-family:var(--cond);font-size:9.5pt;font-weight:500;color:var(--accent);margin:1mm 0 0}
+  .spec{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);text-align:right;line-height:1.5;white-space:nowrap}
+  .spec b{color:var(--ink);font-weight:600}
+  .lede{font-size:9pt;color:var(--ink-soft)}
+  .lede b{color:var(--ink)}
+  .q{border-left:2px solid var(--accent);padding-left:3.4mm;page-break-inside:avoid}
+  .q+.q{margin-top:4.6mm}
+  .qhead{display:flex;align-items:baseline;gap:2.6mm}
+  .num{font-family:var(--mono);font-size:8pt;font-weight:600;color:var(--accent)}
+  .title{font-family:var(--cond);font-size:10.5pt;font-weight:600}
+  .ask{font-family:var(--deva);font-size:11pt;line-height:1.5;margin:1.6mm 0 0;
+       background:var(--accent-b);padding:2mm 2.6mm;border-radius:1mm}
+  .why{font-size:8.2pt;color:var(--ink-soft);margin:1.8mm 0 0}
+  .why b{color:var(--signal);font-family:var(--cond);font-weight:600;text-transform:uppercase;
+         font-size:6.9pt;letter-spacing:.06em;margin-right:1.6mm}
+  .ans{background:var(--panel);padding:2.2mm 2.6mm;margin-top:1.8mm}
+  .ans .lbl{font-family:var(--cond);font-size:6.9pt;font-weight:600;text-transform:uppercase;
+            letter-spacing:.06em;color:var(--ink-soft)}
+  .ans .hi{font-family:var(--deva);font-size:9.4pt;line-height:1.5;margin:.9mm 0 0}
+  .ans .en{font-size:7.9pt;color:var(--ink-soft);margin:1.2mm 0 0}
+  .meta{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);margin-top:1.4mm}
+  .note{background:var(--accent-b);border-left:3px solid var(--accent);padding:2.6mm 3mm}
+  .note .hd{font-family:var(--cond);font-size:9.6pt;font-weight:700;color:var(--accent);margin:0 0 1.2mm}
+  .note p{margin:0 0 1.2mm;font-size:8.2pt}
+  .note p:last-child{margin:0}
+  code{font-family:var(--mono);font-size:.92em;color:var(--accent)}
+  @page{size:A4;margin:11mm 14mm 9mm;
+    @bottom-left{content:"ASHA Sahayak \00b7 ten critical questions";font-family:var(--mono);font-size:6.6pt;color:#52607A}
+    @bottom-right{content:"Page " counter(page) " of " counter(pages);font-family:var(--mono);font-size:6.6pt;color:#52607A}}
+  @media print{.doc{max-width:none;padding:0;margin:0}}
+</style>
+
+<div class="doc">
+  <header class="masthead">
+    <div><h1>Ten Critical Questions</h1>
+    <p class="sub">ASHA Sahayak &mdash; verified demonstration set</p></div>
+    <div class="spec"><b>Every answer below was produced by the device</b><br>
+    Jetson Orin Nano 8&nbsp;GB &middot; MAXN_SUPER &middot; 11 Sep 2026<br>
+    <b>no network at any point</b></div>
+  </header>
+  <p class="lede">
+    These ten were not chosen for how well they read. They were chosen by running twenty-six
+    candidate questions through the device and keeping only those whose answers are correct and
+    traceable to a page of the ASHA manual. <b>Sixteen were discarded</b> &mdash; among them a question
+    about bleeding after delivery, which the device answered from the contraception page because
+    Module 7 does not cover postpartum haemorrhage at all. What follows is what the device can
+    actually do, not what it ought to.
+  </p>
+  <div class="q">
+    <div class="qhead"><span class="num">01</span><span class="title">Baby does not breathe at birth</span></div>
+    <p class="ask">बच्चा पैदा होने के बाद रो नहीं रहा है और साँस भी नहीं ले रहा तो क्या करें</p>
+    <p class="why"><b>Why it matters</b>Birth asphyxia is the single commonest cause of newborn death in the first minutes of life. The window to act is about a minute, and the ASHA is usually the only person present.</p>
+    <div class="ans">
+      <div class="lbl">What the device says</div>
+      <p class="hi">यदि बच्चा रो नहीं रहा है और जन्म के बाद सांस भी नहीं ले रहा है, तो तुरंत एक बलगम निकालने वाले से गले को चूसें। यदि बच्चा अभी भी सांस नहीं लेता है, तो श्लेष्मा निकालने वाले से नाक को चूसो। यदि बच्चा अभी भी नहीं रोता है, तो एक थैले और मास्क के साथ वेंटिलेशन करें।</p>
+      <p class="en">If the baby is not crying and not even breathing after birth, immediately suction the throat with a mucus extractor. If the baby still doesn’t breathe, suction the nose with a mucus extractor. If the baby still doesn’t cry, perform ventilation with a bag and mask.</p>
+    </div>
+    <p class="meta">manual pages 55 + 54 + 31 &nbsp;&middot;&nbsp; 4.9 s to answer</p>
+  </div>
+  <div class="q">
+    <div class="qhead"><span class="num">02</span><span class="title">Meconium-stained liquor</span></div>
+    <p class="ask">प्रसव के समय पानी पीला और गाढ़ा है और बच्चे का सिर दिख रहा है</p>
+    <p class="why"><b>Why it matters</b>Yellow, thick liquor means the baby has passed meconium in the womb. If it is inhaled at the first breath it blocks the airway, so the mouth must be cleared before the chest delivers.</p>
+    <div class="ans">
+      <div class="lbl">What the device says</div>
+      <p class="hi">बच्चे का सिर दिखाई देता है, और पानी पीला और मोटा होता है। आशा को सिर देखते ही बच्चे के मुंह को जाली से साफ करना चाहिए।</p>
+      <p class="en">The baby&#x27;s head is visible, and the water is yellow and thick. The ASHA should clear the mouth of the baby with gauze as soon as the head is seen.</p>
+    </div>
+    <p class="meta">manual pages 55 + 54 + 51 &nbsp;&middot;&nbsp; 3.3 s to answer</p>
+  </div>
+  <div class="q">
+    <div class="qhead"><span class="num">03</span><span class="title">Danger signs of newborn sepsis</span></div>
+    <p class="ask">नवजात में सेप्सिस के क्या लक्षण होते हैं</p>
+    <p class="why"><b>Why it matters</b>One newborn in ten develops sepsis in rural India and it is the commonest killer in the first month. Untreated most die; treated most recover completely, so recognition is the whole battle.</p>
+    <div class="ans">
+      <div class="lbl">What the device says</div>
+      <p class="hi">नवजात शिशु में सेप्सिस के लक्षणों में अंग लंगड़े होना, खाना खाना बंद करना, छाती में दर्द, बुखार और छूने में ठंड शामिल है।</p>
+      <p class="en">The symptoms of sepsis in a newborn include limbs becoming limp, stopping feeding, chest indrawing, fever, and being cold to touch.</p>
+    </div>
+    <p class="meta">manual pages 56 + 57 + 54 &nbsp;&middot;&nbsp; 3.2 s to answer</p>
+  </div>
+  <div class="q">
+    <div class="qhead"><span class="num">04</span><span class="title">When to refer a newborn at once</span></div>
+    <p class="ask">नवजात को कब तुरंत अस्पताल भेजना चाहिए</p>
+    <p class="why"><b>Why it matters</b>Knowing the signs is useless without knowing the threshold to act on them. This is the decision an ASHA has to make alone, at night, far from a facility.</p>
+    <div class="ans">
+      <div class="lbl">What the device says</div>
+      <p class="hi">यदि निम्नलिखित में से कोई भी संकेत विकसित होता हैः अंग लंगड़े हो जाते हैं, खाना बंद कर देते हैं, छाती में दर्द होता है, बुखार होता है, या छूने में सर्दी होती है तो नवजात को तुरंत अस्पताल भेजा जाना चाहिए।</p>
+      <p class="en">The newborn should be sent to the hospital immediately if any of the following signs develop: limbs become limp, stops feeding, has chest indrawing, has fever, or is cold to touch.</p>
+    </div>
+    <p class="meta">manual pages 57 + 54 + 56 &nbsp;&middot;&nbsp; 3.8 s to answer</p>
+  </div>
+  <div class="q">
+    <div class="qhead"><span class="num">05</span><span class="title">Maternal infection after delivery</span></div>
+    <p class="ask">डिलीवरी के दस दिन बाद महिला को तेज बुखार है और बदबूदार रक्तस्राव हो रहा है</p>
+    <p class="why"><b>Why it matters</b>Puerperal sepsis is a leading cause of maternal death and it appears days after everyone has gone home, when no clinician is watching.</p>
+    <div class="ans">
+      <div class="lbl">What the device says</div>
+      <p class="hi">महिला को प्रसव के 10 दिन बाद तेज बुखार और दुर्गंध का स्राव होता है, जो तत्काल रेफरल के लिए चेतावनी संकेत हैं।</p>
+      <p class="en">The woman has a high fever and foul-smelling discharge 10 days after delivery, which are warning signs for immediate referral.</p>
+    </div>
+    <p class="meta">manual pages 39 + 43 + 64 &nbsp;&middot;&nbsp; 3.3 s to answer</p>
+  </div>
+  <div class="q">
+    <div class="qhead"><span class="num">06</span><span class="title">General danger signs in a sick child</span></div>
+    <p class="ask">बीमार बच्चे में खतरे के लक्षण कौन कौन से हैं</p>
+    <p class="why"><b>Why it matters</b>These four signs decide whether a child is treated at home or sent urgently. They are the entry point of the whole IMNCI algorithm.</p>
+    <div class="ans">
+      <div class="lbl">What the device says</div>
+      <p class="hi">बीमार बच्चे में खतरे के संकेतों में पीने या स्तनपान न करना, सब कुछ उल्टी करना, ऐंठन होना, या सुस्ती या बेहोशी होना शामिल है।</p>
+      <p class="en">The danger signs in a sick child include not being able to drink or breastfeed, vomiting everything, having convulsions, or being lethargic or unconscious.</p>
+    </div>
+    <p class="meta">manual pages 22 + 23 + 32 &nbsp;&middot;&nbsp; 3.3 s to answer</p>
+  </div>
+  <div class="q">
+    <div class="qhead"><span class="num">07</span><span class="title">High fever with a stiff neck</span></div>
+    <p class="ask">बच्चे को तेज बुखार है और गर्दन अकड़ गई है</p>
+    <p class="why"><b>Why it matters</b>Fever with neck stiffness is meningitis until proved otherwise. Hours matter, and the temptation to treat a fever at home is exactly what costs the time.</p>
+    <div class="ans">
+      <div class="lbl">What the device says</div>
+      <p class="hi">स्मीयर बनाने के बाद मलेरिया रोधी दवा की पहली खुराक दें। तेज बुखार को कम करने के लिए पेरासिटामोल की एक खुराक दें। अस्पताल में रेफरल।</p>
+      <p class="en">Give first dose of anti-malarial, after making a smear. Give one dose of paracetamol to bring the high fever down. Referral to hospital.</p>
+    </div>
+    <p class="meta">manual pages 24 + 25 + 62 &nbsp;&middot;&nbsp; 3.5 s to answer</p>
+  </div>
+  <div class="q">
+    <div class="qhead"><span class="num">08</span><span class="title">Bathing a low birth weight newborn</span></div>
+    <p class="ask">बच्चे का वजन बहुत कम है और परिवार उसे जन्म के तुरंत बाद नहलाना चाहता है</p>
+    <p class="why"><b>Why it matters</b>Bathing a newborn immediately is a widespread custom. In a small baby it causes hypothermia, which leads to sepsis. The ASHA has to overrule the family with a number, not an opinion.</p>
+    <div class="ans">
+      <div class="lbl">What the device says</div>
+      <p class="hi">बच्चा बहुत हल्का है और परिवार उसे जन्म के तुरंत बाद नहलाना चाहता है। मार्गदर्शन के अनुसार, बच्चे को तब तक नहलाना न चाहिए जब तक कि उसका वजन 2000 ग्राम न हो जाए। इसलिए, परिवार को नहाने से पहले बच्चे के इस वजन तक पहुंचने तक इंतजार करना चाहिए।</p>
+      <p class="en">The baby is very light weight and the family wants to bathe him immediately after birth. According to the guidance, do not bathe a baby until its weight is 2000 gm. Therefore, the family should wait until the baby reaches this weight before bathing.</p>
+    </div>
+    <p class="meta">manual pages 52 + 55 + 51 &nbsp;&middot;&nbsp; 4.4 s to answer</p>
+  </div>
+  <div class="q">
+    <div class="qhead"><span class="num">09</span><span class="title">Dehydration in a child with diarrhoea</span></div>
+    <p class="ask">दस्त से पीड़ित बच्चे में पानी की कमी के लक्षण क्या हैं</p>
+    <p class="why"><b>Why it matters</b>Diarrhoea kills through dehydration, not infection. The signs are physical and checkable at the doorstep, and they decide between ORS at home and urgent referral.</p>
+    <div class="ans">
+      <div class="lbl">What the device says</div>
+      <p class="hi">दस्त वाले बच्चे में निर्जलीकरण के लक्षणों में सुस्ती, बेहोशी, आंखें डूबना, पीने या खराब तरीके से पीने में सक्षम नहीं होना और त्वचा बहुत धीरे-धीरे वापस चली जाती है।</p>
+      <p class="en">The symptoms of dehydration in a child with diarrhea include lethargy, unconsciousness, sunken eyes, not being able to drink or drinking poorly, and the skin pinch going back very slowly.</p>
+    </div>
+    <p class="meta">manual pages 27 + 30 + 26 &nbsp;&middot;&nbsp; 3.8 s to answer</p>
+  </div>
+  <div class="q">
+    <div class="qhead"><span class="num">10</span><span class="title">Feeding a low birth weight baby</span></div>
+    <p class="ask">कम वजन वाले नवजात को दूध कैसे पिलाना चाहिए</p>
+    <p class="why"><b>Why it matters</b>A small baby who feeds poorly loses weight, gets cold and becomes septic. Feeding support in the first days is what breaks that chain.</p>
+    <div class="ans">
+      <div class="lbl">What the device says</div>
+      <p class="hi">दूध की आपूर्ति को बनाए रखने के लिए हर 2-3 घंटे में दूध का प्रयोग करें, और चूसने में सक्षम होने के बाद बच्चे को जितनी बार हो सके स्तन में डालें।</p>
+      <p class="en">Express milk every 2-3 hours to keep the milk supply up, and put the baby to breast as often as possible once she is able to suckle.</p>
+    </div>
+    <p class="meta">manual pages 51 + 53 + 5 &nbsp;&middot;&nbsp; 3.6 s to answer</p>
+  </div>
+  <div class="note">
+    <p class="hd">Two things to know before demonstrating</p>
+    <p><b>The translation has two rough edges in this set.</b> "Chest indrawing" comes out as
+    <span style="font-family:var(--deva)">&#2331;&#2366;&#2340;&#2368; &#2350;&#2375;&#2306; &#2342;&#2352;&#2381;&#2342;</span>, which means chest <em>pain</em>, and
+    "limbs limp" as <span style="font-family:var(--deva)">&#2309;&#2306;&#2327; &#2354;&#2306;&#2327;&#2396;&#2375;</span>, which suggests limping
+    rather than floppy. The English is right and the retrieval is right; the Hindi wording is not,
+    and it is a translation-model limit, not a retrieval one.</p>
+    <p><b>Speak the question as written.</b> Speech recognition is the weakest link in the chain:
+    one mis-heard syllable once turned a question about an eye infection into one about a child
+    drinking, and the device answered the question it was given. One word decides the meaning.</p>
+    <p><b>Recording is a toggle</b> &mdash; one press starts, the next ends it, and 3.5&nbsp;s of
+    silence ends it anyway. Timings above are machine time from the stop, and exclude how long the
+    question itself takes to ask.</p>
+  </div>
+</div>
