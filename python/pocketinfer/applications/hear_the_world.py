@@ -270,6 +270,24 @@ class HearTheWorld(BaseApplication):
     # refusal rather than this marker.
     NO_ANSWER_SENTINEL = "NO ANSWER IN CONTEXT"
 
+    # The prompt asks for the answer directly, and mostly gets it, but the
+    # model still sometimes opens with a stock lead-in. It survives translation
+    # as "इसका उत्तर हैः", which is the first thing the ASHA hears and says
+    # nothing. Stripped here rather than fought for in the prompt, because it
+    # is cheap and certain.
+    _LEAD_IN = re.compile(
+        r'^\s*(the\s+answer\s+is|answer|according to the (context|guidance|text)|'
+        r'based on the (context|text))\s*[:,]?\s*', re.I)
+
+    @classmethod
+    def _strip_lead_in(cls, text):
+        cleaned = cls._LEAD_IN.sub('', text or '', count=1).lstrip()
+        # Only accept the strip if something is actually left to say.
+        if len(cleaned) <= 20:
+            return text or ''
+        # Removing "According to the context," leaves a lower-case opening.
+        return cleaned[0].upper() + cleaned[1:]
+
     @classmethod
     def build_prompt(cls, context, query):
         """The one place the RAG prompt is written.
@@ -477,6 +495,7 @@ class HearTheWorld(BaseApplication):
             try:
                 for sent in self.ollama.generate_sentences(
                         llm_prompt, max_sentences=self.MAX_ANSWER_SENTENCES):
+                    sent = self._strip_lead_in(sent) if not english else sent
                     if self.NO_ANSWER_SENTINEL in sent.upper():
                         # Caught before synthesis, so nothing of it is spoken.
                         # Leaving english empty makes the caller fall back to
@@ -623,7 +642,7 @@ class HearTheWorld(BaseApplication):
                     else:
                         streamed = None
                         resp = self.ollama.generate(images=[], prompt=llm_prompt)
-                        result = resp.response.strip().rstrip()
+                        result = self._strip_lead_in(resp.response.strip())
                         if self.NO_ANSWER_SENTINEL in result.upper():
                             result = ""
                 else:
