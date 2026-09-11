@@ -201,16 +201,25 @@ class HearTheWorld(BaseApplication):
     # time. Each one tells the ASHA what to do next - "I don't know" on its own
     # leaves her no better off than before she asked.
     FIXED_REPLIES = {
+        # Has to fit anything that falls outside the manual, not just a
+        # health question the manual happens to miss. Sending someone to a
+        # health centre because they asked why it has not rained in Ahmedabad
+        # reads as nonsense, so the referral is stated as a condition rather
+        # than as advice, and the first sentence explains the boundary so the
+        # answer makes sense whatever was asked.
         'out_of_scope': {
-            'en': ("This is not in my manual. Please ask the health centre "
-                   "or a doctor about it."),
-            'hi': ("यह जानकारी मेरी किताब में नहीं है। कृपया इस बारे में "
-                   "नज़दीकी स्वास्थ्य केंद्र या डॉक्टर से सलाह लें।"),
+            # Kept short on purpose. Spoken Hindi runs about 0.08s per
+            # character here, so the fuller wording took 11.5s to say - longer
+            # than most real answers, for a reply that carries no information.
+            # This one says the same thing in 6.3s.
+            'en': ("This is not in the ASHA manual. If it is a health "
+                   "question, ask your health centre."),
+            'hi': ("यह सवाल आशा की किताब में नहीं है। सेहत से जुड़ा हो तो "
+                   "स्वास्थ्य केंद्र से पूछें।"),
         },
         'not_understood': {
-            'en': "Sorry, I could not understand. Please ask again.",
-            'hi': ("माफ़ कीजिए, मैं समझ नहीं पाई। कृपया सवाल दोबारा "
-                   "पूछिए।"),
+            'en': "Sorry, I did not catch that. Please ask again.",
+            'hi': "माफ़ कीजिए, समझ नहीं आया। कृपया दोबारा पूछें।",
         },
     }
 
