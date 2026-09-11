@@ -52,6 +52,11 @@ class BashiniAPIServer:
         self.logger.info(f"TTS RAM Usage: {ram_tts-ram_nmt:.2f} MB")
         self.logger.info(f"Total RAM Usage: {ram_tts:.2f} MB")
 
+        # Warm the translator last. It has to come after TTS: TTS builds its
+        # own onnxruntime session, and doing that after NMT was warmed left the
+        # first real translate paying 4.9s again.
+        self.nmt_engine.warm_up()
+
         self.logger.info("All Engines Loaded Successfully.")
 
         self.app.add_url_rule("/asr", "asr", self.handle_asr, methods=["POST"])
