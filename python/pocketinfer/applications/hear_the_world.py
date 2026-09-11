@@ -287,25 +287,28 @@ class HearTheWorld(BaseApplication):
     # here when the opening sentence is mostly the question's own words and
     # there is a real answer behind it.
     @classmethod
+    def _is_restatement(cls, sentence, query):
+        """True when this sentence just echoes the question back.
+
+        A sentence carrying a figure is never an echo. The model frequently
+        restates the situation and gives the rule in one breath - "the baby is
+        very small in weight, so do not bathe it until its weight is 2000 gm" -
+        and treating that as an echo deletes the only number in the answer.
+        """
+        if re.search(r'\d', sentence or ''):
+            return False
+        first = set(cls._terms(sentence))
+        q_terms = set(cls._terms(query))
+        if not first or not q_terms:
+            return False
+        return len(first & q_terms) / len(first) >= 0.7
+
+    @classmethod
     def _strip_restatement(cls, answer, query):
         parts = [p.strip() for p in re.split(r'(?<=[.!?])\s+', answer or '') if p.strip()]
         if len(parts) < 2:
             return answer
-        q_terms = set(cls._terms(query))
-        first = set(cls._terms(parts[0]))
-        if not first or not q_terms:
-            return answer
-        # Never drop a sentence carrying a figure. The model often answers by
-        # restating the situation and appending the rule in the same breath -
-        # "the baby is very small in weight, so do not bathe it until its
-        # weight is 2000 gm" - and an overlap test alone reads that as an echo
-        # and deletes the only number in the answer. Measured: dropping it took
-        # the bathing question from pass to fail.
-        if re.search(r'\d', parts[0]):
-            return answer
-        if len(first & q_terms) / len(first) >= 0.7:
-            return " ".join(parts[1:])
-        return answer
+        return " ".join(parts[1:]) if cls._is_restatement(parts[0], query) else answer
 
     @classmethod
     def _strip_lead_in(cls, text):
@@ -522,7 +525,7 @@ class HearTheWorld(BaseApplication):
             w.writeframes(b"".join(frames))
         return out.getvalue()
 
-    def _pipeline_answer(self, llm_prompt):
+    def _pipeline_answer(self, llm_prompt, query):
         """Stream, translate, synthesise and play the answer sentence by sentence.
 
         Returns (english, translated, audio_bytes, first_audio_at). Playback
@@ -539,8 +542,12 @@ class HearTheWorld(BaseApplication):
                 for sent in self.ollama.generate_sentences(
                         llm_prompt, max_sentences=self.MAX_ANSWER_SENTENCES):
                     if not english:
-                        sent = self._strip_restatement(
-                            self._strip_lead_in(sent), query)
+                        sent = self._strip_lead_in(sent)
+                        # _strip_restatement needs a whole answer; here the
+                        # sentences arrive one at a time, so test this one and
+                        # skip it rather than letting it be spoken.
+                        if self._is_restatement(sent, query):
+                            continue
                     if self.NO_ANSWER_SENTINEL in sent.upper():
                         # Caught before synthesis, so nothing of it is spoken.
                         # Leaving english empty makes the caller fall back to
@@ -554,9 +561,14 @@ class HearTheWorld(BaseApplication):
                     audio_q.put((hi, base64.b64decode(
                         self.tts.infer(hi, out_lang)['audio_base64'])))
             except Exception:
-                # Never let a streaming failure hang the foreground; the caller
-                # checks for an empty answer and uses the usual fallback text.
+                # Never let a streaming failure hang the foreground. It must
+                # also never be reported to the ASHA as "this is not in the
+                # manual": a NameError in this thread once did exactly that,
+                # turning every streamed answer into a refusal while retrieval
+                # was still scoring 4.75. The flag tells the caller to fall
+                # back to the single-shot path instead of refusing.
                 self.logger.exception("Streaming answer failed")
+                failed.append(True)
             finally:
                 audio_q.put(None)
 
@@ -564,6 +576,7 @@ class HearTheWorld(BaseApplication):
         worker.start()
 
         chunks, first_audio_at = [], None
+        failed = []
         while True:
             item = audio_q.get()
             if item is None:
@@ -580,6 +593,8 @@ class HearTheWorld(BaseApplication):
                              self.board.alsa_playback_device) as player:
                 player.play(clip.readframes(clip.getnframes()))
         worker.join(timeout=2.0)
+        if failed:
+            return None
         return (" ".join(english), " ".join(translated),
                 self._join_wavs(chunks), first_audio_at)
 
@@ -678,9 +693,20 @@ class HearTheWorld(BaseApplication):
                     if self.STREAM_ANSWER:
                         # Speaks as it goes; nothing left to do below but log.
                         resp = None
-                        streamed = self._pipeline_answer(llm_prompt)
-                        result = streamed[0].strip()
-                        if not result:
+                        streamed = self._pipeline_answer(llm_prompt, query)
+                        if streamed is None:
+                            # Streaming broke; answer the ordinary way rather
+                            # than telling her the manual does not cover it.
+                            self.logger.warning(
+                                "Falling back to single-shot generation")
+                            resp = self.ollama.generate(images=[], prompt=llm_prompt)
+                            result = self._strip_restatement(
+                                self._strip_lead_in(resp.response.strip()), query)
+                            if self.NO_ANSWER_SENTINEL in result.upper():
+                                result = ""
+                        else:
+                            result = streamed[0].strip()
+                        if streamed is not None and not result:
                             # Streaming produced nothing usable - fall through
                             # to the ordinary path's empty-answer handling.
                             streamed = None
