@@ -158,6 +158,26 @@ class HearTheWorld(BaseApplication):
             terms.append(w[:5] if len(w) > 5 else w)
         return terms
 
+    # The PDF the knowledge base was extracted from renders some headings and
+    # emphasised runs twice, one character apart, so the text came out as
+    # "ddiiaarrrrhhooeeaa" and "WWaarrnniinngg ssiiggnnss". 79 words across 8 of
+    # the 76 pages. They are invisible to search - a question about diarrhoea
+    # never matched that page - and meaningless to the model when they do reach
+    # it as context, so they are repaired on load rather than left in place.
+    @staticmethod
+    def _undouble(word):
+        """Collapse "ddiiaarrrrhhooeeaa" to "diarrhoea"; leave anything else."""
+        if (len(word) >= 6 and len(word) % 2 == 0
+                and all(word[i].lower() == word[i + 1].lower()
+                        for i in range(0, len(word), 2))):
+            return "".join(word[i] for i in range(0, len(word), 2))
+        return word
+
+    @classmethod
+    def _repair_extraction(cls, text):
+        return re.sub(r'[A-Za-z]{6,}',
+                      lambda m: cls._undouble(m.group(0)), text)
+
     def _load_knowledge_chunks(self, chunks_dir='/home/ubuntu/asha_knowledge/chunks'):
         '''Load pre-chunked ASHA Module-7 text and build a TF-IDF index.'''
         self._chunk_tf = []   # per-chunk: {stem: count}
@@ -168,7 +188,7 @@ class HearTheWorld(BaseApplication):
             for fname in sorted(os.listdir(chunks_dir)):
                 if fname.endswith('.txt'):
                     with open(os.path.join(chunks_dir, fname), 'r', encoding='utf-8') as f:
-                        text = f.read()
+                        text = self._repair_extraction(f.read())
                     terms = self._terms(text)
                     tf = {}
                     for t in terms:
