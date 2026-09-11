@@ -217,6 +217,29 @@ class HearTheWorld(BaseApplication):
     def _is_form(text):
         return len(re.findall(r'Yes\s*/\s*No', text, re.I)) >= 5
 
+    # Transcription slips, not vocabulary corrections. The recogniser sometimes
+    # emits a character twice - नाभभी for नाभी, कौनसीी for कौनसी - or stacks two
+    # vowel signs on one consonant, नाभीि, which is not writable Hindi at all.
+    # The cost is real: नाभभी translated to "the navel is peeling off" and the
+    # pus vanished from the question entirely, so the answer came back about
+    # something else. Collapsed to one character, the same sentence translates
+    # to "the navel has turned red and pus is coming out of it".
+    #
+    # This deliberately holds no word list and cannot turn one word into a
+    # different word. It only removes a repeat the writing system does not
+    # allow, which is the same repair the manual's own text needed.
+    _DOUBLED_CHAR = re.compile(r'([\u0915-\u0939\u093e-\u094c\u0902\u0903])\1')
+    _STACKED_MATRA = re.compile(r'([\u093e-\u094c])[\u093e-\u094c]+')
+
+    @classmethod
+    def _normalise_transcript(cls, text):
+        text = text or ''
+        previous = None
+        while previous != text:
+            previous = text
+            text = cls._DOUBLED_CHAR.sub(r'\1', text)
+        return cls._STACKED_MATRA.sub(r'\1', text)
+
     @classmethod
     def _repair_extraction(cls, text):
         if cls._looks_reversed(text):
@@ -715,7 +738,7 @@ class HearTheWorld(BaseApplication):
                     asr_result = self.asr.infer(wav_bytes, self.settings["input_language"])
                 else:
                     asr_result = self.vosk.recognize(self.board.audio.to_audio_data())
-                raw_query = asr_result['text']
+                raw_query = self._normalise_transcript(asr_result['text'])
                 asr_stop = time.time()
                 self.logger.info("Detected query is '{}'".format(raw_query))
                 self.board.top_text(raw_query)
