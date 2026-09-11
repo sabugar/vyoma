@@ -263,7 +263,13 @@ class HearTheWorld(BaseApplication):
     # in-scope scored 1.74-5.41 and out-of-scope 0.00-1.49. 1.6 sits in that
     # gap with margin on both sides; at 1.8 a real question about a cord
     # infection (1.74) starts being refused.
-    MIN_RELEVANCE = 1.6
+    # Recalibrated when the scope test moved from "one page carries the
+    # question" to "the manual covers the subject" - the numbers are on a
+    # different scale. Measured over fifteen real questions and twelve
+    # off-topic ones: in-scope 3.65-6.09 with a single mangled outlier at 2.34,
+    # off-topic 0.00-2.56. 3.0 sits in that band; anywhere from 2.6 to 3.4
+    # gives the same answer on this set, so the exact figure is not delicate.
+    MIN_RELEVANCE = 3.0
 
     # What the model is told to emit when the retrieved pages do not answer the
     # question. Caught before anything is spoken, so the user hears the proper
@@ -285,7 +291,8 @@ class HearTheWorld(BaseApplication):
     # voice, so an 85-character echo of the question is seven seconds of audio
     # that says nothing, before the ASHA hears a word of the answer. Dropped
     # here when the opening sentence is mostly the question's own words and
-    # there is a real answer behind it.
+    # there is a real answer behind it. See _is_restatement below.
+
     # English "drink" with no object is ambiguous, and the translator resolves
     # it to alcohol often enough to matter: "sunken eyes, poor drinking
     # ability, drinking poorly" came out as "खराब शराब पीना" - drinking
@@ -411,6 +418,33 @@ class HearTheWorld(BaseApplication):
         out_lang = self.settings['output_language']
         return entry['en'], entry.get(out_lang, entry['en'])
 
+    # The ASHA's word and the manual's word are not always the same, and a
+    # bag-of-words retriever has no way to know they mean one thing. Asked in
+    # Hindi about the नाभी, the translator says "navel"; the manual only ever
+    # writes "umbilicus", "umbilical" or "cord", so a question about pus at the
+    # navel scored 1.13 and 1.36 against a 1.60 floor and was refused - while
+    # page 75 says plainly what to do about it. Phrased as "umbilical cord" the
+    # same question scored 1.65 and was answered, which is the whole bug in two
+    # numbers.
+    #
+    # Built by taking fifteen realistic questions, translating them the way the
+    # device does, and listing every word the manual never uses. Four came
+    # back; these two are the ones with a real equivalent in the text. Kept
+    # this short on purpose - a general thesaurus would blur the scope test
+    # that keeps cricket scores out.
+    _SYNONYMS = {
+        'navel': ('umbil', 'cord'),
+        'swoll': ('disten', 'swell'),
+        # "When is the measles vaccine administered?" scored 2.34 against a 3.0
+        # floor purely because the manual says given, never administered, and
+        # in a three-word question one unmatched word is a third of the score.
+        'admin': ('given', 'dose'),
+    }
+
+    @classmethod
+    def _variants(cls, term):
+        return (term,) + cls._SYNONYMS.get(term, ())
+
     def _retrieve_context(self, query, top_k=3):
         '''TF-IDF retrieval: score chunks by content-word overlap weighted by
         term rarity, so "abortion"/"diarrhea" beat stopword noise. Returns []
@@ -424,7 +458,13 @@ class HearTheWorld(BaseApplication):
         import math
         # Weight of everything the question is asking about, used below to ask
         # how much of it a page actually accounts for.
-        idf_total = sum(self._idf.get(t, 1.0) for t in q_terms) or 1.0
+        # Each query term is matched through its variants, so the word an
+        # ASHA uses finds the word the manual prints. The weight of a term
+        # comes from whichever variant the manual actually knows.
+        variants = {t: self._variants(t) for t in q_terms}
+        term_idf = {t: max([self._idf.get(v, 0.0) for v in vs] or [0.0]) or 1.0
+                    for t, vs in variants.items()}
+        idf_total = sum(term_idf.values()) or 1.0
         # Two different questions get two different numbers. "Is this subject
         # in the manual at all" is answered by the raw overlap, which separates
         # health questions from cricket scores cleanly. "Which page answers it"
@@ -434,12 +474,22 @@ class HearTheWorld(BaseApplication):
         # copper T (0.21) below a question about recharging a phone (0.83).
         scores = []
         raw_best = 0.0
+        term_best = {}
         for i, tf in enumerate(self._chunk_tf):
-            matched = [t for t in q_terms if t in tf]
+            matched, score = [], 0.0
             # log(1+tf) * idf: a chunk mentioning "diarrhoea" 20x beats a short
             # TOC page mentioning it once, without being length-normalized away.
-            score = sum(math.log(1 + tf[t]) * self._idf.get(t, 1.0)
-                        for t in matched)
+            for t in q_terms:
+                best = max((math.log(1 + tf[v]) * self._idf.get(v, 1.0)
+                            for v in variants[t] if v in tf), default=0.0)
+                if best > 0.0:
+                    matched.append(t)
+                    score += best
+                # Scope is judged across the whole manual, not one page:
+                # see term_best below.
+                if best > term_best.get(t, 0.0):
+                    term_best[t] = best
+
             # ...but summing term contributions on their own let one common
             # word carry a page past the page that actually answers. Asked how
             # to stay clean during menstruation, a sepsis page won on "clean"
@@ -451,7 +501,7 @@ class HearTheWorld(BaseApplication):
             # to one that does not. Measured over six labelled questions, this
             # ranks the correct page first in all six; raw scoring managed four.
             raw_best = max(raw_best, score)
-            coverage = (sum(self._idf.get(t, 1.0) for t in matched) / idf_total)
+            coverage = (sum(term_idf[t] for t in matched) / idf_total)
             # Applied once, not
             # squared. Squaring ranked one more labelled case first, but it
             # also pulled a low-birth-weight weighing schedule ("Days 7, 14,
@@ -461,7 +511,17 @@ class HearTheWorld(BaseApplication):
             # that page stays out and the eval holds at 10/10.
             scores.append((score * coverage, i))
         scores.sort(reverse=True, key=lambda x: x[0])
-        best_per_term = raw_best / len(q_terms)
+        # Whether the manual covers the subject is a different question from
+        # which page answers it, and asking it of a single page gets it wrong.
+        # "The baby's navel has turned red and pus is coming out" scored 1.45
+        # because the highest-scoring page carried only two of its six words,
+        # and was refused - while page 75 says what to do about pus on the
+        # umbilicus. Letting every word find its own best page instead
+        # separates the two populations properly: measured over ten real
+        # questions and nine off-topic ones, in-scope scores 3.55-6.97 and
+        # out-of-scope 0.00-2.53. The old one-page measure overlapped - its
+        # worst in-scope question scored below its best off-topic one.
+        best_per_term = sum(term_best.values()) / len(q_terms)
         # asha_eval/run_eval.py calls this directly on a bare instance that
         # has no application logger, so do not assume one exists.
         log = getattr(self, "logger", None) or logging.getLogger(__name__)
