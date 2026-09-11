@@ -512,7 +512,10 @@ class HearTheWorld(BaseApplication):
                     streamed = None
                     result, preset_output = self._fixed_reply('out_of_scope')
                 llm_end = time.time()
-                if result and streamed is None:
+                # Fixed replies are already the length they should be; the
+                # two-sentence trim below is for model output only, and was
+                # clipping the referral half off the logged refusal.
+                if result and streamed is None and preset_output is None:
                     # Safety net: on complex/sensitive topics the model sometimes
                     # ignores the length instruction and rambles for the whole
                     # token budget, producing minutes of TTS audio. Cut to at
