@@ -1,5 +1,6 @@
 import ollama
 import logging
+import re
 from subprocess import check_output
 import requests
 
@@ -77,6 +78,72 @@ class Ollama:
                 attempt, self.MAX_ATTEMPTS, getattr(resp, "done_reason", "?"),
                 getattr(resp, "eval_count", "?"))
         return resp
+
+    # A sentence ends at . ! or ? followed by whitespace or end of text. The
+    # trailing-whitespace requirement is what keeps "2000 gm." a boundary and
+    # "1.5" not one.
+    _SENT_END = re.compile(r"[.!?](?=\s|$)")
+
+    @classmethod
+    def _take_sentences(cls, buf):
+        """Split off every complete sentence in buf.
+
+        Returns (sentences, remainder). The remainder is whatever is still
+        being written and has not reached a terminator yet.
+        """
+        out, start = [], 0
+        for m in cls._SENT_END.finditer(buf):
+            piece = buf[start:m.end()].strip()
+            if piece:
+                out.append(piece)
+            start = m.end()
+        return out, buf[start:]
+
+    def generate_sentences(self, prompt, max_sentences=2):
+        """Yield the answer one complete sentence at a time, as it is written.
+
+        The caller can start translating and speaking sentence one while the
+        model is still writing sentence two, which is what the user actually
+        experiences as latency. Generation also stops as soon as
+        max_sentences are complete: the non-streaming path asked for 90
+        tokens and then threw away everything past the second sentence, so
+        the tokens beyond it were being paid for and discarded.
+
+        Falls back to yielding nothing if the model returns empty, and the
+        caller is expected to handle that the same way it always has.
+        """
+        full_prompt = prompt + self.THINK_PREFILL
+        buf, produced, eval_count = "", 0, 0
+        for chunk in ollama.generate(
+            model=self.model_name,
+            prompt=full_prompt,
+            raw=True,
+            stream=True,
+            keep_alive=self.KEEP_ALIVE,
+            options={
+                "num_predict": self.NUM_PREDICT,
+                "num_ctx": self.NUM_CTX,
+                "temperature": self.TEMPERATURE,
+            },
+        ):
+            buf += getattr(chunk, "response", "") or ""
+            eval_count = getattr(chunk, "eval_count", None) or eval_count
+            sentences, buf = self._take_sentences(buf)
+            for sent in sentences:
+                yield sent
+                produced += 1
+                if produced >= max_sentences:
+                    self.logger.info(
+                        "LLM stopped after %d sentences (eval_count=%s)",
+                        produced, eval_count)
+                    return
+            if getattr(chunk, "done", False):
+                break
+        # Whatever is left without a terminator still counts - the model may
+        # have hit the token cap mid-sentence.
+        tail = buf.strip()
+        if tail and produced < max_sentences:
+            yield tail
 
     def restart(self):
         print(check_output('systemctl restart ollama', shell=True))

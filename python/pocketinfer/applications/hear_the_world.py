@@ -14,10 +14,13 @@ from pocketinfer.audio import AudioPlayer
 from io import BytesIO
 from subprocess import check_output
 
+import logging
 import time
 import wave
 import os
 import json
+import queue
+import threading
 import sys
 import threading
 import re
@@ -180,9 +183,48 @@ class HearTheWorld(BaseApplication):
         self._idf = {t: math.log((1 + n) / (1 + d)) + 1.0 for t, d in df.items()}
         return chunks
 
+    # A page only counts as relevant if the question's own words carry it
+    # there. Accepting any score above zero meant one shared common word was
+    # enough: "I want to buy a new saree" pulled in three manual pages and got
+    # a confident answer about newborn care, and an ASR-mangled question
+    # ("seizures" heard as "twins") did the same. Dividing the best score by
+    # the number of query terms separates the two populations cleanly -
+    # measured over 14 realistic questions plus the 10-question eval set,
+    # in-scope scored 1.74-5.41 and out-of-scope 0.00-1.49. 1.6 sits in that
+    # gap with margin on both sides; at 1.8 a real question about a cord
+    # infection (1.74) starts being refused.
+    MIN_RELEVANCE = 1.6
+
+    # Fixed replies are written in the output language, not translated. They
+    # are the same every time, so paying NMT for them only adds latency and a
+    # chance of mangling; a refusal in particular has to come out right every
+    # time. Each one tells the ASHA what to do next - "I don't know" on its own
+    # leaves her no better off than before she asked.
+    FIXED_REPLIES = {
+        'out_of_scope': {
+            'en': ("This is not in my manual. Please ask the health centre "
+                   "or a doctor about it."),
+            'hi': ("यह जानकारी मेरी किताब में नहीं है। कृपया इस बारे में "
+                   "नज़दीकी स्वास्थ्य केंद्र या डॉक्टर से सलाह लें।"),
+        },
+        'not_understood': {
+            'en': "Sorry, I could not understand. Please ask again.",
+            'hi': ("माफ़ कीजिए, मैं समझ नहीं पाई। कृपया सवाल दोबारा "
+                   "पूछिए।"),
+        },
+    }
+
+    def _fixed_reply(self, key):
+        """Return (english_for_the_log, text_in_the_output_language)."""
+        entry = self.FIXED_REPLIES[key]
+        out_lang = self.settings['output_language']
+        return entry['en'], entry.get(out_lang, entry['en'])
+
     def _retrieve_context(self, query, top_k=3):
         '''TF-IDF retrieval: score chunks by content-word overlap weighted by
-        term rarity, so "abortion"/"diarrhea" beat stopword noise.'''
+        term rarity, so "abortion"/"diarrhea" beat stopword noise. Returns []
+        when nothing clears MIN_RELEVANCE, which is what makes the device
+        refuse instead of inventing.'''
         if not self.knowledge_chunks:
             return []
         q_terms = set(self._terms(query))
@@ -199,6 +241,15 @@ class HearTheWorld(BaseApplication):
                     score += math.log(1 + tf[t]) * self._idf.get(t, 1.0)
             scores.append((score, i))
         scores.sort(reverse=True, key=lambda x: x[0])
+        best_per_term = scores[0][0] / len(q_terms) if scores else 0.0
+        # asha_eval/run_eval.py calls this directly on a bare instance that
+        # has no application logger, so do not assume one exists.
+        log = getattr(self, "logger", None) or logging.getLogger(__name__)
+        if best_per_term < self.MIN_RELEVANCE:
+            log.info("Best chunk scored %.2f per term, below %.2f - out of scope",
+                     best_per_term, self.MIN_RELEVANCE)
+            return []
+        log.info("Retrieval relevance %.2f per term", best_per_term)
         return [self.knowledge_chunks[i] for score, i in scores[:top_k] if score > 0]
 
     def ui_cb(self, msg):
@@ -237,6 +288,88 @@ class HearTheWorld(BaseApplication):
         th = threading.Thread(target=delayed_write, args=(val, delay), daemon=True)
         th.start()
 
+
+    # Speak each sentence as the model finishes writing it, rather than
+    # waiting for the whole answer, then the whole translation, then the whole
+    # synthesis. Measured on this board: generation ends at 1.65-2.57s, and the
+    # old path then spent a further 0.82s translating and 1.66s synthesising
+    # before any sound came out. Per sentence those cost about 0.5s and 0.7s
+    # and they overlap the model still writing the next one, so the first audio
+    # starts roughly 2.5s earlier. Set POCKETINFER_STREAM=0 to fall back to the
+    # single-shot path.
+    STREAM_ANSWER = os.environ.get('POCKETINFER_STREAM', '1') == '1'
+    MAX_ANSWER_SENTENCES = 2
+
+    @staticmethod
+    def _join_wavs(chunks):
+        """Concatenate WAV clips into one, for the interaction log."""
+        if not chunks:
+            return b""
+        if len(chunks) == 1:
+            return chunks[0]
+        first = wave.open(BytesIO(chunks[0]), 'rb')
+        params = first.getparams()
+        frames = [first.readframes(first.getnframes())]
+        for c in chunks[1:]:
+            w = wave.open(BytesIO(c), 'rb')
+            frames.append(w.readframes(w.getnframes()))
+        out = BytesIO()
+        with wave.open(out, 'wb') as w:
+            w.setparams(params)
+            w.writeframes(b"".join(frames))
+        return out.getvalue()
+
+    def _pipeline_answer(self, llm_prompt):
+        """Stream, translate, synthesise and play the answer sentence by sentence.
+
+        Returns (english, translated, audio_bytes, first_audio_at). Playback
+        happens inside, overlapped with generation: a background thread turns
+        each finished sentence into audio while the foreground plays whatever
+        is already queued, so the two never wait on each other.
+        """
+        out_lang = self.settings['output_language']
+        audio_q = queue.Queue()
+        english, translated = [], []
+
+        def produce():
+            try:
+                for sent in self.ollama.generate_sentences(
+                        llm_prompt, max_sentences=self.MAX_ANSWER_SENTENCES):
+                    english.append(sent)
+                    hi = sent if out_lang == 'en' else \
+                        self.nmt.infer(sent, "EN", out_lang)['translated_text']
+                    translated.append(hi)
+                    audio_q.put((hi, base64.b64decode(
+                        self.tts.infer(hi, out_lang)['audio_base64'])))
+            except Exception:
+                # Never let a streaming failure hang the foreground; the caller
+                # checks for an empty answer and uses the usual fallback text.
+                self.logger.exception("Streaming answer failed")
+            finally:
+                audio_q.put(None)
+
+        worker = threading.Thread(target=produce, daemon=True)
+        worker.start()
+
+        chunks, first_audio_at = [], None
+        while True:
+            item = audio_q.get()
+            if item is None:
+                break
+            _, wav = item
+            if first_audio_at is None:
+                first_audio_at = time.time()
+                self.board.statusbar("Running: Playback")
+                self.delayed_write_led_anim(0)
+            chunks.append(wav)
+            self.board.bottom_text(" ".join(translated))
+            clip = wave.open(BytesIO(wav), 'rb')
+            with AudioPlayer(clip.getframerate(),
+                             self.board.alsa_playback_device) as player:
+                player.play(clip.readframes(clip.getnframes()))
+        worker.join(timeout=2.0)
+        return (" ".join(english), " ".join(translated),
+                self._join_wavs(chunks), first_audio_at)
 
     def run(self):
         self.logger.debug('Starting with settings: %s', self.settings)
@@ -306,6 +439,7 @@ class HearTheWorld(BaseApplication):
                 # Perform LLM inference on the recognized text (no image - text-only Q&A)
                 self.board.statusbar("Running: LLM")
                 llm_start = time.time()
+                preset_output = None
 
                 # Retrieve relevant pages from ASHA Module-7 knowledge base
                 # top_k=3, not 2: retrieval ranks by term overlap, so a page
@@ -342,8 +476,19 @@ class HearTheWorld(BaseApplication):
                         f'QUESTION: {query}\n\n'
                         f'ANSWER:'
                     )
-                    resp = self.ollama.generate(images=[], prompt=llm_prompt)
-                    result = resp.response.strip().rstrip()
+                    if self.STREAM_ANSWER:
+                        # Speaks as it goes; nothing left to do below but log.
+                        resp = None
+                        streamed = self._pipeline_answer(llm_prompt)
+                        result = streamed[0].strip()
+                        if not result:
+                            # Streaming produced nothing usable - fall through
+                            # to the ordinary path's empty-answer handling.
+                            streamed = None
+                    else:
+                        streamed = None
+                        resp = self.ollama.generate(images=[], prompt=llm_prompt)
+                        result = resp.response.strip().rstrip()
                 else:
                     # Nothing in the manual matched, so there is nothing to
                     # ground an answer in. Do NOT fall back to asking the LLM
@@ -355,9 +500,10 @@ class HearTheWorld(BaseApplication):
                     # question it would invent plausible-sounding medical
                     # guidance. Refusing here is also faster - no LLM call.
                     resp = None
-                    result = "I do not have this information in my training materials."
+                    streamed = None
+                    result, preset_output = self._fixed_reply('out_of_scope')
                 llm_end = time.time()
-                if result:
+                if result and streamed is None:
                     # Safety net: on complex/sensitive topics the model sometimes
                     # ignores the length instruction and rambles for the whole
                     # token budget, producing minutes of TTS audio. Cut to at
@@ -384,12 +530,19 @@ class HearTheWorld(BaseApplication):
                     # "thinking" despite /no_think and returns nothing (see
                     # models/ollama.py's done_reason=="length" warning). Fall back
                     # to a fixed message instead of crashing NMT with empty text.
-                    result = "Sorry, I could not understand. Please try again."
+                    result, preset_output = self._fixed_reply('not_understood')
                 self.logger.info("Result is '{}'".format(result))
                 # Likewise the English answer: the user sees only the translated
                 # Hindi one, written below once NMT has produced it.
                 # Perform NMT on the LLM response, convert it back to the original language
-                if self.settings['output_language'] != 'en':
+                first_audio_at = None
+                if preset_output is not None:
+                    nmt_result = preset_output
+                elif streamed is not None:
+                    # Already translated and spoken, sentence by sentence.
+                    _, nmt_result, tts_result_bytes, first_audio_at = streamed
+                    self.logger.info("Translated result is '{}'".format(nmt_result))
+                elif self.settings['output_language'] != 'en':
                     self.board.statusbar(f"Running: NMT en -> {self.settings['output_language']}")
                     nmt_result = self.nmt.infer(result, "EN", self.settings["output_language"])['translated_text']
                     self.logger.info("Translated result is '{}'".format(nmt_result))
@@ -399,17 +552,19 @@ class HearTheWorld(BaseApplication):
                 # Question stays as the user asked it (already on screen since
                 # ASR); only the answer needs writing, and immediately - the
                 # delayed variants existed to undo the English flashes above.
-                self.board.bottom_text(nmt_result)
-                # Perform TTS on the LLM response, convert it to audio and play it back
-                self.board.statusbar("Running: Playback")
-                self.delayed_write_led_anim(0)
-                tts_result = self.tts.infer(nmt_result, self.settings["output_language"])
-                tts_result_bytes = base64.b64decode(tts_result['audio_base64'])
-                # self.piper.start_playback(result)
-                app_end = time.time()
-                wave_obj = wave.open(BytesIO(tts_result_bytes), 'rb')
-                with AudioPlayer(wave_obj.getframerate(), self.board.alsa_playback_device) as player:
-                    player.play(wave_obj.readframes(wave_obj.getnframes()))
+                if streamed is None:
+                    self.board.bottom_text(nmt_result)
+                    # Perform TTS on the LLM response, convert it to audio and play it back
+                    self.board.statusbar("Running: Playback")
+                    self.delayed_write_led_anim(0)
+                    tts_result = self.tts.infer(nmt_result, self.settings["output_language"])
+                    tts_result_bytes = base64.b64decode(tts_result['audio_base64'])
+                    app_end = time.time()
+                    wave_obj = wave.open(BytesIO(tts_result_bytes), 'rb')
+                    with AudioPlayer(wave_obj.getframerate(), self.board.alsa_playback_device) as player:
+                        player.play(wave_obj.readframes(wave_obj.getnframes()))
+                else:
+                    app_end = time.time()
                 self.logger.debug(f"Total Run time {app_end-audio_start}s, audio {audio_stop-audio_start}s, ASR {asr_stop-asr_start}, NMT A {nmt_a_stop-asr_stop}, LLM {llm_end-llm_start}, NMT B {nmt_b_stop-llm_end}, TTS {app_end-nmt_b_stop}")
                 # Log
                 log_id = int(audio_start*1000)
@@ -428,8 +583,14 @@ class HearTheWorld(BaseApplication):
                         "llm_start": llm_start,
                         "llm_end": llm_end,
                         "nmt_b_stop": nmt_b_stop,
-                        "app_end": app_end
-                    }
+                        "app_end": app_end,
+                        # The number the user actually feels: press-stop to
+                        # first audible word. None on the non-streaming path.
+                        "first_audio_at": first_audio_at
+                    },
+                    "answer_en": result,
+                    "answer_out": nmt_result,
+                    "streamed": streamed is not None
                 }
                 with open("/tmp/hear_the_world_en_logs/log.jsonl", "a") as f:
                     f.write(json.dumps(log_data)+"\n")
