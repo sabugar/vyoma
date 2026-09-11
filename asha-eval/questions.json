@@ -1,0 +1,91 @@
+[
+ {
+  "id": "bathe",
+  "hi": "एक परिवार बच्चे को जन्म के एक घंटे बाद नहलाने की तैयारी कर रहा है। बच्चे का वजन बहुत कम है। आशा को क्या सलाह देनी चाहिए?",
+  "must": [
+   "2000"
+  ],
+  "note": "Do not bathe a baby until its weight is 2000 gm"
+ },
+ {
+  "id": "gauze",
+  "hi": "प्रसव के दौरान पानी पीला और गाढ़ा था। बच्चे का सिर दिखाई देने लगा है। आशा को क्या करना चाहिए?",
+  "must": [
+   "gauze",
+   "mouth"
+  ],
+  "note": "Clear the mouth of baby with gauze piece as soon as head is seen"
+ },
+ {
+  "id": "asphyxia",
+  "hi": "बच्चा पैदा होने के बाद रो नहीं रहा है और सांस भी कमजोर है। आशा को क्या करना चाहिए?",
+  "must": [
+   "mucus extractor",
+   "suction",
+   "bag and mask",
+   "ventilation"
+  ],
+  "note": "mucus extractor / suction / bag-and-mask ventilation (all in manual)"
+ },
+ {
+  "id": "sepsis",
+  "hi": "नवजात बच्चे में सेप्सिस के लक्षण क्या हैं?",
+  "must": [
+   "limp",
+   "feed"
+  ],
+  "note": "limp limbs, stops feeding, chest indrawing, fever, cold"
+ },
+ {
+  "id": "fever",
+  "hi": "बच्चे को तेज बुखार है। क्या दवा देनी चाहिए?",
+  "must": [
+   "paracetamol"
+  ],
+  "note": "one dose of Paracetamol"
+ },
+ {
+  "id": "diarrhea",
+  "hi": "बच्चे को डायरिया हो गया है। आशा को क्या करना चाहिए?",
+  "must": [
+   "ORS",
+   "fluid",
+   "dehydration"
+  ],
+  "note": "ORS, assess dehydration, refer if blood/over 14 days"
+ },
+ {
+  "id": "weigh",
+  "hi": "बच्चों का वजन कितनी बार लेना चाहिए?",
+  "must": [
+   "month"
+  ],
+  "note": "weigh every child monthly"
+ },
+ {
+  "id": "breastfeed",
+  "hi": "बच्चे को कितने महीने तक सिर्फ स्तनपान कराना चाहिए?",
+  "must": [
+   "six",
+   "6"
+  ],
+  "note": "exclusive breastfeeding till six months"
+ },
+ {
+  "id": "abortion",
+  "hi": "भारत में गर्भपात कब तक कानूनी रूप से सुरक्षित है?",
+  "must": [
+   "20",
+   "week"
+  ],
+  "note": "legal up to 20 weeks"
+ },
+ {
+  "id": "offtopic",
+  "hi": "फ्रांस की राजधानी क्या है?",
+  "must": [
+   "do not have this information"
+  ],
+  "note": "must refuse - outside the manual"
+ }
+]

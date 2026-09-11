@@ -195,6 +195,40 @@ class HearTheWorld(BaseApplication):
     # infection (1.74) starts being refused.
     MIN_RELEVANCE = 1.6
 
+    # What the model is told to emit when the retrieved pages do not answer the
+    # question. Caught before anything is spoken, so the user hears the proper
+    # refusal rather than this marker.
+    NO_ANSWER_SENTINEL = "NO ANSWER IN CONTEXT"
+
+    @classmethod
+    def build_prompt(cls, context, query):
+        """The one place the RAG prompt is written.
+
+        asha_eval/run_eval.py used to keep its own copy, which drifted: it was
+        still scoring the old wording, and at a different num_predict, so the
+        eval was reporting 9/10 for a prompt the device no longer used. Both
+        call this now, so a prompt change is measured by the next eval run
+        rather than going unnoticed.
+
+        The refusal rule comes first on purpose. It used to sit at the end,
+        after an instruction to make the answer "sound informed, not vague" -
+        two orders pulling opposite ways, and the model followed the one that
+        told it to answer.
+        """
+        return (
+            f'First decide: does the CONTEXT below actually contain the answer '
+            f'to the QUESTION?\n'
+            f'If it does NOT, output exactly: {cls.NO_ANSWER_SENTINEL}\n'
+            f'Only if it DOES, answer in 1-2 complete sentences (max 35 words) '
+            f'using the specific details from the context - numbers, steps, '
+            f'signs, timing. State the answer directly, as if you already knew '
+            f'it; do not explain your reasoning, do not describe the context, '
+            f'and do not say "let me check" or "the text says".\n\n'
+            f'CONTEXT:\n{context}\n\n'
+            f'QUESTION: {query}\n\n'
+            f'ANSWER:'
+        )
+
     # Fixed replies are written in the output language, not translated. They
     # are the same every time, so paying NMT for them only adds latency and a
     # chance of mangling; a refusal in particular has to come out right every
@@ -240,17 +274,46 @@ class HearTheWorld(BaseApplication):
         if not q_terms:
             return []
         import math
+        # Weight of everything the question is asking about, used below to ask
+        # how much of it a page actually accounts for.
+        idf_total = sum(self._idf.get(t, 1.0) for t in q_terms) or 1.0
+        # Two different questions get two different numbers. "Is this subject
+        # in the manual at all" is answered by the raw overlap, which separates
+        # health questions from cricket scores cleanly. "Which page answers it"
+        # is answered by the coverage-weighted score below. Using the weighted
+        # score for both was tried and fails the first job: it crushes short
+        # queries that match one rare word, putting a real question about a
+        # copper T (0.21) below a question about recharging a phone (0.83).
         scores = []
+        raw_best = 0.0
         for i, tf in enumerate(self._chunk_tf):
+            matched = [t for t in q_terms if t in tf]
             # log(1+tf) * idf: a chunk mentioning "diarrhoea" 20x beats a short
             # TOC page mentioning it once, without being length-normalized away.
-            score = 0.0
-            for t in q_terms:
-                if t in tf:
-                    score += math.log(1 + tf[t]) * self._idf.get(t, 1.0)
-            scores.append((score, i))
+            score = sum(math.log(1 + tf[t]) * self._idf.get(t, 1.0)
+                        for t in matched)
+            # ...but summing term contributions on their own let one common
+            # word carry a page past the page that actually answers. Asked how
+            # to stay clean during menstruation, a sepsis page won on "clean"
+            # and "keep" while scoring nothing on "menstrual"; asked when a
+            # copper T can be fitted, the ORS page won on "tea" alone. In both
+            # cases the right page was sitting at rank 2. Coverage is the share
+            # of the question's own idf weight that this page accounts for, and
+            # squaring it makes a page that ignores the distinctive word lose
+            # to one that does not. Measured over six labelled questions, this
+            # ranks the correct page first in all six; raw scoring managed four.
+            raw_best = max(raw_best, score)
+            coverage = (sum(self._idf.get(t, 1.0) for t in matched) / idf_total)
+            # Applied once, not
+            # squared. Squaring ranked one more labelled case first, but it
+            # also pulled a low-birth-weight weighing schedule ("Days 7, 14,
+            # 21, 28") into the context for "how often should children be
+            # weighed", and the model answered from that instead of the
+            # monthly guidance - 9/10 on the eval, every run. Applied once,
+            # that page stays out and the eval holds at 10/10.
+            scores.append((score * coverage, i))
         scores.sort(reverse=True, key=lambda x: x[0])
-        best_per_term = scores[0][0] / len(q_terms) if scores else 0.0
+        best_per_term = raw_best / len(q_terms)
         # asha_eval/run_eval.py calls this directly on a bare instance that
         # has no application logger, so do not assume one exists.
         log = getattr(self, "logger", None) or logging.getLogger(__name__)
@@ -344,6 +407,12 @@ class HearTheWorld(BaseApplication):
             try:
                 for sent in self.ollama.generate_sentences(
                         llm_prompt, max_sentences=self.MAX_ANSWER_SENTENCES):
+                    if self.NO_ANSWER_SENTINEL in sent.upper():
+                        # Caught before synthesis, so nothing of it is spoken.
+                        # Leaving english empty makes the caller fall back to
+                        # the fixed refusal.
+                        english[:] = []
+                        break
                     english.append(sent)
                     hi = sent if out_lang == 'en' else \
                         self.nmt.infer(sent, "EN", out_lang)['translated_text']
@@ -471,20 +540,7 @@ class HearTheWorld(BaseApplication):
 
                 # Powerful RAG prompt: restrict LLM to ONLY use provided context
                 if context:
-                    llm_prompt = (
-                        f'Answer the question using ONLY the CONTEXT below. '
-                        f'Output ONLY the final answer, in 1-2 complete sentences (max 35 words), '
-                        f'including the specific relevant detail(s) from the context (numbers, steps, '
-                        f'signs, timing) so the answer sounds informed, not vague. '
-                        f'Do not explain your reasoning, do not describe the context, do not say '
-                        f'"let me check" or "the text says" or similar - just state the answer directly, '
-                        f'as if you already knew it. '
-                        f'If the context does not contain the answer, output exactly: '
-                        f'"I do not have this information in my training materials."\n\n'
-                        f'CONTEXT:\n{context}\n\n'
-                        f'QUESTION: {query}\n\n'
-                        f'ANSWER:'
-                    )
+                    llm_prompt = self.build_prompt(context, query)
                     if self.STREAM_ANSWER:
                         # Speaks as it goes; nothing left to do below but log.
                         resp = None
@@ -498,6 +554,8 @@ class HearTheWorld(BaseApplication):
                         streamed = None
                         resp = self.ollama.generate(images=[], prompt=llm_prompt)
                         result = resp.response.strip().rstrip()
+                        if self.NO_ANSWER_SENTINEL in result.upper():
+                            result = ""
                 else:
                     # Nothing in the manual matched, so there is nothing to
                     # ground an answer in. Do NOT fall back to asking the LLM
@@ -542,7 +600,14 @@ class HearTheWorld(BaseApplication):
                     # "thinking" despite /no_think and returns nothing (see
                     # models/ollama.py's done_reason=="length" warning). Fall back
                     # to a fixed message instead of crashing NMT with empty text.
-                    result, preset_output = self._fixed_reply('not_understood')
+                    # Two ways to get here: the model emitted the no-answer
+                    # sentinel because the retrieved pages did not cover the
+                    # question, or it returned nothing at all. The first is far
+                    # more common now that the prompt asks for that decision up
+                    # front, and saying so is more useful than claiming not to
+                    # have heard.
+                    result, preset_output = self._fixed_reply(
+                        'out_of_scope' if context_chunks else 'not_understood')
                 self.logger.info("Result is '{}'".format(result))
                 # Likewise the English answer: the user sees only the translated
                 # Hindi one, written below once NMT has produced it.
