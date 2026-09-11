@@ -286,6 +286,26 @@ class HearTheWorld(BaseApplication):
     # that says nothing, before the ASHA hears a word of the answer. Dropped
     # here when the opening sentence is mostly the question's own words and
     # there is a real answer behind it.
+    # English "drink" with no object is ambiguous, and the translator resolves
+    # it to alcohol often enough to matter: "sunken eyes, poor drinking
+    # ability, drinking poorly" came out as "खराब शराब पीना" - drinking
+    # alcohol badly - as a sign of dehydration in a child. Giving the verb an
+    # object fixes it ("खराब तरल पदार्थ पीना"). Probed the rest of the domain's
+    # ambiguous words the same way - stool, labour, discharge, delivery,
+    # passing, water breaking - and they all resolve correctly in context, so
+    # this stays a single narrow substitution rather than a glossary.
+    # Narrow on purpose: only where the verb is qualified by an adverb and so
+    # stands without an object, which is the construction that goes wrong.
+    # Substituting on every bare "drink" also works but makes ordinary lines
+    # clumsy - "give the child ORS to drink" becomes "ORS to drink fluids".
+    _BARE_DRINK = re.compile(
+        r'\b(drink|drinks|drinking)\b(?=\s+(?:poorly|badly|well|less|eagerly))',
+        re.I)
+
+    @classmethod
+    def _disambiguate_for_translation(cls, text):
+        return cls._BARE_DRINK.sub(lambda m: m.group(1) + ' fluids', text or '')
+
     @classmethod
     def _is_restatement(cls, sentence, query):
         """True when this sentence just echoes the question back.
@@ -555,8 +575,9 @@ class HearTheWorld(BaseApplication):
                         english[:] = []
                         break
                     english.append(sent)
-                    hi = sent if out_lang == 'en' else \
-                        self.nmt.infer(sent, "EN", out_lang)['translated_text']
+                    hi = sent if out_lang == 'en' else self.nmt.infer(
+                        self._disambiguate_for_translation(sent),
+                        "EN", out_lang)['translated_text']
                     translated.append(hi)
                     audio_q.put((hi, base64.b64decode(
                         self.tts.infer(hi, out_lang)['audio_base64'])))
@@ -782,7 +803,9 @@ class HearTheWorld(BaseApplication):
                     self.logger.info("Translated result is '{}'".format(nmt_result))
                 elif self.settings['output_language'] != 'en':
                     self.board.statusbar(f"Running: NMT en -> {self.settings['output_language']}")
-                    nmt_result = self.nmt.infer(result, "EN", self.settings["output_language"])['translated_text']
+                    nmt_result = self.nmt.infer(
+                        self._disambiguate_for_translation(result),
+                        "EN", self.settings["output_language"])['translated_text']
                     self.logger.info("Translated result is '{}'".format(nmt_result))
                 else:
                     nmt_result = result
