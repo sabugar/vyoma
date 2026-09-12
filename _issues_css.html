@@ -1,0 +1,68 @@
+<meta charset="utf-8">
+<title>Engineering Issues and Fixes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{--ground:#FFFFFF;--panel:#F1F5F9;--ink:#14203A;--ink-soft:#52607A;--rule:#C6CEDB;
+        --accent:#0E6E5C;--accent-b:#E4F0EC;--signal:#A85410;
+        --sans:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif,"Lohit Devanagari";
+        --cond:"IBM Plex Sans Condensed","IBM Plex Sans",ui-sans-serif,sans-serif,"Lohit Devanagari";
+        --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace,"Lohit Devanagari";
+        --deva:"Lohit Devanagari","Noto Sans Devanagari",serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:8.6pt;line-height:1.4}
+  .doc{max-width:182mm;margin:0 auto;padding:9mm 0}
+  .doc>*+*{margin-top:4mm}
+  .masthead{display:grid;grid-template-columns:1fr auto;align-items:end;gap:8mm;
+            border-bottom:2px solid var(--ink);padding-bottom:2mm}
+  h1{font-family:var(--cond);font-size:19pt;font-weight:700;letter-spacing:-.01em;margin:0}
+  .sub{font-family:var(--cond);font-size:9.5pt;font-weight:500;color:var(--accent);margin:1mm 0 0}
+  .spec{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);text-align:right;line-height:1.5;white-space:nowrap}
+  .spec b{color:var(--ink);font-weight:600}
+  .lede{font-size:9pt;color:var(--ink-soft)}
+  .lede b{color:var(--ink)}
+  .q{border-left:2px solid var(--accent);padding-left:3.4mm;page-break-inside:avoid}
+  .q+.q{margin-top:4.6mm}
+  .qhead{display:flex;align-items:baseline;gap:2.6mm}
+  .num{font-family:var(--mono);font-size:8pt;font-weight:600;color:var(--accent)}
+  .title{font-family:var(--cond);font-size:10.5pt;font-weight:600}
+  .ask{font-family:var(--deva);font-size:11pt;line-height:1.5;margin:1.6mm 0 0;
+       background:var(--accent-b);padding:2mm 2.6mm;border-radius:1mm}
+  .why{font-size:8.2pt;color:var(--ink-soft);margin:1.8mm 0 0}
+  .why b{color:var(--signal);font-family:var(--cond);font-weight:600;text-transform:uppercase;
+         font-size:6.9pt;letter-spacing:.06em;margin-right:1.6mm}
+  .ans{background:var(--panel);padding:2.2mm 2.6mm;margin-top:1.8mm}
+  .ans .lbl{font-family:var(--cond);font-size:6.9pt;font-weight:600;text-transform:uppercase;
+            letter-spacing:.06em;color:var(--ink-soft)}
+  .ans .hi{font-family:var(--deva);font-size:9.4pt;line-height:1.5;margin:.9mm 0 0}
+  .ans .en{font-size:7.9pt;color:var(--ink-soft);margin:1.2mm 0 0}
+  .meta{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);margin-top:1.4mm}
+  .note{background:var(--accent-b);border-left:3px solid var(--accent);padding:2.6mm 3mm}
+  .note .hd{font-family:var(--cond);font-size:9.6pt;font-weight:700;color:var(--accent);margin:0 0 1.2mm}
+  .note p{margin:0 0 1.2mm;font-size:8.2pt}
+  .note p:last-child{margin:0}
+  code{font-family:var(--mono);font-size:.92em;color:var(--accent)}
+
+  h2{font-family:var(--cond);font-size:12pt;font-weight:700;margin:6mm 0 0;color:var(--accent);
+     padding-bottom:1.2mm;border-bottom:2px solid var(--accent);page-break-after:avoid}
+  h2 .cnt{font-family:var(--mono);font-size:7pt;font-weight:400;color:var(--ink-soft);float:right;padding-top:2mm}
+  .i{page-break-inside:avoid;margin-top:3.4mm;padding-left:3mm;border-left:2px solid var(--rule)}
+  .i.sev{border-left-color:var(--signal)}
+  .i h3{font-family:var(--cond);font-size:9.8pt;font-weight:700;margin:0 0 1.2mm}
+  .i p{margin:0 0 1mm;font-size:8.3pt}
+  .i p:last-child{margin:0}
+  .i b.k{font-family:var(--cond);font-size:6.8pt;font-weight:600;text-transform:uppercase;
+         letter-spacing:.06em;color:var(--signal);margin-right:1.8mm}
+  .i b.kk{color:var(--accent)}
+  table{border-collapse:collapse;width:100%;font-size:7.8pt;margin:1.6mm 0}
+  th{font-family:var(--cond);font-size:6.9pt;text-transform:uppercase;letter-spacing:.05em;
+     text-align:left;color:var(--ink-soft);border-bottom:1px solid var(--rule);padding:1mm 2mm 1mm 0}
+  td{padding:1mm 2mm 1mm 0;border-bottom:1px solid #E8ECF2;vertical-align:top}
+  td.n{font-family:var(--mono);white-space:nowrap}
+  .pick{background:var(--accent-b)}
+  .dv{font-family:var(--deva)}
+  @page{size:A4;margin:11mm 14mm 9mm;
+    @bottom-left{content:"ASHA Sahayak \00b7 engineering issues and fixes";font-family:var(--mono);font-size:6.6pt;color:#52607A}
+    @bottom-right{content:"Page " counter(page) " of " counter(pages);font-family:var(--mono);font-size:6.6pt;color:#52607A}}
+  @media print{.doc{max-width:none;padding:0;margin:0}}
+</style>

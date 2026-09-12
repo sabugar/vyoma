@@ -1,0 +1,170 @@
+<meta charset="utf-8">
+<title>Engineering Issues and Fixes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{--ground:#FFFFFF;--panel:#F1F5F9;--ink:#14203A;--ink-soft:#52607A;--rule:#C6CEDB;
+        --accent:#0E6E5C;--accent-b:#E4F0EC;--signal:#A85410;
+        --sans:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif,"Lohit Devanagari";
+        --cond:"IBM Plex Sans Condensed","IBM Plex Sans",ui-sans-serif,sans-serif,"Lohit Devanagari";
+        --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace,"Lohit Devanagari";
+        --deva:"Lohit Devanagari","Noto Sans Devanagari",serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:8.6pt;line-height:1.4}
+  .doc{max-width:182mm;margin:0 auto;padding:9mm 0}
+  .doc>*+*{margin-top:4mm}
+  .masthead{display:grid;grid-template-columns:1fr auto;align-items:end;gap:8mm;
+            border-bottom:2px solid var(--ink);padding-bottom:2mm}
+  h1{font-family:var(--cond);font-size:19pt;font-weight:700;letter-spacing:-.01em;margin:0}
+  .sub{font-family:var(--cond);font-size:9.5pt;font-weight:500;color:var(--accent);margin:1mm 0 0}
+  .spec{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);text-align:right;line-height:1.5;white-space:nowrap}
+  .spec b{color:var(--ink);font-weight:600}
+  .lede{font-size:9pt;color:var(--ink-soft)}
+  .lede b{color:var(--ink)}
+  .q{border-left:2px solid var(--accent);padding-left:3.4mm;page-break-inside:avoid}
+  .q+.q{margin-top:4.6mm}
+  .qhead{display:flex;align-items:baseline;gap:2.6mm}
+  .num{font-family:var(--mono);font-size:8pt;font-weight:600;color:var(--accent)}
+  .title{font-family:var(--cond);font-size:10.5pt;font-weight:600}
+  .ask{font-family:var(--deva);font-size:11pt;line-height:1.5;margin:1.6mm 0 0;
+       background:var(--accent-b);padding:2mm 2.6mm;border-radius:1mm}
+  .why{font-size:8.2pt;color:var(--ink-soft);margin:1.8mm 0 0}
+  .why b{color:var(--signal);font-family:var(--cond);font-weight:600;text-transform:uppercase;
+         font-size:6.9pt;letter-spacing:.06em;margin-right:1.6mm}
+  .ans{background:var(--panel);padding:2.2mm 2.6mm;margin-top:1.8mm}
+  .ans .lbl{font-family:var(--cond);font-size:6.9pt;font-weight:600;text-transform:uppercase;
+            letter-spacing:.06em;color:var(--ink-soft)}
+  .ans .hi{font-family:var(--deva);font-size:9.4pt;line-height:1.5;margin:.9mm 0 0}
+  .ans .en{font-size:7.9pt;color:var(--ink-soft);margin:1.2mm 0 0}
+  .meta{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);margin-top:1.4mm}
+  .note{background:var(--accent-b);border-left:3px solid var(--accent);padding:2.6mm 3mm}
+  .note .hd{font-family:var(--cond);font-size:9.6pt;font-weight:700;color:var(--accent);margin:0 0 1.2mm}
+  .note p{margin:0 0 1.2mm;font-size:8.2pt}
+  .note p:last-child{margin:0}
+  code{font-family:var(--mono);font-size:.92em;color:var(--accent)}
+
+  h2{font-family:var(--cond);font-size:12pt;font-weight:700;margin:6mm 0 0;color:var(--accent);
+     padding-bottom:1.2mm;border-bottom:2px solid var(--accent);page-break-after:avoid}
+  h2 .cnt{font-family:var(--mono);font-size:7pt;font-weight:400;color:var(--ink-soft);float:right;padding-top:2mm}
+  .i{page-break-inside:avoid;margin-top:3.4mm;padding-left:3mm;border-left:2px solid var(--rule)}
+  .i.sev{border-left-color:var(--signal)}
+  .i h3{font-family:var(--cond);font-size:9.8pt;font-weight:700;margin:0 0 1.2mm}
+  .i p{margin:0 0 1mm;font-size:8.3pt}
+  .i p:last-child{margin:0}
+  .i b.k{font-family:var(--cond);font-size:6.8pt;font-weight:600;text-transform:uppercase;
+         letter-spacing:.06em;color:var(--signal);margin-right:1.8mm}
+  .i b.kk{color:var(--accent)}
+  table{border-collapse:collapse;width:100%;font-size:7.8pt;margin:1.6mm 0}
+  th{font-family:var(--cond);font-size:6.9pt;text-transform:uppercase;letter-spacing:.05em;
+     text-align:left;color:var(--ink-soft);border-bottom:1px solid var(--rule);padding:1mm 2mm 1mm 0}
+  td{padding:1mm 2mm 1mm 0;border-bottom:1px solid #E8ECF2;vertical-align:top}
+  td.n{font-family:var(--mono);white-space:nowrap}
+  .pick{background:var(--accent-b)}
+  .dv{font-family:var(--deva)}
+  @page{size:A4;margin:11mm 14mm 9mm;
+    @bottom-left{content:"ASHA Sahayak \00b7 engineering issues and fixes";font-family:var(--mono);font-size:6.6pt;color:#52607A}
+    @bottom-right{content:"Page " counter(page) " of " counter(pages);font-family:var(--mono);font-size:6.6pt;color:#52607A}}
+  @media print{.doc{max-width:none;padding:0;margin:0}}
+</style>
+
+<div class="doc">
+  <header class="masthead">
+    <div><h1>Engineering Issues and Fixes</h1>
+    <p class="sub">ASHA Sahayak &mdash; what broke, why, and what it cost to find</p></div>
+    <div class="spec"><b>Jetson Orin Nano 8&nbsp;GB &middot; JetPack 6.2.1</b><br>
+    VYOMA Innovation Challenge &middot; Stage III<br>
+    <b>12 September 2026</b></div>
+  </header>
+  <p class="lede">
+    This is an account of the problems met while building an offline Hindi voice assistant on a
+    single 8&nbsp;GB board, and of what each one cost to find. Three of them changed a model.
+    Several of them were only visible because something was measured that did not have to be
+    measured &mdash; and two of them were mistakes in our own measurements rather than in the
+    device. Every number here was taken on this board.
+  </p>
+<h2>Models we changed, and why<span class="cnt">four changes</span></h2>
+<div class="i sev"><h3>Hindi speech recognition was dropping nine consonants of the alphabet</h3><p><b class="k">Problem</b>Words came back missing letters, and always the same letters: <span class="dv">&#2350;&#2369;&#2333;&#2375;</span> as <span class="dv">&#2350;&#2369;&#2375;</span>, <span class="dv">&#2325;&#2369;&#2331;</span> as <span class="dv">&#2325;&#2369;</span>, <span class="dv">&#2360;&#2350;&#2333;</span> as <span class="dv">&#2360;&#2350;</span>. Clean audio at the right sample rate made no difference.</p><p><b class="k">Cause</b>The ONNX export we started from carried a hardcoded 89-token vocabulary. The real model has 257. Nine Devanagari consonants were absent from the table altogether (<span class="dv">&#2333; &#2331; &#2328; &#2336; &#2338; &#2339; &#2359; &#2329; &#2334;</span>), and because the CTC blank index is computed as the vocabulary length, every one of the model&rsquo;s other output classes above index 88 was silently discarded too.</p><p><b class="k kk">Fix</b>Traced the checkpoint back to AI4Bharat&rsquo;s indic-conformer-600m-multilingual and switched to a public int8-quantised export of <b>the same model</b> that ships the complete 257-token Hindi vocabulary and its language mask. The model family did not change &mdash; the export did.</p><p><b class="k kk">Result</b>Round-trip synthesis&rarr;recognition on the previously failing sentences now returns character-for-character matches.</p></div>
+<div class="i sev"><h3>The language model reversed a clinical negation</h3><p><b class="k">Problem</b>With the rule <i>&ldquo;Do not bathe a baby until its weight is 2000&nbsp;gm&rdquo;</i> present word for word in the retrieved page, the model answered that the baby <i>should be bathed daily until its weight reaches 2000 grams</i>. On a health device that is not a weak answer; it is a dangerous one.</p><p><b class="k">Cause</b>We had moved to qwen2.5:1.5b purely to save memory. It was not merely weaker at this size &mdash; it was unsafe on negation.</p><p><b class="k kk">Fix</b>Measured four candidates on the same question and chose on behaviour, not size:</p></div>
+  <table>
+    <tr><th>Model</th><th>Resident</th><th>Behaviour on the negation test</th></tr>
+    <tr><td>qwen2.5:1.5b</td><td class="n">817 MB</td><td>negation reversed &mdash; unsafe</td></tr>
+    <tr><td>qwen2.5:3b</td><td class="n">1684 MB</td><td>&ldquo;I do not have this information&rdquo; &mdash; safe but wrong</td></tr>
+    <tr><td>qwen3-vl:2b</td><td class="n">3084 MB</td><td>correct, but rambles and will not fit</td></tr>
+    <tr class="pick"><td><b>qwen3:1.7b</b></td><td class="n">921 MB</td><td><b>correct and concise &mdash; chosen</b></td></tr>
+  </table>
+  <div class="i"><p>qwen3:1.7b is the text-only sibling of the vision model we had been running. The
+  camera-less application could never use that model&rsquo;s CLIP tower, which was costing a 322&nbsp;MB
+  reserved vision buffer and 721 extra tensors at every start. Dropping it freed <b>2.2&nbsp;GB</b>
+  &mdash; the difference between the board swap-thrashing after about six questions, with available
+  memory down to 60&nbsp;MB and audio playback stalling in uninterruptible sleep, and a steady state
+  of 34&nbsp;MB of swap.</p></div>
+<div class="i"><h3>The Hindi voice had to be chosen against the clock, not by ear</h3><p><b class="k">Problem</b>Synthesis was the single largest stage in the pipeline and the voice we liked best could not run in the time budget.</p><p><b class="k kk">Fix</b>All three candidates were run on the same sentences through this device&rsquo;s own speaker:</p></div>
+  <table>
+    <tr><th>Voice</th><th>Synthesis</th><th>Weights</th><th>Rate</th><th>Licence</th></tr>
+    <tr><td>MMS VITS</td><td class="n">~1.0 s</td><td class="n">250 MB</td><td class="n">16 kHz</td><td class="n">CC-BY-NC</td></tr>
+    <tr class="pick"><td><b>Piper</b></td><td class="n">0.48 s</td><td class="n">64 MB</td><td class="n">22 kHz</td><td class="n">CC-BY-NC-SA</td></tr>
+    <tr><td>IndicF5</td><td class="n">5.8&ndash;10.4 s</td><td class="n">1.4 GB</td><td class="n">24 kHz</td><td class="n">MIT</td></tr>
+  </table>
+  <div class="i"><p>IndicF5 sounded clearly best and has the cleanest licence, so it was pursued
+  properly before being ruled out: fp16 diverges to NaN under both half precision and autocast,
+  reducing the solver steps below eight degrades audibly, and trimming the reference clip from 8&nbsp;s
+  to 3&nbsp;s did give a threefold speedup. Even then the floor was 5.8&nbsp;s for a six-word answer,
+  against a 5&ndash;8&nbsp;s budget for the <i>whole</i> pipeline. It is the right upgrade on a larger
+  board, not on this one. Piper&rsquo;s Hindi voice is trained on AI4Bharat&rsquo;s indicnlp corpus, so the
+  Indic provenance is preserved. Its licence is non-commercial and would have to change before
+  sale.</p></div>
+<div class="i"><h3>The translator was cutting the end off spoken answers</h3><p><b class="k">Problem</b>A forty-word answer stopped partway through the instruction: <i>&ldquo;&hellip;that requires immediate intervention&rdquo;</i> was spoken as <span class="dv">&ldquo;&hellip;&#2332;&#2367;&#2360;&#2325;&#2375; &#2354;&#2367;&#2319; &#2340;&#2340;&#2381;&#2325;&#2366;&#2354; &#2361;&#2360;&#2381;&#2340;&#2325;&#2381;&#2359;&#2375;&#2346;&rdquo;</span>, with the verb missing.</p><p><b class="k">Cause</b>The decoder&rsquo;s maximum output length was 64 tokens. Hindi needs more tokens than the English it is translated from, so the ceiling was reached mid-sentence.</p><p><b class="k kk">Fix</b>Raised to 192. With greedy decoding this costs nothing unless the output actually runs long. IndicTrans2 itself was never replaced.</p></div>
+<h2>The board itself<span class="cnt">five issues</span></h2>
+<div class="i sev"><h3>The board&rsquo;s button cannot report that it is being held</h3><p><b class="k">Problem</b>Every question longer than about eight seconds was cut off. This was worse than it sounds: <span class="dv">&ldquo;&hellip;&#2337;&#2377;&#2325;&#2381;&#2335;&#2352; &#2351;&#2366; &#2344;&#2352;&#2381;&#2360; &#2350;&#2380;&#2332;&#2370;&#2342; &#2344;&#2361;&#2368;&#2306; &#2361;&#2376;&rdquo;</span> lost its negation to the cut, the translator rendered the remains as <i>the doctor is present</i>, and the answer inverted with it. Several reports of &ldquo;wrong answer&rdquo; traced back to this one pin.</p><p><b class="k">Cause</b>Measured repeatedly, with raw polling and with edge callbacks, both agreeing: the trigger pin goes high on press and drops low after about 7.8&nbsp;s (7.76 / 7.78 / 7.79 / 7.81 / 7.90 / 7.90 / 7.91&nbsp;s across runs) while the button is still physically held, and never returns high. The recorder itself runs cleanly past eighteen seconds, so this is the pin, not the software. Jetson.GPIO&rsquo;s pull-up request is ignored on this platform; changing it for real needs a device-tree pinmux rebuild, and a pull-down would not fix a high level that decays anyway.</p><p><b class="k kk">Fix</b>The interaction was redesigned around the hardware rather than fought: press once, speak, stop talking. Recording ends after 3.5&nbsp;s of silence, with the threshold calibrated from the room&rsquo;s own noise floor at the start of each recording. Pressing again still stops it immediately. 3.5&nbsp;s and not 2.0&nbsp;s, because at 2.0&nbsp;s an ordinary breath between sentences ended the question and the fragment that reached the model contained no question at all.</p></div>
+<div class="i"><h3>The first question of every session was the slowest one</h3><p><b class="k">Problem</b>Recognition took 6&ndash;8&nbsp;s on question one and about 0.65&nbsp;s afterwards. The very first thing a user experiences was the worst thing they experience.</p><p><b class="k">Cause</b>The warm-up exercised the ONNX sessions directly, so the first real request still paid the audio library&rsquo;s just-in-time compilation. The translator had no warm-up at all, and warming it inside its own constructor was not enough &mdash; synthesis builds another runtime session afterwards, so the warm-up has to run once every engine is up.</p><p><b class="k kk">Fix</b>Warm every engine through the same entry point real requests use, after all of them are loaded, and with a full sentence rather than a two-word greeting, because kernels are selected for the shape actually given.</p><p><b class="k kk">Result</b>First question 0.66&nbsp;s. Translation 0.51&nbsp;s on the first request and on every later one.</p></div>
+<div class="i"><h3>Long questions degraded into nonsense rather than failing cleanly</h3><p><b class="k">Problem</b>The recogniser is trained on short utterances. Measured against known text: 11.0&nbsp;s kept 95% of the characters, 20.2&nbsp;s kept 70%, 28.6&nbsp;s 52%, 38.2&nbsp;s 42% &mdash; and the tail turned to nonsense instead of stopping.</p><p><b class="k">Cause</b>Attention, not a shape limit: every axis in the ONNX graph is dynamic.</p><p><b class="k kk">Fix</b>Long audio is split near twelve-second boundaries, each boundary nudged to the quietest point within 1.5&nbsp;s so the seams fall in word gaps, and each chunk is normalised and decoded on its own.</p><p><b class="k kk">Result</b>95% at every length tested, in 1.3&ndash;1.9&nbsp;s.</p></div>
+<div class="i"><h3>Devanagari could not be drawn on the screen at all</h3><p><b class="k">Problem</b>The display library blits one bitmap glyph per code point with no shaping. Matras floated detached above the line, the pre-base i-matra was never reordered (<span class="dv">&#2350;&#2366;&#2360;&#2367;&#2325;</span> drew as <span class="dv">&#2350;&#2366;&#2360;&#2325;</span>), and conjuncts never formed (<span class="dv">&#2360;&#2381;&#2340;&#2344;&#2346;&#2366;&#2344;</span> drew as <span class="dv">&#2360;&#2340;&#2344;&#2346;&#2366;&#2344;</span>).</p><p><b class="k kk">Fix</b>Text is shaped with HarfBuzz into a one-bit image and pushed into the display buffer &mdash; correct for both scripts, about 33&nbsp;ms per update. The screen also used to flip between languages mid-interaction, showing the English translation and then the English answer before restoring Hindi; those were pipeline internals leaking into the interface, and a worker who asks in Hindi now sees only Hindi.</p></div>
+<div class="i"><h3>Power mode, and where the remaining latency went</h3><p><b class="k">Problem</b>Generation was the dominant cost and the board was not being asked for everything it has.</p><p><b class="k kk">Fix</b>MAXN_SUPER, made persistent across reboot; and the answer is now spoken sentence by sentence as it is generated rather than after it is complete.</p><p><b class="k kk">Result</b>Generation 35.8 tokens/s, steady over ten runs at 52&nbsp;&deg;C. Language model 4.34&nbsp;s &rarr; 2.51&nbsp;s. First audio 5.37&nbsp;s &rarr; 4.05&nbsp;s. Synthesis moved to the GPU separately: 4.3&nbsp;s &rarr; 0.9&nbsp;s.</p></div><h2>The manual, and the language gap<span class="cnt">four issues</span></h2>
+<div class="i"><h3>The manual arrived as a PDF that had been printed backwards</h3><p><b class="k">Problem</b>Text extracted from the source PDF was corrupt in four distinct ways at once: letters doubled inside words, running heads reversed, whole pages reversed character by character (<i>mroF tisiV emoH</i> for <i>Home Visit Form</i>), and bullet markers turned into the letter u.</p><p><b class="k kk">Fix</b>The whole extracted book was audited page by page and repaired on load: 82 doubled words, 78 reversed heads, 4 fully reversed pages and 35 bullets. Of the source PDF&rsquo;s 88 pages, 12 yield no text at all &mdash; they are images or blank.</p><p><b class="k kk">Result</b>72 pages are indexed. Four of the reversed pages are the home-visit checklists; they were deliberately left out of the index after measurement, because including them pushed the clean list of sepsis danger signs out of the retrieved context and the evaluation fell from 9/10 to 8/10.</p></div>
+<div class="i sev"><h3>Where the real accuracy problem was hiding</h3><p><b class="k">Problem</b>On a 52-question set &mdash; one question from every page of the manual from page 20 onward &mdash; only 42 were answered and only 30 came from the page the question was written against.</p><p><b class="k">Cause</b>Not the ranking. With the relevance gate switched off, the correct page was already in the top three for 71% of them. It was the vocabulary: the question is asked in Hindi and the book is written in English, and the translator kept choosing the everyday sense of a word the manual uses clinically. Question and answer then shared no word at all.</p><p><b class="k kk">Fix</b>Eight substitutions, each chosen by translating the real question both ways and keeping the wording that produced the term the index is actually built on.</p></div>
+  <table>
+    <tr><th>What she says</th><th>What the translator produced</th><th>What the manual prints</th></tr>
+    <tr><td class="dv">&#2310;&#2358;&#2366;</td><td>the role of <b>hope</b></td><td>ASHA</td></tr>
+    <tr><td class="dv">&#2346;&#2366;&#2344;&#2368; &#2325;&#2368; &#2325;&#2350;&#2368;</td><td>water scarcity, no water</td><td><b>dehydration</b> &mdash; on all four pages that answer it</td></tr>
+    <tr><td class="dv">&#2351;&#2380;&#2344; &#2360;&#2306;&#2325;&#2381;&#2352;&#2350;&#2339;</td><td>sexual <b>transition</b></td><td>sexually transmitted infection</td></tr>
+    <tr><td class="dv">&#2342;&#2350; &#2328;&#2369;&#2335;&#2344;&#2366;</td><td>choking</td><td>asphyxia</td></tr>
+    <tr><td class="dv">&#2331;&#2354;&#2381;&#2354;&#2366;</td><td>cut open</td><td>IUCD</td></tr>
+    <tr><td class="dv">&#2344;&#2360;&#2348;&#2306;&#2342;&#2368;</td><td>vasectomy &mdash; even for a woman</td><td>sterilisation</td></tr>
+    <tr><td class="dv">&#2346;&#2360;&#2354;&#2368; &#2330;&#2354;&#2344;&#2366;</td><td>walk rib</td><td>chest indrawing</td></tr>
+  </table>
+  <div class="i"><p><b class="k kk">Result</b>Answered 42&nbsp;&rarr;&nbsp;50 of 52; answered from the
+  page the question came from 30&nbsp;&rarr;&nbsp;39. One of these was not cosmetic: asked what
+  medicine an ASHA may give for a breathing illness, the device had been answering
+  <i>chloroquine or ACT</i> &mdash; malaria drugs &mdash; for pneumonia. The words <i>ASHA</i> and
+  <i>worker</i> appear on nearly every page of a manual written for her, so they carried a page of
+  session objectives and two TB pages above the classification table that names the drug. Dropped
+  from both the question and the index, the same question now answers <b>Cotrimoxazole</b>.</p></div>
+<div class="i"><h3>The recogniser does not give the same answer twice</h3><p><b class="k">Problem</b>One pass of the 52 questions said 45 keywords survived; another said 50. Neither was a measurement.</p><p><b class="k">Cause</b>The recogniser is not deterministic. The same question, spoken the same way, came back as <span class="dv">&#2347;&#2360;&#2354;&#2368;</span>, <span class="dv">&#2346;&#2360;&#2368;</span> and <span class="dv">&#2347;&#2360;&#2354;&#2368;</span> across three tries.</p><p><b class="k kk">Fix</b>Everything about speech is now measured over 156 recognitions &mdash; all 52 questions, three times each &mdash; not one pass. Two narrow repairs were added on that evidence: a dropped letter costs a whole point of edit distance and could never clear the confusable-slip limit, so <span class="dv">&#2360;&#2381;&#2340;&#2344;&#2346;&#2366;&#2344;</span> heard as <span class="dv">&#2360;&#2381;&#2344;&#2346;&#2366;&#2344;</span> went through untouched; and two nasal marks written next to each other spell no Hindi word but, being two different characters, walked past the rule that collapses repeats.</p><p><b class="k kk">Result</b>97% of keywords survived before the repairs, 99% after.</p></div>
+<div class="i"><h3>A rule that was fixing words was also destroying one</h3><p><b class="k">Problem</b>The device answered <i>&ldquo;what can an ASHA do <b>to</b> a pregnant woman&rdquo;</i> instead of <i>&ldquo;to help a pregnant woman&rdquo;</i>.</p><p><b class="k">Cause</b>A rule that collapses stuttered letters was collapsing <span class="dv">&#2350;&#2342;&#2342;</span> &mdash; help &mdash; into <span class="dv">&#2350;&#2342;</span>, and with the help gone from the sentence the translator dropped it from the English too.</p><p><b class="k kk">Fix</b>A doubled vowel sign or nasal is never a real Hindi spelling and is still always collapsed. A doubled consonant can be real, so it is now collapsed only where doing so recovers one of the clinical terms. Over the 156 recognitions the rule fires on five distinct tokens: it repairs three of them and no longer breaks <span class="dv">&#2350;&#2342;&#2342;</span>.</p></div>
+<h2>Answers, and what they sound like<span class="cnt">three issues</span></h2>
+<div class="i sev"><h3>The device gave contraceptive advice to a pregnant woman</h3><p><b class="k">Problem</b>Asked what a pregnant woman with anaemia should watch for, the device said she should avoid an IUCD. Asked what checkups she needs in her first months, that she needs a monthly pelvic exam to confirm the IUCD is in place. Asked which tablet prevents anaemia, that it is Mala&nbsp;N or Mala&nbsp;D &mdash; an oral contraceptive. None of it was hedged.</p><p><b class="k">Cause</b>This module is about children. It has ten pages on preventing pregnancy and none on antenatal care, so <i>pregnant woman</i> finds the contraception pages honestly. No threshold separates these: their relevance, 4.1 to 6.1 per term, sits inside the range of real questions, and coverage does not separate them either &mdash; 0.48 to 0.79, where real questions run from 0.39 up.</p><p><b class="k kk">Fix</b>The rule is stated as what it is. A page about how not to become pregnant cannot answer a question about a woman who already is, and is removed from the context; if nothing else was retrieved the device says it does not have the information, which for this manual is true. What the manual does cover about her &mdash; malaria in pregnancy, TB treatment in pregnancy, her tetanus shot &mdash; is untouched.</p></div>
+<div class="i"><h3>Answers that talked about themselves, and names that were translated away</h3><p><b class="k">Problem</b>Several faults that only appear when the answer is read aloud to someone who cannot see the screen. The model opened with <i>YES</i> and then said, correctly, that pills should <i>not</i> be advised &mdash; the contradiction first, which is the part she would act on. It said <i>the context does not provide information</i>, and the device dutifully translated the word <i>context</i> to a worker who has never been shown one. It repeated the manual&rsquo;s own teaching scaffolding back as an answer: <i>Step 3 of the session includes&hellip;</i> And the names of things she is handed were translated into the ordinary words they are made of: Gentian violet paint became <span class="dv">&#2332;&#2375;&#2306;&#2335;&#2367;&#2351;&#2344; &#2348;&#2376;&#2306;&#2327;&#2344;&#2368; &#2352;&#2306;&#2327;</span> &mdash; a purple colour; the cord became <span class="dv">&#2337;&#2379;&#2352;</span>, a rope; zinc became <span class="dv">&#2332;&#2360;&#2381;&#2340;&#2366;</span>, the metal.</p><p><b class="k kk">Fix</b>Refusals are recognised whether the model uses the words it was given or its own. Bare verdicts and scaffolding are stripped &mdash; and stripped repeatedly, because the model stacks them (<i>&ldquo;The answer is: Step 3 of the session includes&hellip;&rdquo;</i> carries two). Names are steered from the English where that works and corrected on the Hindi where it does not, since how the translator renders a name depends on the sentence around it.</p><p><b class="k kk">Result</b>Checked against all fifty answered questions: exactly the answers that needed changing changed.</p></div>
+<div class="i"><h3>An ambiguous English word that named the wrong substance</h3><p><b class="k">Problem</b>Among the signs of dehydration the device read out <span class="dv">&#2326;&#2352;&#2366;&#2348; &#2358;&#2352;&#2366;&#2348; &#2346;&#2368;&#2344;&#2366;</span> &mdash; drinking <b>alcohol</b> badly.</p><p><b class="k">Cause</b>English <i>drink</i> with no object is ambiguous, and the translator resolves it to alcohol often enough to matter.</p><p><b class="k kk">Fix</b>Give the verb an object. Probed the rest of the domain&rsquo;s ambiguous words the same way &mdash; stool, labour, discharge, delivery, passing, water breaking &mdash; and they all resolve correctly in context, so this stayed one narrow substitution rather than a glossary. It had to be fixed twice: the first fix caught the verb followed by an adverb (<i>drinking poorly</i>) but not the adjective in front of the noun (<i>poor drinking</i>), which is how the manual actually writes it.</p></div>
+<h2>What we got wrong about our own measurements<span class="cnt">four issues</span></h2>
+<div class="i sev"><h3>A crash that hid itself inside the one path the tests did not run</h3><p><b class="k">Problem</b>Every streamed answer became &ldquo;this is not in the ASHA manual&rdquo; while retrieval was scoring 4.75 and the right page was in hand.</p><p><b class="k">Cause</b>A variable was used in a worker thread that was never passed into it. The exception was swallowed and the failure looked exactly like a refusal. It went unnoticed because the evaluation harness never exercised the streaming path &mdash; the path the device actually uses.</p><p><b class="k kk">Fix</b>The variable is threaded through, and a failure now falls back to answering the ordinary way rather than telling a health worker the manual does not cover her question.</p></div>
+<div class="i"><h3>Two of our own measurements were wrong before the device was</h3><p><b class="k">Problem</b>A comparison of two prompt wordings appeared to show one clearly better. It was not.</p><p><b class="k">Cause</b>The test script truncated the retrieved context to 2400 characters while the device sends all of it, so the prompt under test was not the prompt in use. Separately, the evaluation harness kept its own copy of the prompt, which had drifted from the device&rsquo;s, and was scoring a wording the device no longer used.</p><p><b class="k kk">Fix</b>Both now import the prompt and the generation settings from the application, so a change to either is measured by the next run rather than going unnoticed.</p></div>
+<div class="i"><h3>Three changes that measured worse and were reverted</h3><p><b class="k">Problem</b>Not every good idea survived contact with the numbers.</p><p><b class="k kk">Fix</b>Splitting pages into paragraph-sized passages is the textbook improvement to this kind of retrieval. Measured: grounding fell from 0.67 to 0.63, strongly-grounded answers from 31 to 29, and one answer regressed from the right drug to the wrong one. Reverted. An early correction list for misheard words folded sounds together too aggressively and turned <span class="dv">&#2342;&#2370;&#2343;</span> into <span class="dv">&#2342;&#2360;&#2381;&#2340;</span> &mdash; milk into diarrhoea &mdash; damaging 6 of 19 good sentences; rebuilt from observed confusions only, it damages none of 28. And un-reversing the four checklist pages, which looked like an obvious repair, dropped the evaluation from 9/10 to 8/10.</p><p><b class="k kk">Result</b>Every change in this project is now kept or discarded on three checks: the 52-question page-by-page set, the ten-question evaluation, and twelve off-manual questions that must all be refused.</p></div>
+<div class="i"><h3>A document that reads correctly but cannot be copied</h3><p><b class="k">Problem</b>Text copied out of our own Hindi PDFs comes back broken &mdash; <span class="dv">&#2330;&#2366;&#2361;&#2367;&#2319;</span> copies as <span class="dv">&#2330;&#2366; &#2361;&#2319;</span>, <span class="dv">&#2351;&#2342;&#2367;</span> as <span class="dv">&#2342;</span> &mdash; and this was briefly mistaken for the device having answered differently. It had not.</p><p><b class="k">Cause</b>Wherever a vowel sign is reordered for display, the PDF loses the mapping back to the characters behind it. All eleven Devanagari fonts on this board were tried and every one loses it, most far worse than the one in use, so this is the renderer rather than the font.</p><p><b class="k kk">Fix</b>The test sheet is published as UTF-8 text alongside the PDF. The PDF is for reading and printing; the text file is for copying.</p></div>
+  <div class="note">
+    <p class="hd">What is still open, stated plainly</p>
+    <p><b>The knowledge base is one module of seven.</b> Module 7 covers child health and nutrition.
+    Antenatal care, bleeding after delivery and anaemia in pregnancy are not in it, so questions
+    about them have no right answer to find and the device is built to say so. Adding the remaining
+    modules is the single largest improvement available, and it is a content task, not an
+    algorithmic one.</p>
+    <p><b>Two answers in the 52 are wrong and are documented as wrong</b> on the test sheet, along
+    with two refusals and three loose answers. Both wrong answers are ranking failures on pages
+    whose topic runs across a facing pair; neither is hidden.</p>
+    <p><b>Asking the question in Hindi against an English book is the remaining structural cost.</b>
+    Eight vocabulary substitutions were needed to close the gap by hand, and we cannot know which
+    word a jury will use next. Indexing the Hindi edition of the same volume would remove that whole
+    class of failure, and is the first thing to do after this stage.</p>
+    <p><b>Two licences must change before sale:</b> the Hindi voice and the voice it replaced are
+    both non-commercial.</p>
+  </div>
+</div>
