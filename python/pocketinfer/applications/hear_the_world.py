@@ -270,6 +270,12 @@ class HearTheWorld(BaseApplication):
         # when the consonants survive, and the two spellings are the same word.
         set('िी'),
         set('ुू'),
+        # द with भ is not a shared place of articulation - one is dental, the
+        # other labial - so this pair is here on evidence rather than on
+        # phonetics. नाभी came back as नादी, and checked against every word in
+        # the twenty-eight sentences known to transcribe correctly, plus नदी,
+        # दादी, नाड़ी, भाभी, दूध and दाई, it replaces none of them.
+        set('दभ'),
     )
 
     @classmethod
@@ -326,6 +332,19 @@ class HearTheWorld(BaseApplication):
                 best, best_d = term, d
         # At most two confusable slips, and nothing else.
         return best if best_d <= limit else None
+
+    # Both words mean pus, but only one of them survives translation. Asked
+    # about पीप at the navel, the translator returned "the navel is peeling"
+    # three times out of four and "peeking" once; the same sentences with मवाद
+    # returned "pus" every time. The question is not changed - it is written in
+    # the synonym the translator actually knows.
+    _HI_FOR_TRANSLATION = (('पीप', 'मवाद'),)
+
+    @classmethod
+    def _prepare_hindi_for_translation(cls, text):
+        for weak, strong in cls._HI_FOR_TRANSLATION:
+            text = (text or '').replace(weak, strong)
+        return text
 
     @classmethod
     def _correct_terms(cls, text):
@@ -880,7 +899,9 @@ class HearTheWorld(BaseApplication):
                 # Perform NMT on the recognized text, convert it to the target language
                 if self.settings['input_language'] != 'en':
                     self.board.statusbar(f"Running: NMT {self.settings['input_language']} -> en")
-                    query = self.nmt.infer(raw_query, self.settings["input_language"], "EN")['translated_text']
+                    query = self.nmt.infer(
+                        self._prepare_hindi_for_translation(raw_query),
+                        self.settings["input_language"], "EN")['translated_text']
                     self.logger.info("Translated query is '{}'".format(query))
                     # The English translation is an internal pipeline step, not
                     # something to put in front of the user: showing it here
