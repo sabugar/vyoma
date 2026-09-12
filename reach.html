@@ -1,0 +1,256 @@
+<meta charset="utf-8">
+<title>Who This Reaches</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{--ground:#FFFFFF;--panel:#F1F5F9;--ink:#14203A;--ink-soft:#52607A;--rule:#C6CEDB;
+        --accent:#0E6E5C;--accent-b:#E4F0EC;--signal:#A85410;
+        --sans:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif,"Lohit Devanagari";
+        --cond:"IBM Plex Sans Condensed","IBM Plex Sans",ui-sans-serif,sans-serif,"Lohit Devanagari";
+        --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace,"Lohit Devanagari";
+        --deva:"Lohit Devanagari","Noto Sans Devanagari",serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:8.6pt;line-height:1.4}
+  .doc{max-width:182mm;margin:0 auto;padding:9mm 0}
+  .doc>*+*{margin-top:4mm}
+  .masthead{display:grid;grid-template-columns:1fr auto;align-items:end;gap:8mm;
+            border-bottom:2px solid var(--ink);padding-bottom:2mm}
+  h1{font-family:var(--cond);font-size:19pt;font-weight:700;letter-spacing:-.01em;margin:0}
+  .sub{font-family:var(--cond);font-size:9.5pt;font-weight:500;color:var(--accent);margin:1mm 0 0}
+  .spec{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);text-align:right;line-height:1.5;white-space:nowrap}
+  .spec b{color:var(--ink);font-weight:600}
+  .lede{font-size:9pt;color:var(--ink-soft)}
+  .lede b{color:var(--ink)}
+  .q{border-left:2px solid var(--accent);padding-left:3.4mm;page-break-inside:avoid}
+  .q+.q{margin-top:4.6mm}
+  .qhead{display:flex;align-items:baseline;gap:2.6mm}
+  .num{font-family:var(--mono);font-size:8pt;font-weight:600;color:var(--accent)}
+  .title{font-family:var(--cond);font-size:10.5pt;font-weight:600}
+  .ask{font-family:var(--deva);font-size:11pt;line-height:1.5;margin:1.6mm 0 0;
+       background:var(--accent-b);padding:2mm 2.6mm;border-radius:1mm}
+  .why{font-size:8.2pt;color:var(--ink-soft);margin:1.8mm 0 0}
+  .why b{color:var(--signal);font-family:var(--cond);font-weight:600;text-transform:uppercase;
+         font-size:6.9pt;letter-spacing:.06em;margin-right:1.6mm}
+  .ans{background:var(--panel);padding:2.2mm 2.6mm;margin-top:1.8mm}
+  .ans .lbl{font-family:var(--cond);font-size:6.9pt;font-weight:600;text-transform:uppercase;
+            letter-spacing:.06em;color:var(--ink-soft)}
+  .ans .hi{font-family:var(--deva);font-size:9.4pt;line-height:1.5;margin:.9mm 0 0}
+  .ans .en{font-size:7.9pt;color:var(--ink-soft);margin:1.2mm 0 0}
+  .meta{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);margin-top:1.4mm}
+  .note{background:var(--accent-b);border-left:3px solid var(--accent);padding:2.6mm 3mm}
+  .note .hd{font-family:var(--cond);font-size:9.6pt;font-weight:700;color:var(--accent);margin:0 0 1.2mm}
+  .note p{margin:0 0 1.2mm;font-size:8.2pt}
+  .note p:last-child{margin:0}
+  code{font-family:var(--mono);font-size:.92em;color:var(--accent)}
+
+  h2{font-family:var(--cond);font-size:12pt;font-weight:700;margin:5.5mm 0 0;color:var(--accent);
+     padding-bottom:1.2mm;border-bottom:2px solid var(--accent);page-break-after:avoid}
+  h2 .cnt{font-family:var(--mono);font-size:6.9pt;font-weight:400;color:var(--ink-soft);float:right;padding-top:2.2mm}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:2mm;margin-top:3mm}
+  .stat{background:var(--panel);padding:2.2mm 2.4mm;border-top:2px solid var(--accent)}
+  .stat .n{font-family:var(--cond);font-size:16pt;font-weight:700;line-height:1;color:var(--accent)}
+  .stat .k{font-family:var(--cond);font-size:6.8pt;font-weight:600;text-transform:uppercase;
+           letter-spacing:.05em;color:var(--ink-soft);margin-top:1.2mm;display:block;line-height:1.3}
+  table{border-collapse:collapse;width:100%;font-size:8pt;margin:2mm 0}
+  th{font-family:var(--cond);font-size:6.9pt;text-transform:uppercase;letter-spacing:.05em;
+     text-align:left;color:var(--ink-soft);border-bottom:1px solid var(--rule);padding:1.2mm 2mm 1.2mm 0}
+  th.r,td.r{text-align:right}
+  td{padding:1.2mm 2mm 1.2mm 0;border-bottom:1px solid #E8ECF2;vertical-align:top}
+  td.n{font-family:var(--mono);white-space:nowrap}
+  tr.tot td{font-weight:600;border-bottom:2px solid var(--rule)}
+  .gap{color:var(--signal);font-weight:600}
+  p.body{font-size:8.4pt;margin:2.4mm 0 0}
+  p.body b{color:var(--ink)}
+  .src{font-family:var(--mono);font-size:6.6pt;color:var(--ink-soft);margin-top:1.2mm;line-height:1.5}
+  .tier{page-break-inside:avoid;margin-top:3mm;padding-left:3mm;border-left:2px solid var(--accent)}
+  .tier.later{border-left-color:var(--signal)}
+  .tier h3{font-family:var(--cond);font-size:9.6pt;font-weight:700;margin:0 0 1mm}
+  .tier h3 span{font-family:var(--mono);font-size:6.7pt;font-weight:400;color:var(--ink-soft);margin-left:2mm}
+  .tier p{margin:0;font-size:8.3pt}
+  ol.srcs{font-size:7.4pt;color:var(--ink-soft);margin:2mm 0 0;padding-left:5mm}
+  ol.srcs li{margin-bottom:1.2mm}
+  ol.srcs b{color:var(--ink)}
+  @page{size:A4;margin:11mm 14mm 9mm;
+    @bottom-left{content:"ASHA Sahayak \00b7 who this reaches";font-family:var(--mono);font-size:6.6pt;color:#52607A}
+    @bottom-right{content:"Page " counter(page) " of " counter(pages);font-family:var(--mono);font-size:6.6pt;color:#52607A}}
+  @media print{.doc{max-width:none;padding:0;margin:0}}
+</style>
+<div class="doc">
+  <header class="masthead">
+    <div><h1>Who This Reaches</h1>
+    <p class="sub">ASHA Sahayak &mdash; the people behind the numbers, and where it goes next</p></div>
+    <div class="spec"><b>Every figure below is from a Government of India source</b><br>
+    SRS 2023 &middot; Population Projections 2011&ndash;36 &middot; TRAI &middot; MoHFW<br>
+    <b>sources listed on the last page</b></div>
+  </header>
+
+  <p class="lede">
+    India has <b>142.34 crore</b> people and this device does not serve all of them; we have never
+    claimed it does. What it serves is one worker, at one doorstep, answering one question &mdash; and
+    the people on the other side of that question are <b>mothers and their children</b>. This is who
+    they are, how many, and where they live.
+  </p>
+
+  <div class="stats">
+    <div class="stat"><span class="n">2.61 cr</span><span class="k">births a year in India</span></div>
+    <div class="stat"><span class="n">11.30 cr</span><span class="k">children under five alive today</span></div>
+    <div class="stat"><span class="n">40.70 cr</span><span class="k">women of childbearing age</span></div>
+    <div class="stat"><span class="n">10.29 lakh</span><span class="k">ASHAs who would carry it</span></div>
+  </div>
+
+  <h2>Rural and urban, side by side<span class="cnt">SRS 2023 &times; projected population</span></h2>
+  <p class="body">
+    The device is given to an ASHA, and about nine in ten ASHAs work rural blocks. That is not a
+    marketing choice &mdash; it is where the births are, and where the deaths are.
+  </p>
+  <table>
+    <tr><th>People on the other side of the question</th><th class="r">Rural</th><th class="r">Urban</th><th class="r">Total</th><th>Rural share</th></tr>
+    <tr><td>Births in a year</td><td class="n r">1.84 cr</td><td class="n r">0.77 cr</td><td class="n r">2.61 cr</td><td class="n">71%</td></tr>
+    <tr><td>Mothers and newborns together, each year</td><td class="n r">3.68 cr</td><td class="n r">1.54 cr</td><td class="n r">5.22 cr</td><td class="n">71%</td></tr>
+    <tr><td>Children under five, alive today</td><td class="n r">7.90 cr</td><td class="n r">3.40 cr</td><td class="n r">11.30 cr</td><td class="n">70%</td></tr>
+    <tr><td>Women aged 15&ndash;49</td><td class="n r">25.76 cr</td><td class="n r">14.94 cr</td><td class="n r">40.70 cr</td><td class="n">63%</td></tr>
+    <tr class="tot"><td>Population</td><td class="n r">90.82 cr</td><td class="n r">51.52 cr</td><td class="n r">142.34 cr</td><td class="n">64%</td></tr>
+  </table>
+  <p class="src">Births from the SRS 2023 crude birth rate applied by residence &mdash; rural 20.3 and urban 14.9 per 1,000 &mdash; to the
+  projected population for 1 March 2026. Children under five from the SRS 2023 age distribution: 8.7% of the rural population and
+  6.6% of the urban. Women 15&ndash;49 from the same table, female column. [1][2]</p>
+
+  <h2>The gap is not only in numbers &mdash; it is in survival<span class="cnt">SRS 2023</span></h2>
+  <table>
+    <tr><th>Per 1,000 live births</th><th class="r">Rural</th><th class="r">Urban</th><th>How much worse, rural</th><th class="r">Deaths a year, rural</th></tr>
+    <tr><td>Neonatal mortality &mdash; first 28 days</td><td class="n r">21</td><td class="n r">13</td><td class="gap">62% higher</td><td class="n r">3.87 lakh</td></tr>
+    <tr><td>Infant mortality &mdash; first year</td><td class="n r">28</td><td class="n r">18</td><td class="gap">56% higher</td><td class="n r">5.16 lakh</td></tr>
+    <tr><td>Under-five mortality</td><td class="n r">33</td><td class="n r">20</td><td class="gap">65% higher</td><td class="n r">6.08 lakh</td></tr>
+  </table>
+  <p class="body">
+    One number decides where a device like this belongs: <b>73.2% of all infant deaths in India are
+    neonatal</b> &mdash; they happen in the first 28 days, and most of those in the first 48 hours.
+    That is precisely the window in which no doctor is present, the ASHA is in the home, the decision
+    is hers, and her only reference is a printed book she cannot search while holding a baby.
+  </p>
+  <p class="src">Neonatal, infant and under-five mortality by residence, SRS Statistical Report 2023, Statements 46, 48 and 53.
+  The 73.2% is the neonatal share of infant deaths in the same report. Annual deaths are those rates applied to the births above. [1]</p>
+
+  <h2>Why it has to work with no network at all<span class="cnt">TRAI &middot; DoT</span></h2>
+  <table>
+    <tr><th>Connectivity, quarter ending 31 December 2025</th><th class="r">Rural</th><th class="r">Urban</th></tr>
+    <tr><td>Tele-density &mdash; connections per 100 people</td><td class="n r gap">59.63%</td><td class="n r">148.92%</td></tr>
+    <tr><td>Telephone subscribers</td><td class="n r">543.70 mn</td><td class="n r">762.44 mn</td></tr>
+  </table>
+  <p class="body">
+    An urban Indian has about <b>two and a half connections for every one a rural Indian has</b>. And
+    that is the average, not the edge: the Government&rsquo;s own 4G Saturation project was created for
+    <b>24,680 villages with no coverage at all</b>, and of <b>39,799</b> rural and remote uncovered
+    villages planned for 4G through Digital Bharat Nidhi, <b>33,044 had been covered by 2025</b>
+    &mdash; leaving about <b>6,755 villages still waiting</b>. An ASHA posted in one of them cannot
+    use a cloud assistant on any day, and an ASHA posted anywhere rural cannot rely on one on the day
+    it matters.
+  </p>
+  <p class="body">
+    This device answers with <b>the network switched off</b>. Speech recognition, translation,
+    retrieval, the language model and the voice all run on the board in the ASHA&rsquo;s hand. There is no
+    data charge, no signal to find, and nothing about the mother or child leaves the device.
+  </p>
+  <p class="src">Tele-density and subscribers: TRAI Press Release No. 32 of 2026, for the quarter October&ndash;December 2025.
+  Village coverage: Ministry of Communications, through PIB. [3][4][5]</p>
+
+  <h2>What one device costs per person it reaches<span class="cnt">derived</span></h2>
+  <p class="body">
+    At <b>2.61 crore births</b> across <b>10.29 lakh ASHAs</b>, one ASHA attends about <b>25 births a
+    year</b>. Over a five-year service life that is roughly <b>127 mothers and 127 newborns</b> from a
+    single device.
+  </p>
+  <table>
+    <tr><th>Per device</th><th class="r">Today, developer kit</th><th class="r">At volume</th></tr>
+    <tr><td>Hardware cost</td><td class="n r">&#8377;46,482</td><td class="n r">&#8377;12,000</td></tr>
+    <tr><td>Cost per mother&ndash;newborn pair, over five years</td><td class="n r">&#8377;366</td><td class="n r">&#8377;95</td></tr>
+    <tr class="tot"><td>Cost per question asked</td><td class="n r">&#8377;0</td><td class="n r">&#8377;0</td></tr>
+  </table>
+  <p class="body">
+    The last line is the one that compounds. There is no per-query cost, no subscription and no
+    bandwidth, so asking the device a hundred questions in a day costs exactly what asking it none
+    costs. A cloud assistant is charged for every answer it gives, forever.
+  </p>
+
+  <h2>Where it goes next<span class="cnt">three tiers, honestly separated</span></h2>
+
+  <div class="tier">
+    <h3>Same device, more of the book <span>no new hardware, no new software</span></h3>
+    <p>Today the device carries <b>one of the seven ASHA modules</b> &mdash; Module 7, child health and
+    nutrition. The remaining six are published by the same ministry in the same form. Adding them is a
+    content task: it widens what she can ask about to antenatal care, delivery, postnatal care,
+    nutrition, communicable and non-communicable disease, without touching the hardware or the
+    pipeline. This is the single largest improvement available and it is the next thing we will do.</p>
+  </div>
+
+  <div class="tier">
+    <h3>Same device, another language <span>a model swap</span></h3>
+    <p>Each unit carries one language pack. BHASHINI already publishes recognition, translation and
+    speech models for every scheduled language, so a device for Marathi, Bengali, Tamil or Odia is the
+    same board with different weights on it &mdash; not a new build, not a new app, and not a new
+    procurement. A district that speaks two languages buys two packs, not two products.</p>
+  </div>
+
+  <div class="tier">
+    <h3>Same device, another worker <span>ANM, Anganwadi worker, MPW</span></h3>
+    <p>The ASHA is not the only frontline worker carrying a manual she cannot search. The Auxiliary
+    Nurse Midwife, the Anganwadi worker and the multi-purpose worker each have their own printed
+    guidance and the same problem with it. The device does not know it is talking to an ASHA; it knows
+    what book it is holding.</p>
+  </div>
+
+  <div class="tier later">
+    <h3>Needs new work, and in one case approval <span>not claimed as ready</span></h3>
+    <p><b>Camera-based screening.</b> The board has a camera the current application does not use. The
+    clearest candidate is newborn jaundice from skin colour, which an ASHA currently judges by eye in
+    poor light. This is a medical screening claim and would need Ministry of Health approval and a
+    proper clinical validation before it goes near a mother &mdash; we are not claiming it works
+    today.</p>
+    <p style="margin-top:1.4mm"><b>Beyond health.</b> Nothing in the architecture is medical. It is an
+    offline machine that answers questions in an Indian language from a book it has been given. The
+    same device with a different book serves agricultural extension, entitlement and scheme
+    eligibility, or school teaching guidance &mdash; wherever a worker in a low-connectivity district
+    has to act on a manual she cannot search.</p>
+  </div>
+
+  <div class="note">
+    <p class="hd">What we do not claim</p>
+    <p><b>This does not serve 142 crore Indians.</b> Today&rsquo;s scope is mothers and children, and the
+    knowledge base is one module of seven. A question about antenatal care has no answer in the book
+    the device carries, and it is built to say so rather than guess.</p>
+    <p><b>The reach figures above are the population the ASHA network is positioned to serve, not
+    users acquired.</b> They are what one device is worth if it is in her hand, multiplied by how many
+    hands there are. Nothing here counts a deployment that has not happened.</p>
+    <p><b>The mortality figures are not a promise of lives saved.</b> They say where the deaths are and
+    when they happen, which is why the ASHA&rsquo;s doorstep is the right place for this. Proving an effect
+    on those numbers needs a field study, and that comes after a pilot, not before it.</p>
+  </div>
+
+  <h2>Sources<span class="cnt">all Government of India</span></h2>
+  <ol class="srcs">
+    <li><b>SRS Statistical Report 2023</b>, Office of the Registrar General &amp; Census Commissioner,
+    Ministry of Home Affairs, released September 2025. Crude birth rate by residence (Statement 14),
+    infant mortality by residence (Statement 46), neonatal mortality and its share of infant deaths
+    (Statement 48), under-five mortality by residence (Statement 53), and the age distribution of the
+    estimated population (Table 1).
+    <br>censusindia.gov.in/nada/index.php/catalog/46172</li>
+    <li><b>Report of the Technical Group on Population Projections, 2011&ndash;2036</b>, National
+    Commission on Population, Ministry of Health and Family Welfare, July 2020. Projected total and
+    urban population by sex as on 1 March 2026.
+    <br>nhm.gov.in/New_Updates_2018/Report_Population_Projection_2019.pdf</li>
+    <li><b>The Indian Telecom Services Performance Indicator Report</b>, quarter ending 31 December
+    2025, Telecom Regulatory Authority of India, Press Release No. 32 of 2026. Rural and urban
+    tele-density and subscribers.
+    <br>trai.gov.in/sites/default/files/2026-03/PR_No.32of2026.pdf</li>
+    <li><b>Strengthening of Telecommunication Network</b> and <b>Internet Connectivity in Rural and
+    Remote Areas</b>, Ministry of Communications, Press Information Bureau. 4G Saturation project for
+    24,680 uncovered villages; 39,799 villages planned through Digital Bharat Nidhi, 33,044 covered.
+    <br>pib.gov.in &mdash; releases 2085672 and 2220339</li>
+    <li><b>Union Health Ministry hosts ASHAs</b>, Ministry of Health and Family Welfare, Press
+    Information Bureau, January 2025. Over 10.29 lakh ASHAs in service.
+    <br>pib.gov.in &mdash; release 2096075</li>
+    <li><b>Guidelines on Accredited Social Health Activists</b>, National Health Mission. One ASHA per
+    1,000 population as the deployment norm.
+    <br>nhm.gov.in/images/pdf/communitisation/task-group-reports/guidelines-on-asha.pdf</li>
+  </ol>
+</div>
