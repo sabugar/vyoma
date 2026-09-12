@@ -116,6 +116,17 @@ class HearTheWorld(BaseApplication):
         'very just and but if or because as until while also'
     ).split())
 
+    # Words that name the reader rather than the subject. Every page of this
+    # manual is written to the ASHA, so "asha" and "worker" cannot tell one
+    # page from another - but they still counted, and once आशा began being
+    # expanded to आशा कार्यकर्ता for the translator they counted twice. Asked
+    # what medicine an ASHA can give for a breathing illness, the two of them
+    # carried a page of session objectives and two TB pages above the
+    # classification table that actually names the drug, and the device
+    # offered chloroquine for pneumonia. They are dropped from both the
+    # question and the index, which is where they belonged all along.
+    STOPWORDS |= set('asha ashas worker workers'.split())
+
     # British spellings used in the ASHA module -> American, so NMT output
     # (usually American) matches book text (usually British).
     SPELLING_MAP = {
@@ -228,7 +239,25 @@ class HearTheWorld(BaseApplication):
     # This deliberately holds no word list and cannot turn one word into a
     # different word. It only removes a repeat the writing system does not
     # allow, which is the same repair the manual's own text needed.
-    _DOUBLED_CHAR = re.compile(r'([\u0915-\u0939\u093e-\u094c\u0902\u0903])\1')
+    # A vowel sign or a nasal written twice in a row spells no Hindi word, so
+    # a repeat of one is always the recogniser stuttering and is collapsed on
+    # sight. A repeated consonant is not the same case - मदद is spelt with two
+    # द - and collapsing those indiscriminately cost the word its meaning:
+    # "आशा क्या मदद कर सकती है" became "क्या मद कर सकती है", and the
+    # translator, with no help left in the sentence, returned "what can an
+    # ASHA do to a pregnant woman". Over the 156 recognitions of the probe the
+    # rule fired on five distinct tokens: लााल and नाभभी and सेप्सस it repairs,
+    # मदद it destroyed, सेसस it did nothing for either way. A doubled
+    # consonant is now collapsed only where doing so turns the token into one
+    # of the clinical terms, which is the case it was written for.
+    _DOUBLED_MARK = re.compile(r'([\u093e-\u094c\u0902\u0903])\1')
+    _DOUBLED_CONS = re.compile(r'([\u0915-\u0939])\1')
+    # A chandrabindu and an anusvara next to each other spell no Hindi
+    # word; it is the recogniser laying down the nasal twice, and because
+    # they are two different characters the doubling rule above walks past
+    # them. जाँंच stayed जाँंच and never met जांच. Only a run of them is
+    # touched, so a word that carries one keeps it.
+    _DOUBLE_NASAL = re.compile(r'[\u0901\u0902]{2,}')
     _STACKED_MATRA = re.compile(r'([\u093e-\u094c])[\u093e-\u094c]+')
 
     # Measured weakness of this recogniser, not of the speaker. Putting one
@@ -331,7 +360,43 @@ class HearTheWorld(BaseApplication):
             if d < best_d:
                 best, best_d = term, d
         # At most two confusable slips, and nothing else.
-        return best if best_d <= limit else None
+        if best_d <= limit:
+            return best
+        # A letter the recogniser simply dropped is not a confusable slip and
+        # costs a whole point, so it can never clear that limit: स्तनपान came
+        # back as स्नपान, one त short, and went through untouched - the single
+        # question of the 52 whose keyword was misheard. A dropped letter is
+        # accepted on its own terms instead, and only on the narrowest reading
+        # of it: the token must be one of the longer clinical terms with
+        # exactly one character missing, and must read that way against only
+        # one term in the list. Checked against the 189 distinct words of every
+        # real transcript and question recorded so far, this rewrites one of
+        # them - स्नपान, to स्तनपान.
+        return cls._match_dropped_letter(tok)
+
+    @classmethod
+    def _match_dropped_letter(cls, tok):
+        found = None
+        for term in cls._ASR_TERMS:
+            cand = cls._strip_marks(term)
+            if len(cand) < 6 or len(tok) + 1 != len(cand):
+                continue
+            i = j = 0
+            skipped = False
+            while i < len(tok) and j < len(cand):
+                if tok[i] == cand[j]:
+                    i += 1
+                    j += 1
+                elif skipped:
+                    break
+                else:
+                    skipped = True
+                    j += 1
+            else:
+                if found:           # ambiguous - two terms fit, so neither
+                    return None
+                found = term
+        return found
 
     # Both words mean pus, but only one of them survives translation. Asked
     # about पीप at the navel, the translator returned "the navel is peeling"
@@ -423,9 +488,22 @@ class HearTheWorld(BaseApplication):
         previous = None
         while previous != text:
             previous = text
-            text = cls._DOUBLED_CHAR.sub(r'\1', text)
+            text = cls._DOUBLE_NASAL.sub('\u0902', text)
+            text = cls._DOUBLED_MARK.sub(r'\1', text)
+        text = ' '.join(cls._undouble_consonant(w) for w in text.split())
         return cls._correct_terms(
             cls._level_spelling(cls._STACKED_MATRA.sub(r'\1', text)))
+
+    @classmethod
+    def _undouble_consonant(cls, word):
+        """Collapse a stuttered consonant only where it recovers a real term."""
+        if not cls._DOUBLED_CONS.search(word) or cls._match_term(word):
+            return word
+        collapsed, previous = word, None
+        while previous != collapsed:
+            previous = collapsed
+            collapsed = cls._DOUBLED_CONS.sub(r'\1', collapsed)
+        return collapsed if cls._match_term(collapsed) else word
 
     @classmethod
     def _repair_extraction(cls, text):
@@ -519,6 +597,24 @@ class HearTheWorld(BaseApplication):
         r'^\s*(the\s+answer\s+is|answer|according to the (context|guidance|text)|'
         r'based on the (context|text))\s*[:,]?\s*', re.I)
 
+    # Asked whether a breastfeeding woman should be given the pill, the model
+    # opened "YES" on a line of its own and then said, correctly, that pills
+    # should not be advised for her. The verdict is the model's own arithmetic
+    # on a yes/no question, not something it read, and it contradicted the
+    # sentence behind it; spoken first, it is the part she would act on. A
+    # bare verdict alone on the opening line is dropped and the sentence that
+    # follows is left to answer.
+    _BARE_VERDICT = re.compile(r'^\s*(?:YES|NO)\b[\s.,:!-]*\n', re.I)
+
+    # ...and in the same answer it went on to say "the context states that",
+    # which the device dutifully translated, so an ASHA would have heard a
+    # word for something she has never been shown. The clause is removed
+    # wherever it appears, not only at the opening.
+    _META_CLAUSE = re.compile(
+        r'\b(?:the|this)\s+(?:context|passage|document|text|manual)\s+'
+        r'(?:states|says|indicates|mentions|shows|notes|specifies)\s+that\s+',
+        re.I)
+
     # Telling the model not to repeat the question back does not stop it - it
     # still opens with a restatement in about one answer in four. That is not
     # merely untidy: spoken Hindi runs about 0.08s per character through this
@@ -543,9 +639,57 @@ class HearTheWorld(BaseApplication):
         r'\b(drink|drinks|drinking)\b(?=\s+(?:poorly|badly|well|less|eagerly))',
         re.I)
 
+    # Names of things an ASHA holds in her hand, which the translator renders
+    # as the ordinary words they are made of. Measured by translating the
+    # manual's own sentences:
+    #
+    #   Gentian violet paint  जेंटियन बैंगनी रंग   a purple colour
+    #   cord                  डोर, तार, डोरियाँ    a rope, a wire
+    #   zinc                  जस्ता                the metal
+    #   mucus extractor       श्लेष्मा निकालने वाले  one who removes phlegm
+    #
+    # Each is rewritten into the English that comes back as the name she
+    # knows: जेंटियन वायलेट लोशन, नाभि, जिंक, म्यूकस-एक्सट्रैक्टर. Capitalising
+    # zinc is not a typo - the lower-case word is translated and the
+    # capitalised one is transliterated.
+    _EN_FOR_TRANSLATION = tuple((re.compile(pat, re.I), rep) for pat, rep in (
+        (r'\bgentian\s+violet(?:\s+paint)?\b', 'gentian violet lotion'),
+        (r'(?<!umbilical\s)\bcords?\b', 'umbilical cord'),
+        (r'\bzinc\b', 'Zinc'),
+        (r'\bmucus\s+extractor\b', 'mucus-extractor'),
+    ))
+
+    # How the translator renders a name is decided by the sentence around it,
+    # so steering it from the English side only half works: "Apply gentian
+    # violet lotion on the navel" comes back correctly as जेंटियन वायलेट लोशन,
+    # while the bare answer "Gentian violet paint." still comes back as
+    # जेंटियन बैंगनी - a purple colour, not the bottle in her kit. The name is
+    # therefore put right on the Hindi, where no context is left to change it.
+    _HI_AFTER_TRANSLATION = tuple((re.compile(pat), rep) for pat, rep in (
+        (r'जेंटियन[\s-]*बैंगनी(?:[\s-]*रंग)?', 'जेंटियन वायलेट'),
+        (r'श्लेष्मा[\s-]*निकालने[\s-]*वाले?(?:[\s-]*उपकरण)?', 'म्यूकस एक्सट्रैक्टर'),
+        (r'जस्ता', 'जिंक'),
+        # ...and the cord has no bone in it. "umbilical cord" is the
+        # English that keeps the translator away from डोर and तार - a
+        # rope and a wire - but it lands on नाभि की हड्डी about as often
+        # as on नाभि की नली.
+        (r'नाभि\s*की\s*हड्डी', 'नाभि'),
+    ))
+
+    @classmethod
+    def _name_in_hindi(cls, text):
+        """Put back the names of things she is handed, after translation."""
+        text = text or ''
+        for pattern, replacement in cls._HI_AFTER_TRANSLATION:
+            text = pattern.sub(replacement, text)
+        return text
+
     @classmethod
     def _disambiguate_for_translation(cls, text):
-        return cls._BARE_DRINK.sub(lambda m: m.group(1) + ' fluids', text or '')
+        text = cls._BARE_DRINK.sub(lambda m: m.group(1) + ' fluids', text or '')
+        for pattern, replacement in cls._EN_FOR_TRANSLATION:
+            text = pattern.sub(replacement, text)
+        return text
 
     @classmethod
     def _is_restatement(cls, sentence, query):
@@ -573,7 +717,8 @@ class HearTheWorld(BaseApplication):
 
     @classmethod
     def _strip_lead_in(cls, text):
-        cleaned = cls._LEAD_IN.sub('', text or '', count=1).lstrip()
+        cleaned = cls._META_CLAUSE.sub('', cls._BARE_VERDICT.sub('', text or ''))
+        cleaned = cls._LEAD_IN.sub('', cleaned, count=1).lstrip()
         # Only accept the strip if something is actually left to say.
         if len(cleaned) <= 20:
             return text or ''
@@ -869,9 +1014,10 @@ class HearTheWorld(BaseApplication):
                         english[:] = []
                         break
                     english.append(sent)
-                    hi = sent if out_lang == 'en' else self.nmt.infer(
-                        self._disambiguate_for_translation(sent),
-                        "EN", out_lang)['translated_text']
+                    hi = sent if out_lang == 'en' else self._name_in_hindi(
+                        self.nmt.infer(
+                            self._disambiguate_for_translation(sent),
+                            "EN", out_lang)['translated_text'])
                     translated.append(hi)
                     audio_q.put((hi, base64.b64decode(
                         self.tts.infer(hi, out_lang)['audio_base64'])))
@@ -1099,9 +1245,9 @@ class HearTheWorld(BaseApplication):
                     self.logger.info("Translated result is '{}'".format(nmt_result))
                 elif self.settings['output_language'] != 'en':
                     self.board.statusbar(f"Running: NMT en -> {self.settings['output_language']}")
-                    nmt_result = self.nmt.infer(
+                    nmt_result = self._name_in_hindi(self.nmt.infer(
                         self._disambiguate_for_translation(result),
-                        "EN", self.settings["output_language"])['translated_text']
+                        "EN", self.settings["output_language"])['translated_text'])
                     self.logger.info("Translated result is '{}'".format(nmt_result))
                 else:
                     nmt_result = result
