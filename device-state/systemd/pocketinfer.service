@@ -1,0 +1,16 @@
+[Unit]
+Description=PocketInfer Service (ASHA Sahayak / HearTheWorld)
+After=network.target bhashini_models.service ollama-warmup.service
+Wants=bhashini_models.service
+
+[Service]
+Environment=POCKETINFER_UI=1
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/pocket-infer-sw
+ExecStart=/usr/local/bin/pocketinfer-service --app HearTheWorld --setting input_language=hi --setting output_language=hi --log-level info
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

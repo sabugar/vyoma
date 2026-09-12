@@ -1,0 +1,95 @@
+"""Score the whole Hindi pipeline against known-correct answers.
+
+Written because fixes were being judged one question at a time, which cannot
+tell an improvement from a trade: the retrieval and prompt changes that helped
+scenario questions had already been seen to break factual ones. Each question
+carries the fact from the manual its answer must contain, so any change can be
+re-scored in a minute.
+
+Runs text-only by default (skips ASR) to isolate retrieval/LLM/NMT quality;
+pass --audio to include TTS->ASR so ASR errors are measured too.
+"""
+import argparse
+import base64
+import json
+import sys
+import time
+
+import requests
+
+sys.path.insert(0, "/home/ubuntu/pocket-infer-sw/python")
+from pocketinfer.applications.hear_the_world import HearTheWorld  # noqa: E402
+
+BH = "http://localhost:11400"
+OLLAMA = "http://127.0.0.1:11434/api/generate"
+MODEL = "qwen3:1.7b"
+
+PROMPT = (
+    'Answer the question using ONLY the CONTEXT below. '
+    'Output ONLY the final answer, in 1-2 complete sentences (max 35 words), '
+    'including the specific relevant detail(s) from the context (numbers, steps, '
+    'signs, timing) so the answer sounds informed, not vague. '
+    'Do not explain your reasoning, do not describe the context, do not say '
+    '"let me check" or "the text says" or similar - just state the answer directly, '
+    'as if you already knew it. '
+    'If the context does not contain the answer, output exactly: '
+    '"I do not have this information in my training materials."\n\n'
+)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--audio", action="store_true",
+                    help="round-trip through TTS+ASR to include ASR errors")
+    ap.add_argument("--top-k", type=int, default=3)
+    args = ap.parse_args()
+
+    app = HearTheWorld.__new__(HearTheWorld)
+    app.knowledge_chunks = app._load_knowledge_chunks()
+    questions = json.load(open("/home/ubuntu/asha_eval/questions.json"))
+
+    passed = 0
+    for q in questions:
+        hindi = q["hi"]
+        if args.audio:
+            tts = requests.post(f"{BH}/tts", json={"text": hindi, "language": "hi"},
+                                timeout=240).json()
+            asr = requests.post(f"{BH}/asr",
+                                json={"audio_base64": tts["audio_base64"],
+                                      "language": "hi"}, timeout=240).json()
+            hindi = asr["text"]
+
+        english = requests.post(f"{BH}/nmt",
+                                json={"text": hindi, "src_lang": "hi",
+                                      "tgt_lang": "EN"}, timeout=240
+                                ).json()["translated_text"]
+        chunks = app._retrieve_context(english, top_k=args.top_k)
+        if chunks:
+            prompt = (PROMPT + f'CONTEXT:\n{chr(10).join(chunks)}\n\n'
+                               f'QUESTION: {english}\n\nANSWER:')
+            t0 = time.time()
+            resp = requests.post(OLLAMA, json={
+                "model": MODEL, "prompt": prompt + "\n<think>\n\n</think>\n\n",
+                "raw": True, "stream": False, "keep_alive": -1,
+                "options": {"num_predict": 110, "num_ctx": 2048,
+                            "temperature": 0.2}}, timeout=300).json()
+            answer = resp.get("response", "").strip()
+            llm_s = time.time() - t0
+        else:
+            answer = "I do not have this information in my training materials."
+            llm_s = 0.0
+
+        low = answer.lower()
+        hit = any(m.lower() in low for m in q["must"])
+        passed += hit
+        print(f"[{'PASS' if hit else 'FAIL'}] {q['id']:11} ({llm_s:4.1f}s)")
+        if not hit:
+            print(f"         chahiye : {q['note']}")
+            print(f"         EN q    : {english[:100]}")
+            print(f"         mila    : {answer[:130]}")
+
+    print(f"\n  SCORE: {passed}/{len(questions)}")
+
+
+if __name__ == "__main__":
+    main()
