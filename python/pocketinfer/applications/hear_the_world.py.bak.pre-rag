@@ -1,0 +1,255 @@
+import base64
+from pocketinfer.applications.base import BaseApplication
+from pocketinfer.applications.registry import RegisterApplication
+
+from pocketinfer.models.ollama import Ollama
+from pocketinfer.models.piper import Piper
+from pocketinfer.models.vosk import Vosk
+from pocketinfer.models.asr import Asr
+from pocketinfer.models.nmt import Nmt
+from pocketinfer.models.tts import Tts
+
+from pocketinfer.audio import AudioPlayer
+
+from io import BytesIO
+from subprocess import check_output
+
+import time
+import wave
+import os
+import json
+import sys
+import threading
+
+
+# Register this class as an application that can run on the Pocket Infer Device
+# The argument here is a dictionary of metadata about the application
+# Metadata will be used to instantiate the application and ensure dependencies are met
+@RegisterApplication({
+    "name": "Hear The World",
+    "description": "An application that allows the user to ask questions about their surroundings.",
+    "author": "PocketInfer",
+    "version": "0.1.0",
+    "models": {
+        "ollama": {"model_name": "qwen3-vl:2b"},
+        # "ollama": {"model_name": "moondream:1.8B"},
+        # "ollama": {"model_name": "ministral-3:3B"},
+        "piper": {"voice_name": "en_US-lessac-medium"},
+        "vosk": {"model_name": "vosk-model-small-en-us-0.15"},
+        "asr": {},
+        "nmt": {},
+        "tts": {},
+    },
+    "default_settings": {
+        "input_language": "en",
+        "output_language": "en",
+    },
+    "service_dependencies": ["ollama", "bashini_models"],
+})
+class HearTheWorld(BaseApplication):
+    def start(self):
+        # Load any models or resources needed for the application
+        # Piper (TTS) and Vosk (ASR) are only used on the English path. In hi/hi
+        # mode Bhashini handles both, but loading them anyway costs ~500MB of
+        # onnxruntime/CUDA context - enough to push qwen3-vl off the GPU
+        # (17%/83% -> 56%/44% CPU/GPU) and drop it from 28 tok/s to 0.45 tok/s.
+        self.piper = None
+        self.vosk = None
+        if self.settings["input_language"] == "en" or self.settings["output_language"] == "en":
+            self.piper = Piper(voice_name=self.METADATA["models"]["piper"]["voice_name"],
+                               audio_device=self.board.alsa_playback_device)
+            self.vosk = Vosk(model_name=self.METADATA["models"]["vosk"]["model_name"])
+        else:
+            self.logger.info("Non-English mode: skipping Piper/Vosk load to free memory for the LLM")
+        self.ollama = Ollama(model_name=self.METADATA["models"]["ollama"]["model_name"])
+        self.asr = Asr()
+        self.nmt = Nmt()
+        self.tts = Tts()
+        self.board.subscribe_to_ui(self.ui_cb)
+        # Proceed with running the application in it's own thread
+        if not os.path.exists("/tmp/hear_the_world_en_logs"):
+            os.makedirs("/tmp/hear_the_world_en_logs")
+        super().start()
+
+    def ui_cb(self, msg):
+        if msg == 'Reset':
+            self.logger.info('Reset!')
+            check_output('systemctl restart pocketinfer', shell=True)
+        elif msg == 'Reboot':
+            self.logger.info('REbooting!')
+            # check_output('reboot', shell=True)
+        elif msg == 'Shutdown':
+            self.logger.info('Shutdown!')
+            # check_output('halt', shell=True)
+        elif msg.startswith('ASR'):
+            self.settings['input_language'] = msg[4:].lower()
+        elif msg.startswith('TTS'):
+            self.settings['output_language'] = msg[4:].lower()
+
+    def delayed_write_toptext(self, text, delay=1.0):
+        def delayed_write(text, delay):
+            time.sleep(delay)
+            self.board.top_text(text)
+        th = threading.Thread(target=delayed_write, args=(text, delay), daemon=True)
+        th.start()
+
+    def delayed_write_bottext(self, text, delay=1.0):
+        def delayed_write(text, delay):
+            time.sleep(delay)
+            self.board.bottom_text(text)
+        th = threading.Thread(target=delayed_write, args=(text, delay), daemon=True)
+        th.start()
+
+    def delayed_write_led_anim(self, val, delay=1.0):
+        def delayed_write(val, delay):
+            time.sleep(delay)
+            self.board.led_animation(val)
+        th = threading.Thread(target=delayed_write, args=(val, delay), daemon=True)
+        th.start()
+
+
+    def run(self):
+        self.logger.debug('Starting with settings: %s', self.settings)
+        while self.running:
+            try:
+                self.board.statusbar("Ready - Press Button")
+                # self.board.UI.force_refresh()
+                self.board.wait_for_trigger_button_down()
+                self.board.statusbar("Release Button")
+                self.board.top_text("")
+                self.board.bottom_text("")
+                audio_start = time.time()
+                # When user presses button, start recording audio.
+                # Camera/image capture is intentionally not used for this deployment -
+                # the app answers spoken questions directly rather than describing a
+                # photographed scene. Re-add camera_frame_jpg() + pass images=[img] to
+                # ollama.generate() below if visual grounding is needed again later.
+                if self.piper is not None:
+                    self.piper.stop_playback()  # If previous TTS is still playing, stop it
+                self.board.audio.start()
+                self.board.wait_for_trigger_button_up()
+                audio_stop = time.time()
+                # When user releases button, stop recording
+                self.board.audio.stop()
+                self.board.statusbar("Running: ASR")
+                self.board.led_animation(1)
+                asr_start = time.time()
+                # Perform ASR on the recorded audio, convert it to text
+                if self.settings["input_language"] != 'en':
+                    # Bhashini ASR expects 16kHz; the mic negotiates ~44.1kHz (audio.py).
+                    # Without convert_rate, get_wav_data() sends the raw captured rate
+                    # unresampled, which corrupts conjunct consonants on longer utterances.
+                    # (The English/Vosk path below already does this correctly.)
+                    wav_bytes = self.board.audio.to_audio_data().get_wav_data(convert_rate=16000)
+                    asr_result = self.asr.infer(wav_bytes, self.settings["input_language"])
+                else:
+                    asr_result = self.vosk.recognize(self.board.audio.to_audio_data())
+                raw_query = asr_result['text']
+                asr_stop = time.time()
+                self.logger.info("Detected query is '{}'".format(raw_query))
+                self.board.top_text(raw_query)
+                if not raw_query.strip():
+                    # ASR occasionally returns 200 with an empty transcription (e.g. a
+                    # very short/quiet press). NMT rejects empty text with a 400, which
+                    # would otherwise crash this loop iteration.
+                    self.logger.warning("ASR returned empty text, skipping this interaction")
+                    self.board.bottom_text("Sorry, I didn't catch that. Please try again.")
+                    continue
+                # Perform NMT on the recognized text, convert it to the target language
+                if self.settings['input_language'] != 'en':
+                    self.board.statusbar(f"Running: NMT {self.settings['input_language']} -> en")
+                    query = self.nmt.infer(raw_query, self.settings["input_language"], "EN")['translated_text']
+                    self.logger.info("Translated query is '{}'".format(query))
+                    self.delayed_write_toptext(query, delay=2.0)
+                else:
+                    query = raw_query
+                nmt_a_stop = time.time()
+                # Perform LLM inference on the recognized text (no image - text-only Q&A)
+                self.board.statusbar("Running: LLM")
+                llm_start = time.time()
+                # Keep the instruction direct even when query is garbled by upstream
+                # ASR/NMT errors - an open-ended/ambiguous prompt makes the model
+                # second-guess itself and burn its whole token budget on hidden
+                # reasoning without ever answering (see models/ollama.py's
+                # done_reason=="length" warning and MAX_ATTEMPTS retry).
+                llm_prompt = (
+                    f'Answer this question in EXACTLY one short sentence (max 20 words), '
+                    f'no repetition, no disclaimers, no alternate phrasings: {query}\n'
+                    'If the question is unclear, briefly say you did not understand instead.'
+                )
+                resp = self.ollama.generate(images=[], prompt=llm_prompt)
+                llm_end = time.time()
+                result = resp.response.strip().rstrip()
+                if result:
+                    # Safety net: on complex/sensitive topics the model sometimes
+                    # ignores the length instruction and rambles for the whole
+                    # token budget, producing minutes of TTS audio. Cut to the
+                    # first sentence so playback stays reasonable regardless.
+                    for end in ('. ', '.\n', '! ', '? '):
+                        idx = result.find(end)
+                        if idx != -1:
+                            result = result[:idx + 1]
+                            break
+                    else:
+                        if len(result) > 220:
+                            result = result[:220].rsplit(' ', 1)[0] + '.'
+                if not result:
+                    # The model occasionally burns its whole token budget on hidden
+                    # "thinking" despite /no_think and returns nothing (see
+                    # models/ollama.py's done_reason=="length" warning). Fall back
+                    # to a fixed message instead of crashing NMT with empty text.
+                    result = "Sorry, I could not understand. Please try again."
+                self.logger.info("Result is '{}'".format(result))
+                self.board.bottom_text(result)
+                # Perform NMT on the LLM response, convert it back to the original language
+                if self.settings['output_language'] != 'en':
+                    self.board.statusbar(f"Running: NMT en -> {self.settings['output_language']}")
+                    nmt_result = self.nmt.infer(result, "EN", self.settings["output_language"])['translated_text']
+                    self.logger.info("Translated result is '{}'".format(nmt_result))
+                else:
+                    nmt_result = result
+                nmt_b_stop = time.time()
+                self.delayed_write_toptext(raw_query)
+                self.delayed_write_bottext(nmt_result)
+                # Perform TTS on the LLM response, convert it to audio and play it back
+                self.board.statusbar("Running: Playback")
+                self.delayed_write_led_anim(0)
+                tts_result = self.tts.infer(nmt_result, self.settings["output_language"])
+                tts_result_bytes = base64.b64decode(tts_result['audio_base64'])
+                # self.piper.start_playback(result)
+                app_end = time.time()
+                wave_obj = wave.open(BytesIO(tts_result_bytes), 'rb')
+                with AudioPlayer(wave_obj.getframerate(), self.board.alsa_playback_device) as player:
+                    player.play(wave_obj.readframes(wave_obj.getnframes()))
+                self.logger.debug(f"Total Run time {app_end-audio_start}s, audio {audio_stop-audio_start}s, ASR {asr_stop-asr_start}, NMT A {nmt_a_stop-asr_stop}, LLM {llm_end-llm_start}, NMT B {nmt_b_stop-llm_end}, TTS {app_end-nmt_b_stop}")
+                # Log
+                log_id = int(audio_start*1000)
+                log_data = {
+                    'id': log_id,
+                    "query": asr_result,
+                    "response": resp.model_dump(),
+                    "timestamps": {
+                        "audio_start": audio_start,
+                        "audio_stop": audio_stop,
+                        "asr_start": asr_start,
+                        "asr_stop": asr_stop,
+                        "nmt_a_stop": nmt_a_stop,
+                        "llm_start": llm_start,
+                        "llm_end": llm_end,
+                        "nmt_b_stop": nmt_b_stop,
+                        "app_end": app_end
+                    }
+                }
+                with open("/tmp/hear_the_world_en_logs/log.jsonl", "a") as f:
+                    f.write(json.dumps(log_data)+"\n")
+                with open("/tmp/hear_the_world_en_logs/audio_{}.wav".format(log_id), "wb") as f:
+                    f.write(tts_result_bytes)
+                # Loop back around and prepare for the next interactionw
+            except KeyboardInterrupt:
+                self.logger.info("Exit")
+                self.board.clear_screen()
+                self.running = False
+            except Exception as e:
+                self.logger.exception("Error in main application loop: %s", e)
+                self.board.statusbar("Error: {}".format(str(e)))
+                time.sleep(1)
