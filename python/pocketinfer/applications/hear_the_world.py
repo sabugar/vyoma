@@ -593,9 +593,16 @@ class HearTheWorld(BaseApplication):
     # as "इसका उत्तर हैः", which is the first thing the ASHA hears and says
     # nothing. Stripped here rather than fought for in the prompt, because it
     # is cheap and certain.
+    # "Step 3 of the session includes assessing the child's general
+    # condition..." - the manual teaches the ASHA in sessions and steps, and
+    # the model repeats that scaffolding back as though the session were the
+    # answer. What follows it is the answer; the opening is dropped so the
+    # sentence begins with the assessment itself.
     _LEAD_IN = re.compile(
         r'^\s*(the\s+answer\s+is|answer|according to the (context|guidance|text)|'
-        r'based on the (context|text))\s*[:,]?\s*', re.I)
+        r'based on the (context|text)|'
+        r'step\s+\d+\s+of\s+the\s+session\s+(?:includes|is|involves)|'
+        r'the\s+session\s+(?:includes|involves))\s*[:,]?\s*', re.I)
 
     # Asked whether a breastfeeding woman should be given the pill, the model
     # opened "YES" on a line of its own and then said, correctly, that pills
@@ -638,6 +645,16 @@ class HearTheWorld(BaseApplication):
     _BARE_DRINK = re.compile(
         r'\b(drink|drinks|drinking)\b(?=\s+(?:poorly|badly|well|less|eagerly))',
         re.I)
+
+    # The same ambiguity with the adjective in front of the verb instead of
+    # the adverb behind it. The manual lists "poor drinking" among the signs
+    # of dehydration and the device read it out as खराब शराब पीना - drinking
+    # alcohol badly - which is the reading that was caught and fixed once
+    # already in the other word order. Giving the noun its object again is
+    # what fixes it: "poor drinking of fluids" comes back as तरल पदार्थ का
+    # खराब सेवन.
+    _ADJ_DRINK = re.compile(
+        r'\b(poor|bad|eager|weak)\s+drinking\b(?!\s+of\b)', re.I)
 
     # Names of things an ASHA holds in her hand, which the translator renders
     # as the ordinary words they are made of. Measured by translating the
@@ -687,6 +704,7 @@ class HearTheWorld(BaseApplication):
     @classmethod
     def _disambiguate_for_translation(cls, text):
         text = cls._BARE_DRINK.sub(lambda m: m.group(1) + ' fluids', text or '')
+        text = cls._ADJ_DRINK.sub(lambda m: m.group(1) + ' drinking of fluids', text)
         for pattern, replacement in cls._EN_FOR_TRANSLATION:
             text = pattern.sub(replacement, text)
         return text
@@ -718,7 +736,15 @@ class HearTheWorld(BaseApplication):
     @classmethod
     def _strip_lead_in(cls, text):
         cleaned = cls._META_CLAUSE.sub('', cls._BARE_VERDICT.sub('', text or ''))
-        cleaned = cls._LEAD_IN.sub('', cleaned, count=1).lstrip()
+        # The model stacks them. "The answer is: Step 3 of the session
+        # includes assessing the child's general condition..." carries two,
+        # and removing one left the other to be read out, so the sheet still
+        # said सत्र के चरण 3. Each pass must still leave something to say.
+        while True:
+            stripped = cls._LEAD_IN.sub('', cleaned, count=1).lstrip()
+            if stripped == cleaned or len(stripped) <= 20:
+                break
+            cleaned = stripped
         # Only accept the strip if something is actually left to say.
         if len(cleaned) <= 20:
             return text or ''
