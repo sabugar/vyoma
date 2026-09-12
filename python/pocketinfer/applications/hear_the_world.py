@@ -231,6 +231,128 @@ class HearTheWorld(BaseApplication):
     _DOUBLED_CHAR = re.compile(r'([\u0915-\u0939\u093e-\u094c\u0902\u0903])\1')
     _STACKED_MATRA = re.compile(r'([\u093e-\u094c])[\u093e-\u094c]+')
 
+    # Measured weakness of this recogniser, not of the speaker. Putting one
+    # question per topic through TTS and back through ASR, 23 of 30 survived
+    # intact; every one of the seven that did not failed the same way - the
+    # model does not separate consonants that are articulated in the same
+    # place:
+    #
+    #     दवा -> दबा ("press the baby")      पसली -> फसली ("crop")
+    #     सेप्सिस -> सेब्सिस                  नाभि -> ना भी ("nose")
+    #     पीप -> पी पा ("drinking")          कॉपर टी -> प्रॉपर्टी ("property")
+    #
+    # So the terms below are matched phonetically rather than literally: each
+    # consonant is folded to its place of articulation before comparing, which
+    # is exactly the distinction the recogniser is losing. The list holds only
+    # words this manual actually uses, and a term is replaced solely when the
+    # transcript word is not already Hindi the list knows.
+    _ASR_TERMS = (
+        'नाभि', 'पीप', 'मवाद', 'दवा', 'पसली', 'सेप्सिस', 'खसरा', 'खसरे',
+        'टीका', 'टीके', 'दस्त', 'बुखार', 'वजन', 'कुपोषित', 'मलेरिया',
+        'गर्भपात', 'नसबंदी', 'दौरे', 'प्रसव', 'रक्तस्राव', 'पीलिया',
+        'स्तनपान', 'नवजात', 'निमोनिया', 'टीबी', 'ऐंठन', 'सुस्ती',
+        # A second pass of the probe turned up these: कॉपर came back as
+        # "कोपरती", गोली as "बोली", मरीज as "वरीज".
+        'कॉपर', 'गोली', 'मरीज', 'गर्दन', 'निर्जलीकरण',
+    )
+
+    # Only the confusions actually observed, and only between sounds made in
+    # the same place. Folding more than this (velars together, or र with ल)
+    # made unrelated words collide: दूध became दस्त, "milk" became "diarrhoea",
+    # and खतरे became खसरे, "danger" became "measles". A correction that can do
+    # that is worse than the fault it fixes.
+    _CONFUSABLE = (
+        set('पफबभवम'),     # दवा/दबा, पसली/फसली, सेप्सिस/सेब्सिस, मरीज/वरीज
+        set('टठतथ'),        # टीका/तीका
+        set('डढदध'),
+        set('सशष'),
+        # Short and long forms of the same vowel. नाभि comes back as नाभी even
+        # when the consonants survive, and the two spellings are the same word.
+        set('िी'),
+        set('ुू'),
+    )
+
+    @classmethod
+    def _sub_cost(cls, a, b):
+        if a == b:
+            return 0.0
+        for group in cls._CONFUSABLE:
+            if a in group and b in group:
+                return 0.4
+        return 1.0
+
+    @classmethod
+    def _weighted_distance(cls, a, b):
+        """Edit distance where a confusable substitution barely counts."""
+        if abs(len(a) - len(b)) > 1:
+            return 99.0
+        prev = [float(j) for j in range(len(b) + 1)]
+        for i, ca in enumerate(a, 1):
+            cur = [float(i)]
+            for j, cb in enumerate(b, 1):
+                cur.append(min(prev[j] + 1.0, cur[j - 1] + 1.0,
+                               prev[j - 1] + cls._sub_cost(ca, cb)))
+            prev = cur
+        return prev[-1]
+
+    # The recogniser writes the same sound two ways - सफ़ेद for सफेद, जाँच for
+    # जांच, सांस for साँस. These are spellings, not mishearings, but they break
+    # a literal comparison, so they are levelled before anything is matched.
+    _SPELLING = str.maketrans({'\u093c': None, '\u0901': '\u0902'})
+
+    @classmethod
+    def _level_spelling(cls, text):
+        return (text or '').translate(cls._SPELLING)
+
+    @classmethod
+    def _strip_marks(cls, word):
+        return re.sub(r'[\u093c\u094d]', '', word)
+
+    @classmethod
+    def _match_term(cls, token, limit=0.8):
+        """The clinical term this token is a mangling of, or None."""
+        tok = cls._strip_marks(token)
+        if len(tok) < 3:
+            return None
+        best, best_d = None, 99.0
+        for term in cls._ASR_TERMS:
+            cand = cls._strip_marks(term)
+            # The opening sound anchors the match; without it, short words
+            # wander into each other.
+            if cls._sub_cost(tok[0], cand[0]) > 0.4:
+                continue
+            d = cls._weighted_distance(tok, cand)
+            if d < best_d:
+                best, best_d = term, d
+        # At most two confusable slips, and nothing else.
+        return best if best_d <= limit else None
+
+    @classmethod
+    def _correct_terms(cls, text):
+        """Repair clinical words the recogniser mangled, leaving the rest alone."""
+        known = set(cls._ASR_TERMS)
+        tokens = (text or '').split()
+        out, i = [], 0
+        while i < len(tokens):
+            if tokens[i] in known:
+                out.append(tokens[i]); i += 1; continue
+            # A word split in two - नाभि heard as "ना भी" - but only when
+            # neither half is a word the list already knows.
+            if (i + 1 < len(tokens) and tokens[i + 1] not in known
+                    and len(cls._strip_marks(tokens[i])) <= 4):
+                # A rejoined pair may carry one extra letter - पीप comes back
+                # as "पी पा" - so it gets a little more room than a single
+                # token, which it can afford: both halves being unknown words
+                # and the first being very short is already a strong filter.
+                # Checked against innocent joins (केबाद, कीकमी, कोदूध, जन्मके)
+                # and none of them match at any threshold.
+                hit = cls._match_term(tokens[i] + tokens[i + 1], limit=1.0)
+                if hit:
+                    out.append(hit); i += 2; continue
+            out.append(cls._match_term(tokens[i]) or tokens[i])
+            i += 1
+        return ' '.join(out)
+
     @classmethod
     def _normalise_transcript(cls, text):
         text = text or ''
@@ -238,7 +360,8 @@ class HearTheWorld(BaseApplication):
         while previous != text:
             previous = text
             text = cls._DOUBLED_CHAR.sub(r'\1', text)
-        return cls._STACKED_MATRA.sub(r'\1', text)
+        return cls._correct_terms(
+            cls._level_spelling(cls._STACKED_MATRA.sub(r'\1', text)))
 
     @classmethod
     def _repair_extraction(cls, text):
