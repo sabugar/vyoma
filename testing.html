@@ -1,0 +1,438 @@
+<meta charset="utf-8">
+<title>Whole-Manual Test Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{--ground:#FFFFFF;--panel:#F1F5F9;--ink:#14203A;--ink-soft:#52607A;--rule:#C6CEDB;
+        --accent:#0E6E5C;--accent-b:#E4F0EC;--signal:#A85410;
+        --sans:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif,"Lohit Devanagari";
+        --cond:"IBM Plex Sans Condensed","IBM Plex Sans",ui-sans-serif,sans-serif,"Lohit Devanagari";
+        --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace,"Lohit Devanagari";
+        --deva:"Lohit Devanagari","Noto Sans Devanagari",serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:8.6pt;line-height:1.4}
+  .doc{max-width:182mm;margin:0 auto;padding:9mm 0}
+  .doc>*+*{margin-top:4mm}
+  .masthead{display:grid;grid-template-columns:1fr auto;align-items:end;gap:8mm;
+            border-bottom:2px solid var(--ink);padding-bottom:2mm}
+  h1{font-family:var(--cond);font-size:19pt;font-weight:700;letter-spacing:-.01em;margin:0}
+  .sub{font-family:var(--cond);font-size:9.5pt;font-weight:500;color:var(--accent);margin:1mm 0 0}
+  .spec{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);text-align:right;line-height:1.5;white-space:nowrap}
+  .spec b{color:var(--ink);font-weight:600}
+  .lede{font-size:9pt;color:var(--ink-soft)}
+  .lede b{color:var(--ink)}
+  .q{border-left:2px solid var(--accent);padding-left:3.4mm;page-break-inside:avoid}
+  .q+.q{margin-top:4.6mm}
+  .qhead{display:flex;align-items:baseline;gap:2.6mm}
+  .num{font-family:var(--mono);font-size:8pt;font-weight:600;color:var(--accent)}
+  .title{font-family:var(--cond);font-size:10.5pt;font-weight:600}
+  .ask{font-family:var(--deva);font-size:11pt;line-height:1.5;margin:1.6mm 0 0;
+       background:var(--accent-b);padding:2mm 2.6mm;border-radius:1mm}
+  .why{font-size:8.2pt;color:var(--ink-soft);margin:1.8mm 0 0}
+  .why b{color:var(--signal);font-family:var(--cond);font-weight:600;text-transform:uppercase;
+         font-size:6.9pt;letter-spacing:.06em;margin-right:1.6mm}
+  .ans{background:var(--panel);padding:2.2mm 2.6mm;margin-top:1.8mm}
+  .ans .lbl{font-family:var(--cond);font-size:6.9pt;font-weight:600;text-transform:uppercase;
+            letter-spacing:.06em;color:var(--ink-soft)}
+  .ans .hi{font-family:var(--deva);font-size:9.4pt;line-height:1.5;margin:.9mm 0 0}
+  .ans .en{font-size:7.9pt;color:var(--ink-soft);margin:1.2mm 0 0}
+  .meta{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);margin-top:1.4mm}
+  .note{background:var(--accent-b);border-left:3px solid var(--accent);padding:2.6mm 3mm}
+  .note .hd{font-family:var(--cond);font-size:9.6pt;font-weight:700;color:var(--accent);margin:0 0 1.2mm}
+  .note p{margin:0 0 1.2mm;font-size:8.2pt}
+  .note p:last-child{margin:0}
+  code{font-family:var(--mono);font-size:.92em;color:var(--accent)}
+
+  /* --- test-sheet additions ------------------------------------------- */
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:2mm;margin-top:3mm}
+  .stat{background:var(--panel);padding:2mm 2.4mm;border-top:2px solid var(--accent)}
+  .stat .n{font-family:var(--cond);font-size:15pt;font-weight:700;line-height:1;color:var(--accent)}
+  .stat .k{font-family:var(--cond);font-size:6.8pt;font-weight:600;text-transform:uppercase;
+           letter-spacing:.05em;color:var(--ink-soft);margin-top:1mm;display:block;line-height:1.25}
+  h2{font-family:var(--cond);font-size:10.5pt;font-weight:700;margin:5.5mm 0 0;
+     padding-bottom:1mm;border-bottom:1px solid var(--rule);page-break-after:avoid}
+  h2 span{font-family:var(--mono);font-size:7pt;font-weight:400;color:var(--ink-soft);
+          float:right;padding-top:1.2mm}
+  .t{page-break-inside:avoid;margin-top:2.6mm;border-left:2px solid var(--accent);padding-left:3mm}
+  .t.miss{border-left-color:var(--signal)}
+  .t .row{display:flex;align-items:baseline;gap:2.2mm}
+  .t .n{font-family:var(--mono);font-size:7.4pt;font-weight:600;color:var(--accent);min-width:7mm}
+  .t.miss .n{color:var(--signal)}
+  .t .qh{font-family:var(--deva);font-size:10.4pt;line-height:1.45;flex:1}
+  .t .pg{font-family:var(--mono);font-size:6.8pt;color:var(--ink-soft);white-space:nowrap}
+  .t .ah{font-family:var(--deva);font-size:8.8pt;line-height:1.45;color:var(--ink-soft);
+         margin:1.1mm 0 0 9.2mm;padding-left:2.4mm;border-left:1px solid var(--rule)}
+  .t .ah b{color:var(--signal);font-family:var(--cond);font-weight:600}
+  .flag{font-family:var(--cond);font-size:6.8pt;font-weight:600;text-transform:uppercase;
+        letter-spacing:.05em;color:var(--signal)}
+  .legend{font-family:var(--mono);font-size:7pt;color:var(--ink-soft);margin-top:2mm}
+  @page{size:A4;margin:11mm 14mm 9mm;
+    @bottom-left{content:"ASHA Sahayak \00b7 whole-manual test sheet";font-family:var(--mono);font-size:6.6pt;color:#52607A}
+    @bottom-right{content:"Page " counter(page) " of " counter(pages);font-family:var(--mono);font-size:6.6pt;color:#52607A}}
+  @media print{.doc{max-width:none;padding:0;margin:0}}
+</style>
+
+<div class="doc">
+  <header class="masthead">
+    <div><h1>Whole-Manual Test Sheet</h1>
+    <p class="sub">ASHA Sahayak &mdash; one question from every page, 20 to 84</p></div>
+    <div class="spec"><b>Every Hindi line below came from the device</b><br>
+    Jetson Orin Nano 8&nbsp;GB &middot; MAXN_SUPER &middot; 12 Sep 2026<br>
+    <b>no network at any point</b></div>
+  </header>
+  <p class="lede">
+    The jury has the manual and may ask anything in it, so this sheet does not
+    pick favourable questions: it takes <b>one question from every page</b> of
+    ASHA Module 7 from page 20 onward, whatever that page happens to be about.
+    Ask them in any order. Under each question is the answer the device gave
+    when this sheet was built, so a wrong answer on the day is visible
+    immediately rather than having to be judged from memory.
+  </p>
+  <div class="stats">
+    <div class="stat"><span class="n">50/52</span>
+      <span class="k">answered from the manual</span></div>
+    <div class="stat"><span class="n">39</span>
+      <span class="k">used the page the question came from</span></div>
+    <div class="stat"><span class="n">99%</span>
+      <span class="k">spoken questions heard correctly</span></div>
+    <div class="stat"><span class="n">12/12</span>
+      <span class="k">off-manual questions refused</span></div>
+    <div class="stat"><span class="n">4.1s</span>
+      <span class="k">median time to answer</span></div>
+  </div>
+  <p class="legend">Seven of the fifty-two are marked in orange: two the device refuses, two it
+  answers wrongly, and three it answers loosely. What is printed under those is the reason and
+  what the manual actually says, not the device&rsquo;s answer. The other forty-five are printed
+  exactly as the device said them.</p>
+  <h2>Part A — Child health, fever, diarrhoea, breathing<span>pages 20&ndash;33</span></h2>
+  <div class="t">
+    <div class="row"><span class="n">01</span>
+      <span class="qh">आशा को टीकाकरण के लिए कौन सी सूची रखनी होती है</span>
+      <span class="pg">from p20 &rarr; p20 + p41 + p67 &middot; 4.1s</span></div>
+    <p class="ah">आशा कार्यकर्ता को गर्भवती महिलाओं, नवजात शिशुओं और दो साल तक के बच्चों की एक सूची रखनी होती है जो अलग-अलग टीकों के लिए पात्र हैं।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">02</span>
+      <span class="qh">टीका लगवाने के लिए आशा माता की क्या मदद करे</span>
+      <span class="pg">from p21 &rarr; p67 + p11 + p21 &middot; 4.7s</span></div>
+    <p class="ah">आशा माँ को टीकाकरण की तारीख याद दिलानी चाहिए, वी. एच. एन. डी. को सतर्क किया जाना चाहिए और नियत तिथि पर वी. एच. एन. डी. तक ले जाया जाना चाहिए। सुनिश्चित करें कि जन्म के तुरंत बाद बी. सी. जी. और मौखिक पोलियो की पहली खुराक दी जाए।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">03</span>
+      <span class="qh">बीमार बच्चे में खतरे के लक्षण कौन कौन से हैं</span>
+      <span class="pg">from p22 &rarr; p22 + p23 + p32 &middot; 4.6s</span></div>
+    <p class="ah">बीमार बच्चे में खतरे के संकेतों में पीने या स्तनपान न करना, सब कुछ उल्टी करना, ऐंठन होना, या सुस्ती या बेहोशी होना शामिल है। इनमें से किसी भी संकेत की उपस्थिति एक गंभीर बीमारी का संकेत देती है जिसे तत्काल रेफरल की आवश्यकता होती है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">04</span>
+      <span class="qh">कैसे पता करें कि बच्चा पानी पी सकता है या नहीं</span>
+      <span class="pg">from p23 &rarr; p27 + p22 + p67 &middot; 4.5s</span></div>
+    <p class="ah">जाँच करें कि जब कोई पेय दिया जाता है तो बच्चा चूसा या निगल सकता है या नहीं। यदि बच्चा पीने में सक्षम नहीं है या तरल पदार्थ खराब तरीके से पी रहा है, तो बच्चे में &quot;उत्सुकता से तरल पदार्थ पीने, प्यासे&quot; का संकेत नहीं है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">05</span>
+      <span class="qh">बुखार वाले बच्चे की जांच आशा कैसे करे</span>
+      <span class="pg">from p24 &rarr; p24 + p22 + p64 &middot; 4.7s</span></div>
+    <p class="ah">आशा कार्यकर्ताओं को माँ से पूछना चाहिए कि क्या बच्चे को बुखार है, थर्मामीटर से या बच्चे के तापमान की जांच करके, और यदि बुखार मौजूद है, तो सामान्य खतरे के संकेतों का आकलन करना चाहिए और यदि आवश्यक हो तो संदर्भ लेना चाहिए।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">06</span>
+      <span class="qh">बुखार के साथ गर्दन अकड़ी हो तो क्या करना चाहिए</span>
+      <span class="pg">from p25 &rarr; p24 + p25 + p54 &middot; 3.7s</span></div>
+    <p class="ah">यदि गर्दन में बुखार है, तो मस्तिष्क शोथ की जांच करें और तुरंत अस्पताल में भर्ती हों। मलेरिया-रोधी और पेरासिटामोल की पहली खुराक दें, और बारीकी से निगरानी करें।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">07</span>
+      <span class="qh">दस्त वाले बच्चे में पानी की कमी कैसे पहचानें</span>
+      <span class="pg">from p26 &rarr; p26 + p30 + p27 &middot; 5.1s</span></div>
+    <p class="ah">बच्चे की सामान्य स्थिति का आकलन करना, सुस्ती या बेहोशी, डूबती हुई आंखें और त्वचा की एक चुटकी की जांच करना। यदि बच्चे में निर्जलीकरण के लक्षण दिखाई देते हैं, तो आशा को उन्हें अस्पताल में भेजना चाहिए या ओ. आर. एस. के साथ उपचार प्रदान करना चाहिए।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">08</span>
+      <span class="qh">पानी की कमी के लक्षण क्या होते हैं</span>
+      <span class="pg">from p27 &rarr; p27 + p30 + p26 &middot; 4.1s</span></div>
+    <p class="ah">निर्जलीकरण के लक्षणों में सुस्ती, बेहोशी, आंखें डूबना, तरल पदार्थ का खराब सेवन, त्वचा की चुटकी जो बहुत धीरे-धीरे वापस चली जाती है, और मूत्र उत्पादन की कमी शामिल है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">09</span>
+      <span class="qh">ओ आर एस का घोल कितने पानी में बनाना चाहिए</span>
+      <span class="pg">from p28 &rarr; p29 + p28 + p33 &middot; 2.9s</span></div>
+    <p class="ah">1 लीटर पीने का पानी।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">10</span>
+      <span class="qh">दस्त है पर पानी की कमी नहीं है तो क्या दें</span>
+      <span class="pg">from p29 &rarr; p30 + p27 + p29 &middot; 6.3s</span></div>
+    <p class="ah">यदि आपको दस्त है लेकिन निर्जलित नहीं हैं, तो ओ. आर. एस. घोल और घर पर उपलब्ध तरल पदार्थ दें। छह महीने से कम उम्र के शिशुओं के लिए, ओआरएस और साफ पानी का उपयोग करें; बड़े बच्चों के लिए, ओआरएस और घर पर उपलब्ध तरल पदार्थों का उपयोग करें। प्रत्येक ढीले शौच के बाद अनुशंसित मात्रा में ओ. आर. एस. दें (शिशुओं के लिए 5 चम्मच, 2-24 महीने की उम्र के बच्चों के लिए आधा कप, बड़े बच्चों के लिए एक कप तक)।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">11</span>
+      <span class="qh">कुछ पानी की कमी हो तो चार घंटे में कितना ओ आर एस दें</span>
+      <span class="pg">from p30 &rarr; p30 + p29 + p27 &middot; 6.0s</span></div>
+    <p class="ah">चार घंटे में ओ. आर. एस. की मात्रा बच्चे की उम्र और वजन पर निर्भर करती है। 4 महीने से कम उम्र के शिशुओं के लिए, 200 मिली (2 कप) की सिफारिश की जाती है। आई. डी. 1. से अधिक महीनों के बच्चों के लिए, 300 मिली (3 कप) की सिफारिश की जाती है। 12-19 किलोग्राम के बच्चों के लिए, 500 मिली (5 कप) की सिफारिश की जाती है। सटीक राशि के आधार पर निर्धारित की जानी चाहिए</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">12</span>
+      <span class="qh">साँस की बीमारी में आशा क्या दवा दे सकती है</span>
+      <span class="pg">from p31 &rarr; p10 + p32 + p33 &middot; 3.1s</span></div>
+    <p class="ah">इसका उत्तर है कोट्रिमोक्साज़ोल।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">13</span>
+      <span class="qh">पसली चलने का क्या मतलब होता है</span>
+      <span class="pg">from p32 &rarr; p31 + p32 + p43 &middot; 3.6s</span></div>
+    <p class="ah">छाती को अंदर खींचना छाती के अंदर आने का संकेत देता है, जो एक बच्चे में निमोनिया का संकेत है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">14</span>
+      <span class="qh">बच्चे की नाक बंद हो तो घर पर क्या करें</span>
+      <span class="pg">from p33 &rarr; p33 + p23 + p58 &middot; 3.9s</span></div>
+    <p class="ah">नाक की बूंदों (उबला हुआ और ठंडा हुआ गिलास पानी, चुटकी भर नमक मिलाकर) में डालकर और नरम सूती बस्ते से नाक को साफ करें।</p>
+  </div>
+  <h2>Part B — Abortion, family planning, infections<span>pages 37&ndash;48</span></h2>
+  <div class="t">
+    <div class="row"><span class="n">15</span>
+      <span class="qh">गर्भपात के बारे में आशा महिला को क्या सलाह दे</span>
+      <span class="pg">from p37 &rarr; p38 + p37 + p41 &middot; 4.4s</span></div>
+    <p class="ah">महिला को सलाह दी जानी चाहिए कि वह केवल एक प्रशिक्षित, कानूनी प्रदाता से सुरक्षित गर्भपात कराएं, कम से कम पाँच दिनों तक यौन संबंध बनाने या योनि में वस्तु डालने से बचें, बहुत सारा तरल पदार्थ पीएं और गर्भपात के तुरंत बाद गर्भनिरोधक का उपयोग करें।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">16</span>
+      <span class="qh">भारत में गर्भपात कौन कर सकता है</span>
+      <span class="pg">from p38 &rarr; p38 + p37 + p39 &middot; 2.3s</span></div>
+    <p class="ah">भारत में केवल एक डॉक्टर गर्भपात कर सकता है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">17</span>
+      <span class="qh">गर्भपात के बाद खतरे के लक्षण क्या हैं</span>
+      <span class="pg">from p39 &rarr; p38 + p37 + p65 &middot; 3.6s</span></div>
+    <p class="ah">गर्भपात के बाद जोखिम के लक्षणों में दो सप्ताह तक योनि से रक्तस्राव, प्रक्रिया के तुरंत बाद गर्भनिरोधक उपयोग की आवश्यकता और गर्भनिरोधक के बिना संभोग फिर से शुरू होने पर गर्भावस्था का खतरा शामिल है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">18</span>
+      <span class="qh">परिवार नियोजन में आशा की क्या भूमिका है</span>
+      <span class="pg">from p40 &rarr; p45 + p40 + p9 &middot; 3.9s</span></div>
+    <p class="ah">परिवार नियोजन में आशा कार्यकर्ताओं की भूमिका में गर्भनिरोधक तरीकों पर परिवारों को परामर्श देना, अनुवर्ती कार्रवाई के लिए योग्य जोड़ों की पहचान करना, स्वास्थ्य रजिस्टरों का प्रबंधन करना और सेवाओं तक पहुंच के बारे में जानकारी प्रदान करना शामिल है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">19</span>
+      <span class="qh">नए शादीशुदा जोड़े को कौन सा साधन बताएं</span>
+      <span class="pg">from p41 &rarr; p41 + p40 + p42 &middot; 4.4s</span></div>
+    <p class="ah">नवविवाहित जोड़े को सलाह देने के लिए, आपको उन्हें उनकी स्थिति के लिए उपयुक्त गर्भनिरोधक तरीकों, जैसे कंडोम या गोलियों के बारे में सलाह देनी चाहिए, और दुष्प्रभावों और आगे की सहायता कब लेनी है, इस बारे में जानकारी देनी चाहिए।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">20</span>
+      <span class="qh">स्तनपान कराने वाली महिला को गोली देनी चाहिए या नहीं</span>
+      <span class="pg">from p42 &rarr; p42 + p41 + p13 &middot; 3.3s</span></div>
+    <p class="ah">स्तनपान कराने वाली महिलाओं के लिए गोलियों की सलाह नहीं दी जानी चाहिए।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">21</span>
+      <span class="qh">किन महिलाओं को छल्ला नहीं लगवाना चाहिए</span>
+      <span class="pg">from p43 &rarr; p43 + p41 + p42 &middot; 5.0s</span></div>
+    <p class="ah">आई. यू. सी. डी. किसे नहीं होना चाहिएः जो महिलाएं कभी गर्भवती नहीं हुई हैं, एनीमिया, उन्हें एस. टी. आई. का खतरा है, उनकी नलिकाओं या गर्भाशय में संक्रमण हुआ है, उनकी नलिकाओं में गर्भावस्था हुई है, या मासिक रक्तस्राव के दौरान बहुत अधिक रक्तस्राव और दर्द होता है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">22</span>
+      <span class="qh">नसबंदी के बारे में महिला को क्या बताना चाहिए</span>
+      <span class="pg">from p44 &rarr; p44 + p41 + p40 &middot; 4.3s</span></div>
+    <p class="ah">महिला को यह उल्लेख करना चाहिए कि नसबंदी एक स्थायी विधि है, कि यह केवल उन लोगों के लिए उपयुक्त है जो अधिक बच्चे नहीं चाहते हैं, और यह कि यह पीएचसी या सीएचसी केंद्रों में विशिष्ट समय पर किया जाता है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">23</span>
+      <span class="qh">गाँव के स्तर पर आशा कौन से साधन दे सकती है</span>
+      <span class="pg">from p45 &rarr; p45 + p63 + p12 &middot; 4.2s</span></div>
+    <p class="ah">आशा कार्यकर्ता परिवार परामर्श के लिए आई. ई. सी., जांच के प्रावधान के लिए जांच, सहायता के लिए रेफरल और ग्राम स्तर पर नसबंदी और आई. यू. डी. पर प्रशिक्षण जैसे साधन प्रदान करती हैं।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">24</span>
+      <span class="qh">यौन संक्रमण से बचाव के लिए महिला को क्या सलाह दें</span>
+      <span class="pg">from p46 &rarr; p42 + p48 + p43 &middot; 4.1s</span></div>
+    <p class="ah">महिला को कंडोम का उपयोग करने की सलाह दें, क्योंकि वे एसटीआई और एचआईवी को रोकने में प्रभावी हैं, और नियमित यौन स्वास्थ्य जांच को प्रोत्साहित करते हैं।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">25</span>
+      <span class="qh">यौन रोग से क्या नुकसान हो सकता है</span>
+      <span class="pg">from p47 &rarr; p46 + p48 + p61 &middot; 4.6s</span></div>
+    <p class="ah">यौन संचारित संक्रमण (एस. टी. आई.) के कारण होने वाले नुकसान में श्रोणि सूजन रोग, बांझपन और अन्य संक्रमणों के प्रति संवेदनशीलता में वृद्धि जैसी जटिलताओं का खतरा शामिल है। यह पुरानी स्थितियों और गंभीर मामलों में मृत्यु का कारण भी बन सकता है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">26</span>
+      <span class="qh">यौन संक्रमण में आराम के लिए महिला क्या करे</span>
+      <span class="pg">from p48 &rarr; p48 + p43 + p42 &middot; 4.9s</span></div>
+    <p class="ah">महिला को 15 मिनट तक साफ, गर्म पानी के पैन में बैठना चाहिए, उसमें निम्बू का रस डालना चाहिए और तब तक यौन संबंध बनाने से बचना चाहिए जब तक कि वह बेहतर महसूस नहीं करती, सूती कपड़े पहनना चाहिए, रोजाना अंडरगारमेंट्स धोना चाहिए और पेशाब करने के बाद जननांगों पर साफ पानी डालना चाहिए।</p>
+  </div>
+  <h2>Part C — The newborn<span>pages 51&ndash;58</span></h2>
+  <div class="t">
+    <div class="row"><span class="n">27</span>
+      <span class="qh">किस नवजात को अधिक जोखिम वाला माना जाता है</span>
+      <span class="pg">from p51 &rarr; p51 + p56 + p52 &middot; 4.2s</span></div>
+    <p class="ah">नवजात शिशु को अधिक जोखिम वाला माना जाता है, वह है जो समय से पहले पैदा होता है (गर्भावस्था के 37 सप्ताह से पहले प्रसव) या कम जन्म वजन (2000 ग्राम से कम) के साथ, या दोनों।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">28</span>
+      <span class="qh">कम वजन वाले बच्चे को कब तक नहीं नहलाना चाहिए</span>
+      <span class="pg">from p52 &rarr; p52 + p51 + p53 &middot; 3.3s</span></div>
+    <p class="ah">बच्चे को तब तक नहलाया नहीं जाना चाहिए जब तक कि उसका वजन 2000 ग्राम न हो जाए।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">29</span>
+      <span class="qh">कम वजन वाले नवजात को माँ का दूध क्यों जरूरी है</span>
+      <span class="pg">from p53 &rarr; p53 + p51 + p10 &middot; 5.7s</span></div>
+    <p class="ah">कम वजन वाले नवजात शिशु के लिए मां का दूध महत्वपूर्ण है क्योंकि यह अधिक प्रोटीन सहित सही पोषक तत्व प्रदान करता है, जो विकास और विकास के लिए आवश्यक है। यह आसानी से पचने योग्य है और इसमें संक्रमण से लड़ने के कारक होते हैं, जो बच्चे को हाइपोथर्मिया और बीमारी से बचाने में मदद करते हैं। स्तनपान भी बच्चे को माँ के करीब रखता है, जिससे गर्मजोशी और समर्थन मिलता है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">30</span>
+      <span class="qh">जन्म के समय दम घुटने के क्या लक्षण हैं</span>
+      <span class="pg">from p54 &rarr; p54 + p55 + p5 &middot; 3.3s</span></div>
+    <p class="ah">जन्म के समय दम घुटने के लक्षणों में कोई रो नहीं, कमजोर रो, सांस नहीं लेना और सांस लेने में कमजोरी शामिल हैं।</p>
+  </div>
+  <div class="t miss">
+    <div class="row"><span class="n">31</span>
+      <span class="qh">प्रसव में किन बातों से दम घुटने का खतरा रहता है</span>
+      <span class="pg">from p55 &rarr; refused</span></div>
+    <p class="ah"><b>Refuses. The page lists what raises the risk of asphyxia during labour; the question asks it in words closer to the page after it, and the device would rather say nothing than answer from the wrong page.</b></p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">32</span>
+      <span class="qh">नवजात को सेप्सिस किन कारणों से होता है</span>
+      <span class="pg">from p56 &rarr; p56 + p57 + p5 &middot; 4.0s</span></div>
+    <p class="ah">नवजात शिशुओं में सेप्सिस के कारणों में मातृ संक्रमण, अशुद्ध प्रसव प्रथाएं, संक्रमित नाभि, समय से पहले जन्म, खराब भोजन, सर्दी के संपर्क में आना और संक्रमित व्यक्तियों के संपर्क में आना शामिल हैं।</p>
+  </div>
+  <div class="t miss">
+    <div class="row"><span class="n">33</span>
+      <span class="qh">नवजात को संक्रमण से कैसे बचाएं</span>
+      <span class="pg">from p57 &rarr; p53 + p56 + p46 &middot; 4.1s</span></div>
+    <p class="ah"><b>Incomplete. It gives breastfeeding, which is on the page, but page 57 leads with hygiene - frequent handwashing, clean instruments at delivery, clean clothes - and the device does not say so.</b></p>
+  </div>
+  <div class="t miss">
+    <div class="row"><span class="n">34</span>
+      <span class="qh">अस्पताल ले जाते समय नवजात को कैसे संभालें</span>
+      <span class="pg">from p58 &rarr; p57 + p27 + p17 &middot; 6.4s</span></div>
+    <p class="ah"><b>Wrong. It answers with the antibiotic dose from the page before. Page 58 says to keep the baby warm by skin-to-skin contact with the mother and to keep breastfeeding during transport, giving 20-50 ml of expressed milk if the baby cannot feed.</b></p>
+  </div>
+  <h2>Part D — Malaria and TB<span>pages 61&ndash;68</span></h2>
+  <div class="t">
+    <div class="row"><span class="n">35</span>
+      <span class="qh">मलेरिया से बचाव के लिए क्या करना चाहिए</span>
+      <span class="pg">from p61 &rarr; p62 + p63 + p61 &middot; 3.5s</span></div>
+    <p class="ah">मलेरिया को रोकने के लिए, कीटनाशक-उपचारित बिस्तर जाल का उपयोग करें, रुके हुए पानी से बचें और मच्छर प्रजनन स्थलों को समाप्त करें।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">36</span>
+      <span class="qh">मलेरिया का शक कब करना चाहिए</span>
+      <span class="pg">from p62 &rarr; p62 + p63 + p61 &middot; 3.4s</span></div>
+    <p class="ah">मलेरिया का संदेह कब करना हैः मलेरिया प्रभावित क्षेत्र में रहने वाले किसी भी व्यक्ति को मलेरिया होने का संदेह होना चाहिए। यदि बुखार ठंडक और कठोरता और सिरदर्द के साथ है, तो इसकी संभावना और भी अधिक है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">37</span>
+      <span class="qh">मच्छरों को बढ़ने से कैसे रोकें</span>
+      <span class="pg">from p63 &rarr; p63 + p62 + p84 &middot; 4.1s</span></div>
+    <p class="ah">कीटनाशक का छिड़काव करें जहाँ मच्छर काटते हैं, प्रजनन गड्ढों को सुखा देते हैं, रुके हुए पानी पर तेल डालते हैं, गैंबुसिया मछली की खेती करते हैं, और साप्ताहिक रूप से नालियों और नहरों को साफ करते हैं।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">38</span>
+      <span class="qh">बुखार वाले मरीज की जांच कब करनी चाहिए</span>
+      <span class="pg">from p64 &rarr; p64 + p62 + p61 &middot; 4.0s</span></div>
+    <p class="ah">बुखार वाले रोगी की आर. डी. टी. और रक्त स्लाइड का उपयोग करके जांच की जानी चाहिए यदि वे आपके पास आते हैं और एक दिन के भीतर प्राथमिक स्वास्थ्य केंद्र नहीं जा सकते हैं।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">39</span>
+      <span class="qh">टीबी कैसे फैलती है</span>
+      <span class="pg">from p65 &rarr; p65 + p80 + p61 &middot; 4.1s</span></div>
+    <p class="ah">फुफ्फुसीय टीबी के रोगी के खांसने या छींकने पर हवा में छोटी बूंदों के माध्यम से टीबी के कीटाणु फैलते हैं। इन बूंदों को एक स्वस्थ व्यक्ति द्वारा साँस में लिया जा सकता है, जिससे संक्रमण हो सकता है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">40</span>
+      <span class="qh">टीबी की जांच कैसे होती है</span>
+      <span class="pg">from p66 &rarr; p65 + p51 + p5 &middot; 4.5s</span></div>
+    <p class="ah">टी. बी. का निदान मुख्य रूप से थूक की जांच के माध्यम से किया जाता है, जहां थूक में टी. बी. रोगाणु की उपस्थिति संक्रमण की पुष्टि करती है। थूक के कम से कम दो नमूने एकत्र किए जाते हैं, एक घर पर और एक स्वास्थ्य सुविधा में, और प्रशिक्षित कर्मियों द्वारा सूक्ष्मदर्शी के तहत जांच की जाती है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">41</span>
+      <span class="qh">टीबी के इलाज में आशा की क्या भूमिका है</span>
+      <span class="pg">from p67 &rarr; p67 + p63 + p9 &middot; 4.1s</span></div>
+    <p class="ah">आशा कार्यकर्ता रोगियों को उनका उपचार पूरा करने के लिए प्रेरित करके, दुष्प्रभावों का प्रबंधन करके, उचित दवा की उपलब्धता सुनिश्चित करके और परिवारों को स्वच्छता और अलगाव उपायों के बारे में शिक्षित करके टीबी के उपचार में महत्वपूर्ण भूमिका निभाती है।</p>
+  </div>
+  <div class="t miss">
+    <div class="row"><span class="n">42</span>
+      <span class="qh">टीबी की दवा बीच में छोड़ने से क्या होता है</span>
+      <span class="pg">from p68 &rarr; refused</span></div>
+    <p class="ah"><b>Refuses. Page 68 is about relapse and about TB drugs in pregnancy - it does not say what happens when treatment is stopped halfway, so there is nothing on it to answer with.</b></p>
+  </div>
+  <h2>Annexes — Procedures, kits and doses<span>pages 75&ndash;84</span></h2>
+  <div class="t">
+    <div class="row"><span class="n">43</span>
+      <span class="qh">नवजात की नाभि में मवाद हो तो क्या लगाना चाहिए</span>
+      <span class="pg">from p75 &rarr; p54 + p56 + p75 &middot; 2.6s</span></div>
+    <p class="ah">जेंटियन वायलेट लोशन।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">44</span>
+      <span class="qh">जन्म के बाद बच्चे का गला कैसे साफ करें</span>
+      <span class="pg">from p76 &rarr; p55 + p53 + p76 &middot; 3.9s</span></div>
+    <p class="ah">ट्यूब को मुँह में डालकर और स्राव को चूसने के द्वारा बच्चे के गले को साफ करने के लिए एक म्यूकस एक्सट्रैक्टर का उपयोग करें, फिर नाक से दोहराएं।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">45</span>
+      <span class="qh">मलेरिया की जांच किट में क्या क्या होता है</span>
+      <span class="pg">from p77 &rarr; p62 + p77 + p61 &middot; 4.2s</span></div>
+    <p class="ah">मलेरिया परीक्षण किट में एक स्पिरिट स्वैब, डिस्पोजेबल लैंसेट, केशिका नली, परीक्षण पट्टी, कई कुएं वाली प्लास्टिक प्लेट, परीक्षण नली, बफर घोल और सूखने का पानी होता है।</p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">46</span>
+      <span class="qh">जांच पट्टी पर दो लाल लकीर का क्या मतलब है</span>
+      <span class="pg">from p78 &rarr; p78 + p16 + p81 &middot; 3.1s</span></div>
+    <p class="ah">चेकबार पर दो लाल रेखाएँ फाल्सीपेरम मलेरिया का संकेत देती हैं।</p>
+  </div>
+  <div class="t miss">
+    <div class="row"><span class="n">47</span>
+      <span class="qh">खून की स्लाइड बनाने के लिए क्या सामान चाहिए</span>
+      <span class="pg">from p79 &rarr; p80 + p64 + p77 &middot; 4.3s</span></div>
+    <p class="ah"><b>Wrong. It lists the rapid-test kit. Page 79 asks for clean glass slides, a disposable lancet, a spirit or cotton swab, cotton, a clean cotton cloth and a lead pencil.</b></p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">48</span>
+      <span class="qh">खून की मोटी स्लाइड कैसे बनाते हैं</span>
+      <span class="pg">from p80 &rarr; p80 + p64 + p79 &middot; 4.4s</span></div>
+    <p class="ah">मोटी रक्त स्लाइड एक साफ स्लाइड के साथ रक्त की एक बूंद को छूकर, एक वृत्त बनाने के लिए इसे दूसरी स्लाइड के कोने के साथ फैलाकर, और फिर दूसरी बूंद को ले जाने वाली स्लाइड के किनारे को पहली स्लाइड की सतह पर लाते हुए, तब तक प्रतीक्षा करते हुए बनाई जाती है जब तक कि रक्त पूरे किनारे पर नहीं फैलता।</p>
+  </div>
+  <div class="t miss">
+    <div class="row"><span class="n">49</span>
+      <span class="qh">बच्चे को दवा कितने दिन तक देनी है</span>
+      <span class="pg">from p81 &rarr; p30 + p32 + p62 &middot; 3.0s</span></div>
+    <p class="ah"><b>Answers “5 days”. Page 81 carries two courses at once - Amoxicillin for seven days and Cotrimoxazole for five - and the question does not say which child. Name the illness when asking.</b></p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">50</span>
+      <span class="qh">खून की कमी वाले बच्चे को आयरन कितने दिन दें</span>
+      <span class="pg">from p82 &rarr; p15 + p14 + p82 &middot; 2.9s</span></div>
+    <p class="ah">इसका जवाब 14 दिन का है।</p>
+  </div>
+  <div class="t miss">
+    <div class="row"><span class="n">51</span>
+      <span class="qh">मलेरिया की दवा कितने दिन देनी होती है</span>
+      <span class="pg">from p83 &rarr; p62 + p64 + p12 &middot; 4.5s</span></div>
+    <p class="ah"><b>Answers by pointing at the dosage table in Annexe 6 rather than giving the number of days, because that is how the page itself puts it.</b></p>
+  </div>
+  <div class="t">
+    <div class="row"><span class="n">52</span>
+      <span class="qh">टीबी की दवा से पेशाब लाल हो तो क्या करें</span>
+      <span class="pg">from p84 &rarr; p84 + p48 + p78 &middot; 3.3s</span></div>
+    <p class="ah">यदि टीबी की दवा से मूत्र लाल हो जाता है, तो रोगी को आश्वस्त करें और गंभीर होने पर एम. ओ. से परामर्श लें।</p>
+  </div>
+  <div class="note">
+    <p class="hd">How to use this sheet</p>
+    <p><b>Speak the question as written.</b> Recognition is the weakest link in the chain, and one
+    mis-heard word changes the question. Over 156 recognitions of these 52 questions, 99% kept the
+    word that carries the meaning &mdash; but that is a synthetic voice; a room with people in it
+    is harder.</p>
+    <p><b>Recording is a toggle.</b> One press starts, the next ends it, and 3.5&nbsp;s of silence
+    ends it anyway. The times printed are machine time from the stop, and do not include how long
+    the question itself takes to ask.</p>
+    <p><b>The manual is Module 7 only.</b> Antenatal care, bleeding after delivery and anaemia in
+    pregnancy are not in this book, so a question about them has no right answer to find. The
+    device should say it does not have the information rather than answer from a neighbouring
+    page; that is the behaviour to check, not a gap to hide.</p>
+  </div>
+</div>

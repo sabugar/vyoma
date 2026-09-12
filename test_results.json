@@ -1,0 +1,903 @@
+[
+ {
+  "page": "20",
+  "topic": "Immunisation tracking",
+  "hi": "आशा को टीकाकरण के लिए कौन सी सूची रखनी होती है",
+  "keys": [
+   "सूची"
+  ],
+  "en": "What list does the ASHA worker have to keep for vaccination?",
+  "pages": [
+   "20",
+   "41",
+   "67"
+  ],
+  "answered": true,
+  "ans_en": "The ASHA worker has to keep a list of pregnant women, newborns, and children up to two years eligible for different vaccines.",
+  "secs": 3.4
+ },
+ {
+  "page": "21",
+  "topic": "VHND aur टीके",
+  "hi": "टीका लगवाने के लिए आशा माता की क्या मदद करे",
+  "keys": [
+   "टीका",
+   "माता"
+  ],
+  "en": "How to help an ASHA mother get vaccinated",
+  "pages": [
+   "67",
+   "11",
+   "21"
+  ],
+  "answered": true,
+  "ans_en": "The ASHA mother should be reminded of the immunisation due date and alerted to the date of the VHND. If needed, she should be escorted to the VHND on the due date. The first dose of BCG and oral polio should be given soon after birth.",
+  "secs": 3.8
+ },
+ {
+  "page": "22",
+  "topic": "Danger signs",
+  "hi": "बीमार बच्चे में खतरे के लक्षण कौन कौन से हैं",
+  "keys": [
+   "खतरे",
+   "लक्षण"
+  ],
+  "en": "What are the danger signs in a sick child?",
+  "pages": [
+   "22",
+   "23",
+   "32"
+  ],
+  "answered": true,
+  "ans_en": "The danger signs in a sick child include not being able to drink or breastfeed, vomiting everything, having convulsions, and being lethargic or unconscious. The presence of any of these signs indicates a severe disease requiring immediate referral.",
+  "secs": 3.6
+ },
+ {
+  "page": "23",
+  "topic": "Drink or swallow",
+  "hi": "कैसे पता करें कि बच्चा पानी पी सकता है या नहीं",
+  "keys": [
+   "पानी"
+  ],
+  "en": "How to know if a child can drink water",
+  "pages": [
+   "27",
+   "22",
+   "67"
+  ],
+  "answered": true,
+  "ans_en": "Check if the child can suck or swallow when offered a drink. If the child is not able to drink or is drinking poorly, the child does not have the sign \"drinking eagerly, thirsty.\"",
+  "secs": 3.5
+ },
+ {
+  "page": "24",
+  "topic": "Fever assessment",
+  "hi": "बुखार वाले बच्चे की जांच आशा कैसे करे",
+  "keys": [
+   "बुखार"
+  ],
+  "en": "How to get a child with fever checked by ASHAs",
+  "pages": [
+   "24",
+   "22",
+   "64"
+  ],
+  "answered": true,
+  "ans_en": "The ASHAs should assess the child for fever by asking the mother if the child has fever, checking the temperature with a thermometer or by feeling the child's temperature, and if the child has a fever, they should refer the child for further assessment if the fever has been present for more than seven days.",
+  "secs": 4.0
+ },
+ {
+  "page": "25",
+  "topic": "Fever danger",
+  "hi": "बुखार के साथ गर्दन अकड़ी हो तो क्या करना चाहिए",
+  "keys": [
+   "बुखार",
+   "गर्दन"
+  ],
+  "en": "What to do if the neck is stiff with fever",
+  "pages": [
+   "24",
+   "25",
+   "54"
+  ],
+  "answered": true,
+  "ans_en": "If the neck is stiff with fever, look for meningitis and refer urgently to a hospital. Give first dose of anti-malarial and paracetamol, and monitor closely.",
+  "secs": 2.8
+ },
+ {
+  "page": "26",
+  "topic": "Diarrhoea basics",
+  "hi": "दस्त वाले बच्चे में पानी की कमी कैसे पहचानें",
+  "keys": [
+   "दस्त",
+   "पानी"
+  ],
+  "en": "How to identify dehydration in a child with diarrhea",
+  "pages": [
+   "26",
+   "30",
+   "27"
+  ],
+  "answered": true,
+  "ans_en": "Step 3 of the session includes assessing the child's general condition, checking for lethargy or unconsciousness, sunken eyes, and a skin pinch that goes back very slowly. These signs help classify dehydration.",
+  "secs": 3.7
+ },
+ {
+  "page": "27",
+  "topic": "Dehydration signs",
+  "hi": "पानी की कमी के लक्षण क्या होते हैं",
+  "keys": [
+   "पानी",
+   "लक्षण"
+  ],
+  "en": "What are the symptoms of dehydration?",
+  "pages": [
+   "27",
+   "30",
+   "26"
+  ],
+  "answered": true,
+  "ans_en": "The symptoms of dehydration include lethargy, unconsciousness, sunken eyes, poor drinking, skin pinch that goes back very slowly, and lack of urine output.",
+  "secs": 3.3
+ },
+ {
+  "page": "28",
+  "topic": "Making ORS",
+  "hi": "ओ आर एस का घोल कितने पानी में बनाना चाहिए",
+  "keys": [
+   "घोल",
+   "पानी"
+  ],
+  "en": "How much water should be made of the ORS solution?",
+  "pages": [
+   "29",
+   "28",
+   "33"
+  ],
+  "answered": true,
+  "ans_en": "1 litre of drinking water.",
+  "secs": 2.3
+ },
+ {
+  "page": "29",
+  "topic": "Plan A",
+  "hi": "दस्त है पर पानी की कमी नहीं है तो क्या दें",
+  "keys": [
+   "दस्त"
+  ],
+  "en": "What to give if you have diarrhea but are not dehydrated",
+  "pages": [
+   "30",
+   "27",
+   "29"
+  ],
+  "answered": true,
+  "ans_en": "If you have diarrhea but are not dehydrated, give ORS solution and home available fluids. For infants under six months, give 5 spoonfuls after every loose stool; for older children, give about half a cup (100 ml) after every loose stool. Use ORS and clean water, and continue giving fluids until the diarrhea stops.",
+  "secs": 4.4
+ },
+ {
+  "page": "30",
+  "topic": "Plan B amounts",
+  "hi": "कुछ पानी की कमी हो तो चार घंटे में कितना ओ आर एस दें",
+  "keys": [
+   "घंटे"
+  ],
+  "en": "How much ORS should you give in four hours if you have some dehydration?",
+  "pages": [
+   "30",
+   "29",
+   "27"
+  ],
+  "answered": true,
+  "ans_en": "The amount of ORS to give in four hours depends on the child's age and weight. For infants under 6 months, 200 ml (2 cups) is recommended. For children 6 months to 12 months, 300 ml (3 cups) is recommended. For children 12 months to 2 years, 500 ml (5 cups) is recommended. For children 2 years to",
+  "secs": 4.5
+ },
+ {
+  "page": "31",
+  "topic": "ARI basics",
+  "hi": "साँस की बीमारी में आशा क्या दवा दे सकती है",
+  "keys": [
+   "दवा"
+  ],
+  "en": "What medicine can an ASHA worker give in case of a respiratory illness?",
+  "pages": [
+   "10",
+   "32",
+   "33"
+  ],
+  "answered": true,
+  "ans_en": "The answer is Cotrimoxazole.",
+  "secs": 2.5
+ },
+ {
+  "page": "32",
+  "topic": "Pneumonia classify",
+  "hi": "पसली चलने का क्या मतलब होता है",
+  "keys": [
+   "पसली"
+  ],
+  "en": "What does it mean to pull the chest in?",
+  "pages": [
+   "31",
+   "32",
+   "43"
+  ],
+  "answered": true,
+  "ans_en": "Pulling the chest in indicates chest indrawing, which is a sign of pneumonia in a child.",
+  "secs": 2.8
+ },
+ {
+  "page": "33",
+  "topic": "Cold at home",
+  "hi": "बच्चे की नाक बंद हो तो घर पर क्या करें",
+  "keys": [
+   "नाक"
+  ],
+  "en": "What to do at home if your child's nose is blocked",
+  "pages": [
+   "33",
+   "23",
+   "58"
+  ],
+  "answered": true,
+  "ans_en": "Clean the nose by putting in nose drops (boiled and cooled glass of water mixed with pinch of salt) and by cleaning the nose with a soft cotton wick.",
+  "secs": 3.2
+ },
+ {
+  "page": "37",
+  "topic": "Safe abortion",
+  "hi": "गर्भपात के बारे में आशा महिला को क्या सलाह दे",
+  "keys": [
+   "गर्भपात"
+  ],
+  "en": "What advice should a woman have about abortion?",
+  "pages": [
+   "38",
+   "37",
+   "41"
+  ],
+  "answered": true,
+  "ans_en": "The woman should be advised to seek a safe abortion only from a trained, legal provider, avoid sex or inserting objects in the vagina for at least five days, drink plenty of fluids for recovery, and use contraception immediately after the abortion.",
+  "secs": 3.5
+ },
+ {
+  "page": "38",
+  "topic": "Who may perform",
+  "hi": "भारत में गर्भपात कौन कर सकता है",
+  "keys": [
+   "गर्भपात"
+  ],
+  "en": "Who can have an abortion in India?",
+  "pages": [
+   "38",
+   "37",
+   "39"
+  ],
+  "answered": true,
+  "ans_en": "Only a doctor can perform an abortion in India.",
+  "secs": 1.7
+ },
+ {
+  "page": "39",
+  "topic": "Post-abortion",
+  "hi": "गर्भपात के बाद खतरे के लक्षण क्या हैं",
+  "keys": [
+   "गर्भपात",
+   "लक्षण"
+  ],
+  "en": "What are the risk symptoms after an abortion?",
+  "pages": [
+   "38",
+   "37",
+   "65"
+  ],
+  "answered": true,
+  "ans_en": "The risk symptoms after an abortion include: \n• Bleeding from the vagina for up to two weeks, which should be light. \n• The risk of pregnancy as soon as intercourse is resumed, requiring contraception. \n• Signs of post-abortion complications, such as infection or other complications, which should be referred to a healthcare provider.",
+  "secs": 3.6
+ },
+ {
+  "page": "40",
+  "topic": "Family planning",
+  "hi": "परिवार नियोजन में आशा की क्या भूमिका है",
+  "keys": [
+   "परिवार",
+   "नियोजन"
+  ],
+  "en": "What is the role of ASHA worker in family planning?",
+  "pages": [
+   "45",
+   "40",
+   "9"
+  ],
+  "answered": true,
+  "ans_en": "The role of ASHA workers in family planning includes counseling families on contraceptive methods, identifying eligible couples for follow-up, managing health registers, providing information on access to services, and assisting in the follow-up of contraceptive users.",
+  "secs": 3.2
+ },
+ {
+  "page": "41",
+  "topic": "Method by need",
+  "hi": "नए शादीशुदा जोड़े को कौन सा साधन बताएं",
+  "keys": [
+   "साधन"
+  ],
+  "en": "What means to tell a newly married couple",
+  "pages": [
+   "41",
+   "40",
+   "42"
+  ],
+  "answered": true,
+  "ans_en": "To counsel a newly married couple, you should advise them on contraceptive methods suitable for their situation, such as condoms or pills, and provide information on side-effects and when to seek further assistance.",
+  "secs": 3.4
+ },
+ {
+  "page": "42",
+  "topic": "Pills",
+  "hi": "स्तनपान कराने वाली महिला को गोली देनी चाहिए या नहीं",
+  "keys": [
+   "स्तनपान",
+   "गोली"
+  ],
+  "en": "Whether or not a breastfeeding woman should be given the pill",
+  "pages": [
+   "42",
+   "41",
+   "13"
+  ],
+  "answered": true,
+  "ans_en": "Pills should not be advised for women who are breastfeeding.",
+  "secs": 2.8
+ },
+ {
+  "page": "43",
+  "topic": "IUCD contra",
+  "hi": "किन महिलाओं को छल्ला नहीं लगवाना चाहिए",
+  "keys": [
+   "महिलाओं"
+  ],
+  "en": "Which women should not have an IUCD",
+  "pages": [
+   "43",
+   "41",
+   "42"
+  ],
+  "answered": true,
+  "ans_en": "Who should not have an IUCD: Women who have never been pregnant, anaemia, are in danger of STIs, have had an infection in their tubes or uterus, have had a pregnancy in their tubes, or have a lot of bleeding and pain during monthly bleeding.",
+  "secs": 4.0
+ },
+ {
+  "page": "44",
+  "topic": "Sterilisation",
+  "hi": "नसबंदी के बारे में महिला को क्या बताना चाहिए",
+  "keys": [
+   "नसबंदी"
+  ],
+  "en": "What a woman should say about sterilization",
+  "pages": [
+   "44",
+   "41",
+   "40"
+  ],
+  "answered": true,
+  "ans_en": "The woman should mention that sterilization is a permanent method, explain the procedure, note that it is safe and fast, and advise on the need for a PHC or CHC visit, along with the timing of the operation.",
+  "secs": 3.5
+ },
+ {
+  "page": "45",
+  "topic": "Service levels",
+  "hi": "गाँव के स्तर पर आशा कौन से साधन दे सकती है",
+  "keys": [
+   "साधन"
+  ],
+  "en": "What means can ASHA workers provide at the village level?",
+  "pages": [
+   "45",
+   "63",
+   "12"
+  ],
+  "answered": true,
+  "ans_en": "The ASHA workers provide means such as IEC for Family Counselling, check-ups for provision of investigation, referral for support, and training on sterilisation and IUDs at the village level.",
+  "secs": 3.2
+ },
+ {
+  "page": "46",
+  "topic": "RTI STI",
+  "hi": "यौन संक्रमण से बचाव के लिए महिला को क्या सलाह दें",
+  "keys": [
+   "संक्रमण"
+  ],
+  "en": "What to advise a woman on for the prevention of sexually transmitted infections",
+  "pages": [
+   "42",
+   "48",
+   "43"
+  ],
+  "answered": true,
+  "ans_en": "Advise the woman to use condoms, as they are effective in preventing STIs and HIV, and to encourage regular testing for STIs.",
+  "secs": 3.3
+ },
+ {
+  "page": "47",
+  "topic": "STI effects",
+  "hi": "यौन रोग से क्या नुकसान हो सकता है",
+  "keys": [
+   "रोग"
+  ],
+  "en": "What harm can be caused by a sexually transmitted infection",
+  "pages": [
+   "46",
+   "48",
+   "61"
+  ],
+  "answered": true,
+  "ans_en": "The harm caused by a sexually transmitted infection (STI) includes symptoms like itching, burning, and discharge, as well as potential complications such as infertility, chronic pain, and increased risk of HIV transmission.",
+  "secs": 3.4
+ },
+ {
+  "page": "48",
+  "topic": "STI relief",
+  "hi": "यौन संक्रमण में आराम के लिए महिला क्या करे",
+  "keys": [
+   "संक्रमण"
+  ],
+  "en": "What a woman should do to relieve a sexually transmitted infection",
+  "pages": [
+   "48",
+   "43",
+   "42"
+  ],
+  "answered": true,
+  "ans_en": "The woman should sit in a pan of clean, warm water for 15 minutes, add lemon juice, and do not have sex until she feels better.",
+  "secs": 3.3
+ },
+ {
+  "page": "51",
+  "topic": "High risk baby",
+  "hi": "किस नवजात को अधिक जोखिम वाला माना जाता है",
+  "keys": [
+   "नवजात"
+  ],
+  "en": "Which newborn is considered to be at higher risk",
+  "pages": [
+   "51",
+   "56",
+   "52"
+  ],
+  "answered": true,
+  "ans_en": "The newborn is considered to be at higher risk if they have a birth weight less than 2000 gm, are pre-term (delivery before 37 weeks), or not taking feeds on Day 1.",
+  "secs": 3.4
+ },
+ {
+  "page": "52",
+  "topic": "LBW care",
+  "hi": "कम वजन वाले बच्चे को कब तक नहीं नहलाना चाहिए",
+  "keys": [
+   "वजन"
+  ],
+  "en": "How long should a low-weight baby not be bathed",
+  "pages": [
+   "52",
+   "51",
+   "53"
+  ],
+  "answered": true,
+  "ans_en": "The baby should not be bathed until its weight is 2000 gm.",
+  "secs": 2.6
+ },
+ {
+  "page": "53",
+  "topic": "LBW feeding",
+  "hi": "कम वजन वाले नवजात को माँ का दूध क्यों जरूरी है",
+  "keys": [
+   "दूध"
+  ],
+  "en": "Why breast milk is important for a low-weight newborn",
+  "pages": [
+   "53",
+   "51",
+   "10"
+  ],
+  "answered": true,
+  "ans_en": "The breast milk is important for a low-weight newborn because it provides the right nutrients, including more protein, and contains factors to fight infection. It is easily digestible and helps keep the baby warm, reducing the risk of hypothermia and infection.",
+  "secs": 3.6
+ },
+ {
+  "page": "54",
+  "topic": "Asphyxia signs",
+  "hi": "जन्म के समय दम घुटने के क्या लक्षण हैं",
+  "keys": [
+   "लक्षण"
+  ],
+  "en": "What are the symptoms of asphyxiation at birth?",
+  "pages": [
+   "54",
+   "55",
+   "5"
+  ],
+  "answered": true,
+  "ans_en": "The symptoms of asphyxiation at birth include no cry, weak cry, no breathing, and weak breathing.",
+  "secs": 2.6
+ },
+ {
+  "page": "55",
+  "topic": "Asphyxia risk",
+  "hi": "प्रसव में किन बातों से दम घुटने का खतरा रहता है",
+  "keys": [
+   "प्रसव",
+   "खतरा"
+  ],
+  "en": "What are the risks of choking in childbirth?",
+  "pages": [
+   "51",
+   "20",
+   "62"
+  ],
+  "answered": false,
+  "ans_en": "",
+  "secs": 2.4
+ },
+ {
+  "page": "56",
+  "topic": "Sepsis causes",
+  "hi": "नवजात को सेप्सिस किन कारणों से होता है",
+  "keys": [
+   "नवजात"
+  ],
+  "en": "What causes sepsis in newborns",
+  "pages": [
+   "56",
+   "57",
+   "5"
+  ],
+  "answered": true,
+  "ans_en": "The causes of sepsis in newborns include maternal infections, unclean delivery techniques, infected umbilical cord, weak baby (pre-term or low birth weight), poor feeding practices, exposure to cold, and contact with infected individuals.",
+  "secs": 3.4
+ },
+ {
+  "page": "57",
+  "topic": "Sepsis prevent",
+  "hi": "नवजात को संक्रमण से कैसे बचाएं",
+  "keys": [
+   "नवजात",
+   "संक्रमण"
+  ],
+  "en": "How to protect a newborn from infection",
+  "pages": [
+   "53",
+   "56",
+   "46"
+  ],
+  "answered": true,
+  "ans_en": "Use breast milk for LBW and pre-term babies, as it contains factors to fight infection. Breastfeeding keeps the baby close to the mother, protecting against hypothermia and infection.",
+  "secs": 3.3
+ },
+ {
+  "page": "58",
+  "topic": "During referral",
+  "hi": "अस्पताल ले जाते समय नवजात को कैसे संभालें",
+  "keys": [
+   "अस्पताल",
+   "नवजात"
+  ],
+  "en": "How to Handle a Newborn While Being Taken to the Hospital",
+  "pages": [
+   "57",
+   "27",
+   "17"
+  ],
+  "answered": true,
+  "ans_en": "When taking a newborn to the hospital, the ANM should administer Oral Amoxicillin (25 mg/kg/dose in two divided doses) and monitor for signs of sepsis, including limp limbs, stopped feeding, chest indrawing, fever, or being cold to touch. If the ANM is unavailable, ASHA should start the treatment with Oral Amoxicillin and refer the baby to the nearest facility, while counseling",
+  "secs": 4.8
+ },
+ {
+  "page": "61",
+  "topic": "Malaria intro",
+  "hi": "मलेरिया से बचाव के लिए क्या करना चाहिए",
+  "keys": [
+   "मलेरिया"
+  ],
+  "en": "What to do to prevent malaria",
+  "pages": [
+   "62",
+   "63",
+   "61"
+  ],
+  "answered": true,
+  "ans_en": "To prevent malaria, use insecticide-treated bed nets, avoid stagnant water, and eliminate mosquito breeding sites.",
+  "secs": 2.7
+ },
+ {
+  "page": "62",
+  "topic": "Suspect malaria",
+  "hi": "मलेरिया का शक कब करना चाहिए",
+  "keys": [
+   "मलेरिया"
+  ],
+  "en": "When to suspect malaria",
+  "pages": [
+   "62",
+   "63",
+   "61"
+  ],
+  "answered": true,
+  "ans_en": "When to suspect malaria: Any person living in a malaria affected area who develops fever must be suspected as having malaria. If fever is with chills and rigor and headache, it is even more likely.",
+  "secs": 2.3
+ },
+ {
+  "page": "63",
+  "topic": "Mosquito control",
+  "hi": "मच्छरों को बढ़ने से कैसे रोकें",
+  "keys": [
+   "मच्छरों"
+  ],
+  "en": "How to stop mosquitoes from growing",
+  "pages": [
+   "63",
+   "62",
+   "84"
+  ],
+  "answered": true,
+  "ans_en": "Spray insecticide where mosquitoes bite, dry up breeding pits, pour oil over stagnant water, cultivate Gambusia fish, and flush drains and canals weekly.",
+  "secs": 3.2
+ },
+ {
+  "page": "64",
+  "topic": "RDT screening",
+  "hi": "बुखार वाले मरीज की जांच कब करनी चाहिए",
+  "keys": [
+   "बुखार",
+   "जांच"
+  ],
+  "en": "When should a patient with a fever be screened?",
+  "pages": [
+   "64",
+   "62",
+   "61"
+  ],
+  "answered": true,
+  "ans_en": "The patient with a fever should be screened using RDT and blood slides if they approach you and cannot go to the primary health centre within a day.",
+  "secs": 3.2
+ },
+ {
+  "page": "65",
+  "topic": "TB basics",
+  "hi": "टीबी कैसे फैलती है",
+  "keys": [
+   "टीबी"
+  ],
+  "en": "How TB is spread",
+  "pages": [
+   "65",
+   "80",
+   "61"
+  ],
+  "answered": true,
+  "ans_en": "The spread of TB is through tiny droplets in the air when a patient with pulmonary TB coughs or sneezes. These droplets can be inhaled by a healthy person, leading to infection.",
+  "secs": 3.2
+ },
+ {
+  "page": "66",
+  "topic": "TB diagnosis",
+  "hi": "टीबी की जांच कैसे होती है",
+  "keys": [
+   "टीबी",
+   "जांच"
+  ],
+  "en": "How is TB diagnosed?",
+  "pages": [
+   "65",
+   "51",
+   "5"
+  ],
+  "answered": true,
+  "ans_en": "The diagnosis of TB is primarily done through sputum examination, where the presence of the TB germ in the sputum confirms the infection. At least two sputum samples are collected, one at home and one at the health facility, and examined under a microscope by trained personnel.",
+  "secs": 3.3
+ },
+ {
+  "page": "67",
+  "topic": "DOTS role",
+  "hi": "टीबी के इलाज में आशा की क्या भूमिका है",
+  "keys": [
+   "टीबी"
+  ],
+  "en": "What is the role of ASHA worker in TB treatment?",
+  "pages": [
+   "67",
+   "63",
+   "9"
+  ],
+  "answered": true,
+  "ans_en": "The ASHA worker plays a key role in TB treatment by motivating patients to complete their treatment, managing side effects, ensuring proper drug availability, and educating families on hygiene and isolation measures.",
+  "secs": 3.1
+ },
+ {
+  "page": "68",
+  "topic": "TB relapse",
+  "hi": "टीबी की दवा बीच में छोड़ने से क्या होता है",
+  "keys": [
+   "टीबी",
+   "दवा"
+  ],
+  "en": "What happens when a TB drug is left in the middle?",
+  "pages": [],
+  "answered": false,
+  "ans_en": "",
+  "secs": 0.4
+ },
+ {
+  "page": "75",
+  "topic": "Cord infection",
+  "hi": "नवजात की नाभि में मवाद हो तो क्या लगाना चाहिए",
+  "keys": [
+   "नाभि",
+   "मवाद"
+  ],
+  "en": "What to apply if the newborn has pus in the navel",
+  "pages": [
+   "54",
+   "56",
+   "75"
+  ],
+  "answered": true,
+  "ans_en": "Gentian violet paint.",
+  "secs": 2.2
+ },
+ {
+  "page": "76",
+  "topic": "Mucus extractor",
+  "hi": "जन्म के बाद बच्चे का गला कैसे साफ करें",
+  "keys": [
+   "गला"
+  ],
+  "en": "How to Clean Your Baby's Throat After Birth",
+  "pages": [
+   "55",
+   "53",
+   "76"
+  ],
+  "answered": true,
+  "ans_en": "Use a mucus extractor to clean the baby's throat by inserting the tube into the mouth and sucking out secretions, then repeat with the nose.",
+  "secs": 3.1
+ },
+ {
+  "page": "77",
+  "topic": "RDT kit",
+  "hi": "मलेरिया की जांच किट में क्या क्या होता है",
+  "keys": [
+   "मलेरिया",
+   "जांच"
+  ],
+  "en": "What's in a malaria testing kit?",
+  "pages": [
+   "62",
+   "77",
+   "61"
+  ],
+  "answered": true,
+  "ans_en": "In a malaria testing kit, there is a spirit swab, disposable lancet, capillary tube, test strip, multiple well plastic plate, test tube, buffer solution, and desiccant.",
+  "secs": 3.3
+ },
+ {
+  "page": "78",
+  "topic": "RDT reading",
+  "hi": "जांच पट्टी पर दो लाल लकीर का क्या मतलब है",
+  "keys": [
+   "लाल"
+  ],
+  "en": "What does two red lines on the checkbar mean?",
+  "pages": [
+   "78",
+   "16",
+   "81"
+  ],
+  "answered": true,
+  "ans_en": "Two red lines on the checkbar indicate falciparum malaria.",
+  "secs": 2.5
+ },
+ {
+  "page": "79",
+  "topic": "Blood smear kit",
+  "hi": "खून की स्लाइड बनाने के लिए क्या सामान चाहिए",
+  "keys": [
+   "खून"
+  ],
+  "en": "What materials are needed to make a blood slide",
+  "pages": [
+   "80",
+   "64",
+   "77"
+  ],
+  "answered": true,
+  "ans_en": "The materials needed to make a blood slide include a spirit swab, disposable lancet, capillary tube, test strip, and a buffer solution.",
+  "secs": 3.0
+ },
+ {
+  "page": "80",
+  "topic": "Blood smear",
+  "hi": "खून की मोटी स्लाइड कैसे बनाते हैं",
+  "keys": [
+   "खून"
+  ],
+  "en": "How to make a thick blood slide",
+  "pages": [
+   "80",
+   "64",
+   "79"
+  ],
+  "answered": true,
+  "ans_en": "The thick blood slide is made by touching a drop of blood with a clean slide, spreading it with the corner of another slide to make a circle, and then bringing the edge of the second slide to the surface of the first to spread the blood along the whole edge.",
+  "secs": 2.9
+ },
+ {
+  "page": "81",
+  "topic": "Amoxicillin",
+  "hi": "बच्चे को दवा कितने दिन तक देनी है",
+  "keys": [
+   "दवा",
+   "दिन"
+  ],
+  "en": "How many days to give the medicine to the child",
+  "pages": [
+   "30",
+   "32",
+   "62"
+  ],
+  "answered": true,
+  "ans_en": "The answer is 5 days.",
+  "secs": 2.4
+ },
+ {
+  "page": "82",
+  "topic": "IFA dose",
+  "hi": "खून की कमी वाले बच्चे को आयरन कितने दिन दें",
+  "keys": [
+   "खून",
+   "दिन"
+  ],
+  "en": "How many days should you give iron to an anemic child?",
+  "pages": [
+   "15",
+   "14",
+   "82"
+  ],
+  "answered": true,
+  "ans_en": "The answer is 14 days.",
+  "secs": 2.5
+ },
+ {
+  "page": "83",
+  "topic": "Chloroquine",
+  "hi": "मलेरिया की दवा कितने दिन देनी होती है",
+  "keys": [
+   "मलेरिया",
+   "दवा"
+  ],
+  "en": "How many days does the malaria drug have to be given?",
+  "pages": [
+   "62",
+   "64",
+   "12"
+  ],
+  "answered": true,
+  "ans_en": "The malaria drug (ACT) should be given for a minimum of 7 days, as per the dosage schedule in Annexe 6.",
+  "secs": 3.2
+ },
+ {
+  "page": "84",
+  "topic": "TB side effects",
+  "hi": "टीबी की दवा से पेशाब लाल हो तो क्या करें",
+  "keys": [
+   "टीबी",
+   "दवा"
+  ],
+  "en": "What to do if urine is red from a TB medication",
+  "pages": [
+   "84",
+   "48",
+   "78"
+  ],
+  "answered": true,
+  "ans_en": "If urine is red from a TB medication, reassure the patient and consult MO if severe.",
+  "secs": 2.5
+ }
+]

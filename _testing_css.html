@@ -1,0 +1,73 @@
+<meta charset="utf-8">
+<title>Whole-Manual Test Sheet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{--ground:#FFFFFF;--panel:#F1F5F9;--ink:#14203A;--ink-soft:#52607A;--rule:#C6CEDB;
+        --accent:#0E6E5C;--accent-b:#E4F0EC;--signal:#A85410;
+        --sans:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif,"Lohit Devanagari";
+        --cond:"IBM Plex Sans Condensed","IBM Plex Sans",ui-sans-serif,sans-serif,"Lohit Devanagari";
+        --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace,"Lohit Devanagari";
+        --deva:"Lohit Devanagari","Noto Sans Devanagari",serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:8.6pt;line-height:1.4}
+  .doc{max-width:182mm;margin:0 auto;padding:9mm 0}
+  .doc>*+*{margin-top:4mm}
+  .masthead{display:grid;grid-template-columns:1fr auto;align-items:end;gap:8mm;
+            border-bottom:2px solid var(--ink);padding-bottom:2mm}
+  h1{font-family:var(--cond);font-size:19pt;font-weight:700;letter-spacing:-.01em;margin:0}
+  .sub{font-family:var(--cond);font-size:9.5pt;font-weight:500;color:var(--accent);margin:1mm 0 0}
+  .spec{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);text-align:right;line-height:1.5;white-space:nowrap}
+  .spec b{color:var(--ink);font-weight:600}
+  .lede{font-size:9pt;color:var(--ink-soft)}
+  .lede b{color:var(--ink)}
+  .q{border-left:2px solid var(--accent);padding-left:3.4mm;page-break-inside:avoid}
+  .q+.q{margin-top:4.6mm}
+  .qhead{display:flex;align-items:baseline;gap:2.6mm}
+  .num{font-family:var(--mono);font-size:8pt;font-weight:600;color:var(--accent)}
+  .title{font-family:var(--cond);font-size:10.5pt;font-weight:600}
+  .ask{font-family:var(--deva);font-size:11pt;line-height:1.5;margin:1.6mm 0 0;
+       background:var(--accent-b);padding:2mm 2.6mm;border-radius:1mm}
+  .why{font-size:8.2pt;color:var(--ink-soft);margin:1.8mm 0 0}
+  .why b{color:var(--signal);font-family:var(--cond);font-weight:600;text-transform:uppercase;
+         font-size:6.9pt;letter-spacing:.06em;margin-right:1.6mm}
+  .ans{background:var(--panel);padding:2.2mm 2.6mm;margin-top:1.8mm}
+  .ans .lbl{font-family:var(--cond);font-size:6.9pt;font-weight:600;text-transform:uppercase;
+            letter-spacing:.06em;color:var(--ink-soft)}
+  .ans .hi{font-family:var(--deva);font-size:9.4pt;line-height:1.5;margin:.9mm 0 0}
+  .ans .en{font-size:7.9pt;color:var(--ink-soft);margin:1.2mm 0 0}
+  .meta{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);margin-top:1.4mm}
+  .note{background:var(--accent-b);border-left:3px solid var(--accent);padding:2.6mm 3mm}
+  .note .hd{font-family:var(--cond);font-size:9.6pt;font-weight:700;color:var(--accent);margin:0 0 1.2mm}
+  .note p{margin:0 0 1.2mm;font-size:8.2pt}
+  .note p:last-child{margin:0}
+  code{font-family:var(--mono);font-size:.92em;color:var(--accent)}
+
+  /* --- test-sheet additions ------------------------------------------- */
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:2mm;margin-top:3mm}
+  .stat{background:var(--panel);padding:2mm 2.4mm;border-top:2px solid var(--accent)}
+  .stat .n{font-family:var(--cond);font-size:15pt;font-weight:700;line-height:1;color:var(--accent)}
+  .stat .k{font-family:var(--cond);font-size:6.8pt;font-weight:600;text-transform:uppercase;
+           letter-spacing:.05em;color:var(--ink-soft);margin-top:1mm;display:block;line-height:1.25}
+  h2{font-family:var(--cond);font-size:10.5pt;font-weight:700;margin:5.5mm 0 0;
+     padding-bottom:1mm;border-bottom:1px solid var(--rule);page-break-after:avoid}
+  h2 span{font-family:var(--mono);font-size:7pt;font-weight:400;color:var(--ink-soft);
+          float:right;padding-top:1.2mm}
+  .t{page-break-inside:avoid;margin-top:2.6mm;border-left:2px solid var(--accent);padding-left:3mm}
+  .t.miss{border-left-color:var(--signal)}
+  .t .row{display:flex;align-items:baseline;gap:2.2mm}
+  .t .n{font-family:var(--mono);font-size:7.4pt;font-weight:600;color:var(--accent);min-width:7mm}
+  .t.miss .n{color:var(--signal)}
+  .t .qh{font-family:var(--deva);font-size:10.4pt;line-height:1.45;flex:1}
+  .t .pg{font-family:var(--mono);font-size:6.8pt;color:var(--ink-soft);white-space:nowrap}
+  .t .ah{font-family:var(--deva);font-size:8.8pt;line-height:1.45;color:var(--ink-soft);
+         margin:1.1mm 0 0 9.2mm;padding-left:2.4mm;border-left:1px solid var(--rule)}
+  .t .ah b{color:var(--signal);font-family:var(--cond);font-weight:600}
+  .flag{font-family:var(--cond);font-size:6.8pt;font-weight:600;text-transform:uppercase;
+        letter-spacing:.05em;color:var(--signal)}
+  .legend{font-family:var(--mono);font-size:7pt;color:var(--ink-soft);margin-top:2mm}
+  @page{size:A4;margin:11mm 14mm 9mm;
+    @bottom-left{content:"ASHA Sahayak \00b7 whole-manual test sheet";font-family:var(--mono);font-size:6.6pt;color:#52607A}
+    @bottom-right{content:"Page " counter(page) " of " counter(pages);font-family:var(--mono);font-size:6.6pt;color:#52607A}}
+  @media print{.doc{max-width:none;padding:0;margin:0}}
+</style>
