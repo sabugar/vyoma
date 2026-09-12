@@ -1,0 +1,146 @@
+<meta charset="utf-8">
+<title>Jury Questions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{--ground:#FFFFFF;--panel:#F1F5F9;--ink:#14203A;--ink-soft:#52607A;--rule:#C6CEDB;
+        --accent:#0E6E5C;--accent-b:#E4F0EC;--signal:#A85410;
+        --sans:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif,"Lohit Devanagari";
+        --cond:"IBM Plex Sans Condensed","IBM Plex Sans",ui-sans-serif,sans-serif,"Lohit Devanagari";
+        --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace,"Lohit Devanagari";
+        --deva:"Lohit Devanagari","Noto Sans Devanagari",serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:8.6pt;line-height:1.4}
+  .doc{max-width:182mm;margin:0 auto;padding:9mm 0}
+  .doc>*+*{margin-top:4mm}
+  .masthead{display:grid;grid-template-columns:1fr auto;align-items:end;gap:8mm;
+            border-bottom:2px solid var(--ink);padding-bottom:2mm}
+  h1{font-family:var(--cond);font-size:19pt;font-weight:700;letter-spacing:-.01em;margin:0}
+  .sub{font-family:var(--cond);font-size:9.5pt;font-weight:500;color:var(--accent);margin:1mm 0 0}
+  .spec{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);text-align:right;line-height:1.5;white-space:nowrap}
+  .spec b{color:var(--ink);font-weight:600}
+  .lede{font-size:9pt;color:var(--ink-soft)}
+  .lede b{color:var(--ink)}
+  .q{border-left:2px solid var(--accent);padding-left:3.4mm;page-break-inside:avoid}
+  .q+.q{margin-top:4.6mm}
+  .qhead{display:flex;align-items:baseline;gap:2.6mm}
+  .num{font-family:var(--mono);font-size:8pt;font-weight:600;color:var(--accent)}
+  .title{font-family:var(--cond);font-size:10.5pt;font-weight:600}
+  .ask{font-family:var(--deva);font-size:11pt;line-height:1.5;margin:1.6mm 0 0;
+       background:var(--accent-b);padding:2mm 2.6mm;border-radius:1mm}
+  .why{font-size:8.2pt;color:var(--ink-soft);margin:1.8mm 0 0}
+  .why b{color:var(--signal);font-family:var(--cond);font-weight:600;text-transform:uppercase;
+         font-size:6.9pt;letter-spacing:.06em;margin-right:1.6mm}
+  .ans{background:var(--panel);padding:2.2mm 2.6mm;margin-top:1.8mm}
+  .ans .lbl{font-family:var(--cond);font-size:6.9pt;font-weight:600;text-transform:uppercase;
+            letter-spacing:.06em;color:var(--ink-soft)}
+  .ans .hi{font-family:var(--deva);font-size:9.4pt;line-height:1.5;margin:.9mm 0 0}
+  .ans .en{font-size:7.9pt;color:var(--ink-soft);margin:1.2mm 0 0}
+  .meta{font-family:var(--mono);font-size:6.9pt;color:var(--ink-soft);margin-top:1.4mm}
+  .note{background:var(--accent-b);border-left:3px solid var(--accent);padding:2.6mm 3mm}
+  .note .hd{font-family:var(--cond);font-size:9.6pt;font-weight:700;color:var(--accent);margin:0 0 1.2mm}
+  .note p{margin:0 0 1.2mm;font-size:8.2pt}
+  .note p:last-child{margin:0}
+  code{font-family:var(--mono);font-size:.92em;color:var(--accent)}
+
+  h2{font-family:var(--cond);font-size:11.5pt;font-weight:700;margin:5.5mm 0 0;color:var(--accent);
+     padding-bottom:1.2mm;border-bottom:2px solid var(--accent);page-break-after:avoid}
+  h2 .cnt{font-family:var(--mono);font-size:6.8pt;font-weight:400;color:var(--ink-soft);float:right;padding-top:2mm}
+  .qa{page-break-inside:avoid;margin-top:3.2mm;padding-left:3mm;border-left:2px solid var(--rule)}
+  .qa.hard{border-left-color:var(--signal)}
+  .qa .q{font-family:var(--cond);font-size:9.6pt;font-weight:700;margin:0 0 1.2mm}
+  .qa .q::before{content:"Q ";font-family:var(--mono);font-size:7.4pt;color:var(--accent)}
+  .qa.hard .q::before{color:var(--signal)}
+  .qa p{margin:0 0 1.2mm;font-size:8.3pt}
+  .qa p:last-child{margin:0}
+  .qa b{color:var(--ink)}
+  .num{font-family:var(--mono);font-size:7.9pt;color:var(--accent);font-weight:600}
+  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:2.4mm;margin-top:3mm}
+  .card{background:var(--panel);padding:2.4mm 2.6mm;border-top:2px solid var(--accent)}
+  .card .n{font-family:var(--cond);font-size:15pt;font-weight:700;line-height:1;color:var(--accent)}
+  .card .k{font-size:7.6pt;color:var(--ink-soft);margin-top:1.4mm;display:block;line-height:1.35}
+  @page{size:A4;margin:11mm 14mm 9mm;
+    @bottom-left{content:"ASHA Sahayak \00b7 jury questions and answers";font-family:var(--mono);font-size:6.6pt;color:#52607A}
+    @bottom-right{content:"Page " counter(page) " of " counter(pages);font-family:var(--mono);font-size:6.6pt;color:#52607A}}
+  @media print{.doc{max-width:none;padding:0;margin:0}}
+</style>
+
+<div class="doc">
+  <header class="masthead">
+    <div><h1>Jury Questions</h1>
+    <p class="sub">ASHA Sahayak &mdash; what they are likely to ask, and what is true</p></div>
+    <div class="spec"><b>Answer with the number, then the reason</b><br>
+    VYOMA Innovation Challenge &middot; Stage III<br>
+    <b>every figure here is measured or cited</b></div>
+  </header>
+  <p class="lede">
+    Thirty-five questions, ordered so the hardest come first. The answers are short on purpose: say
+    the number, then the reason, then stop. <b>Where we are weak, say so and say what we would do</b>
+    &mdash; a jury that catches you hiding one weakness stops believing the strengths. Nothing in
+    this sheet is a figure we have not measured on the device or cited from a government source.
+  </p>
+  <div class="three">
+    <div class="card"><span class="n">4.1 s</span><span class="k">median from the end of her question
+    to the answer, with no network</span></div>
+    <div class="card"><span class="n">50 / 52</span><span class="k">questions answered, one taken
+    from every page of the manual &mdash; and we publish the two that fail</span></div>
+    <div class="card"><span class="n">&#8377;0</span><span class="k">per question, forever &mdash;
+    there is no cloud to bill for it</span></div>
+  </div>
+<h2>The six that could sink us<span class="cnt">answer these first, and honestly</span></h2>
+<div class="qa hard"><p class="q">It just gave a wrong answer. Would you trust this with a newborn?</p><p><b>No &mdash; and it is not built to be trusted that way.</b> It is a searchable copy of a book the ASHA already carries and is already trained on. It does not diagnose, it does not decide, and it does not replace her judgement or the ANM above her.</p><p>We know exactly where it fails because we looked: <span class="num">50 of 52</span> questions answered, <span class="num">two wrong</span>, two refused, three loose. All seven are printed on the test sheet in your hand, with what the manual actually says. We would rather hand you our failures than have you find them.</p></div>
+<div class="qa hard"><p class="q">You have one module out of seven. Isn't this a demo rather than a product?</p><p>It is a working product on a deliberately narrow book. Module 7 is child health and nutrition &mdash; the module that covers the window where <span class="num">73.2%</span> of infant deaths happen.</p><p>The other six are published by the same ministry in the same format. Adding them changes no hardware and no code; it is an ingest and a re-measurement. We did one module properly rather than seven badly, because a health device that is broadly mediocre is worse than one that is narrowly reliable.</p></div>
+<div class="qa hard"><p class="q">Has a single real ASHA ever used this?</p><p><b>No.</b> It has not been in the field. Everything we report is bench measurement on the device, including speech, which we test by synthesising the question and recognising it back.</p><p>That is the next step and it is a pilot, not a launch: one block, twenty devices, an ANM supervising, and every question logged on the device for review. We are asking for that pilot, not claiming to have finished one.</p></div>
+<div class="qa hard"><p class="q">Your voice model is non-commercial. Can you legally sell this?</p><p>Not with that voice, and we say so in our own bill of materials. The Hindi voice is CC-BY-NC-SA, and so was the one it replaced.</p><p>It is a swap, not a redesign &mdash; the voice is one file behind one interface, and there are permissively-licensed Indic voices including AI4Bharat's own. We kept the better-sounding voice for the prototype and flagged the licence as a release blocker rather than discovering it after a purchase order.</p></div>
+<div class="qa hard"><p class="q">&#8377;46,482 a unit. An ASHA's whole kit budget is less than that.</p><p>That is a developer kit bought one at a time, and it is the wrong number to judge. <span class="num">&#8377;12,000</span> is the engineered unit at ten thousand: the same 8&nbsp;GB module without the developer carrier, a four-layer board of our own, on-board audio and a battery.</p><p>What makes that credible is a measurement, not a hope: the stack needs <span class="num">4.2 GB</span> and <span class="num">5.1 W</span> and has no CUDA-only dependency, so a commodity ARM module is a port rather than a rewrite. That single line is &#8377;37,712 today and &#8377;7,000 there.</p></div>
+<div class="qa hard"><p class="q">If it gives wrong advice and a child dies, who is liable?</p><p>The same person who is liable today when she reads the wrong line of the printed book: the health system, through its protocols. We do not change the chain of clinical responsibility and we would resist being sold as if we did.</p><p>What we do change is the failure mode. The device refuses rather than guesses &mdash; <span class="num">12 of 12</span> off-manual questions were refused in testing &mdash; and every answer is traceable to a page number a supervisor can open.</p></div>
+<h2>Accuracy and safety<span class="cnt">six questions</span></h2>
+<div class="qa"><p class="q">What is your accuracy, and how do you measure it?</p><p>Three numbers, on three sets. <b>50 of 52</b> on a set built by taking one question from every page of the manual from page 20 onward &mdash; not chosen for being answerable. <b>9 of 10</b> on a fixed clinical set we have run all through development. <b>12 of 12</b> off-manual questions correctly refused.</p><p>Of the 50 answered, <b>39</b> came from the page the question was written against. The rest came from a facing page on the same topic, which is usually still right and sometimes not.</p></div>
+<div class="qa"><p class="q">What happens when it does not know?</p><p>It says so, in Hindi, and tells her to ask her health centre. That is a deliberate path, not an error: when nothing in the book scores high enough, the language model is never called at all, so there is nothing to invent from.</p><p>We built that after finding the opposite. An earlier build fell back to the model's own knowledge and would happily answer &ldquo;what is the capital of France&rdquo; &mdash; which on a health question means inventing plausible medical advice.</p></div>
+<div class="qa"><p class="q">How do you know it is not making the answers up?</p><p>Because it is only ever shown three pages of one book and told to refuse if the answer is not there. We measure grounding directly &mdash; the share of the answer's content words that appear in the retrieved pages &mdash; and it runs at <span class="num">0.90</span>.</p><p>There is no internet connection at run time to fetch anything from, and no other corpus on the device.</p></div>
+<div class="qa"><p class="q">It is a small model. Why should we believe it on clinical text?</p><p>Because we chose it on exactly that. The test that decided the model was not a benchmark, it was a negation: with <i>&ldquo;do not bathe a baby until its weight is 2000 gm&rdquo;</i> present word for word in the context, one candidate answered that the baby <i>should be bathed daily</i>.</p><p>That model was rejected on the spot despite being smaller and faster. Any model we put in this device has to pass that test first.</p></div>
+<div class="qa"><p class="q">Will it understand a village accent, or a dialect?</p><p>Recognition is the weakest link in the chain and we treat it that way. Over <span class="num">156</span> recognitions &mdash; all 52 questions, three times each &mdash; <span class="num">99%</span> of the words that carry the meaning survived.</p><p>But that is a synthesised voice, not a room with people in it, and the recogniser is not deterministic: the same question came back three different ways across three tries. Real-accent performance is a pilot question and we will not pretend we have the number.</p></div>
+<div class="qa"><p class="q">What if she asks the question badly, or asks two things at once?</p><p>Long questions used to be the biggest single cause of wrong answers &mdash; not because the device misunderstood, but because the recorder cut them off and the cut removed a <i>not</i>. That is fixed, and the device now listens until she stops talking.</p><p>If the question is genuinely outside the book, it refuses. If it is ambiguous &mdash; one page carries two drug courses at once &mdash; it can pick the wrong one, and that case is printed on the test sheet.</p></div>
+<h2>Latency and performance<span class="cnt">three questions</span></h2>
+<div class="qa"><p class="q">Four seconds is a long time to wait.</p><p>It is, and it used to be seven. The answer is spoken sentence by sentence as it is generated, so she hears the first words at <span class="num">4.05 s</span> rather than waiting for the whole answer at 5.37&nbsp;s.</p><p>The breakdown on this board: recognition <span class="num">0.6 s</span>, translation in <span class="num">0.5 s</span>, retrieval is instant, generation <span class="num">2.5&ndash;3 s</span>, translation out <span class="num">0.8 s</span>. Generation dominates, which is why the power mode and the streaming both went there.</p></div>
+<div class="qa"><p class="q">Why is translation in the loop at all?</p><p>Because the manual the Government publishes for this module is in English and the ASHA speaks Hindi. Today we translate the question into the book's language, and the answer back.</p><p>It is also the largest remaining source of error: the translator kept choosing the everyday sense of a clinical word, so <span class="num">आशा</span> became <i>hope</i> and <span class="num">पानी की कमी</span> became <i>water scarcity</i> where the book says <i>dehydration</i>. Indexing the Hindi edition of the same volume removes that whole class, and it is the first thing we do after this stage.</p></div>
+<div class="qa"><p class="q">Could it be faster on better hardware?</p><p>Yes, and it would also be worse value. We measured the opposite direction instead: the whole stack fits in 4.2&nbsp;GB and 5.1&nbsp;W precisely so it can move <i>down</i> to a &#8377;7,000 commodity module rather than up.</p></div>
+<h2>Why offline<span class="cnt">three questions</span></h2>
+<div class="qa"><p class="q">Why offline? 4G is reaching everywhere.</p><p>Two government numbers. Rural tele-density is <span class="num">59.63%</span> against urban <span class="num">148.92%</span> &mdash; an urban Indian has about two and a half connections for every one a rural Indian has. And the 4G Saturation project exists because <span class="num">24,680</span> villages had no coverage at all.</p><p>But the real argument is not the map, it is the moment. She is in a house at night with a baby that is not feeding. A tool that works on most days is not a tool she will reach for on the day it matters.</p></div>
+<div class="qa"><p class="q">Why not an app on her phone? She already has one.</p><p>An app is a client for a server. Take the network away and a cloud assistant has nothing left; take it away from this and nothing changes.</p><p>Running the models on the phone itself is the interesting version of the question, and the honest answer is memory: this stack needs 4.2&nbsp;GB resident, which is not what an entry-level phone will give an app. It is also her personal phone, with her battery and her data.</p></div>
+<div class="qa"><p class="q">What about privacy &mdash; where does the mother's data go?</p><p>Nowhere. The application never opens a socket. The developer kit's Wi-Fi card enumerates and is never used, and the production carrier omits the slot entirely.</p><p>Nothing about the mother or the child is transmitted, because there is nothing to transmit to.</p></div>
+<h2>Models, and BHASHINI<span class="cnt">three questions</span></h2>
+<div class="qa"><p class="q">Which BHASHINI models are you actually using?</p><p>Recognition is AI4Bharat's IndicConformer 600M, int8, running in ONNX Runtime on the board. Translation is IndicTrans2, int8, through CTranslate2. The Hindi voice is a Piper model trained on AI4Bharat's indicnlp corpus.</p><p>So the whole Indic language chain &mdash; hearing, translating and speaking &mdash; is the BHASHINI ecosystem, running locally rather than called as an API.</p></div>
+<div class="qa"><p class="q">Then why is the language model not an Indian one?</p><p>Because none we could fit passed the test. The generator has to hold a clinical negation in 8 GB alongside three other models, and the one that does today is a 921&nbsp;MB general model.</p><p>It is also the one piece that is easiest to replace &mdash; it sits behind one interface and is the last English-only stage. <b>The day an Indic model of this size passes the negation test, it goes in</b>, and indexing the Hindi manual would then let us drop translation from the loop entirely.</p></div>
+<div class="qa"><p class="q">Did you fine-tune anything?</p><p>No. Every model is used as published, quantised for this board. That is deliberate: a fine-tune on a health corpus is a regulatory and maintenance commitment, and the accuracy problem we actually had was retrieval and vocabulary, not model weights.</p><p>We fixed it where it was: eight vocabulary substitutions took the set from 42 answered to 50.</p></div>
+<h2>Scale, cost and procurement<span class="cnt">four questions</span></h2>
+<div class="qa"><p class="q">How does this reach 22 languages?</p><p>One language pack per device, and the pack is a model swap on the same board. BHASHINI already publishes recognition, translation and speech for every scheduled language.</p><p>A district that speaks two languages buys two packs, not two products. Nothing about the hardware, the enclosure or the application changes.</p></div>
+<div class="qa"><p class="q">Guidelines change. How does a device with no internet get updated?</p><p>The same way the book does &mdash; through the system that already replaces her printed modules. A content update is a file, and it can travel on the microSD, over USB at the block office, or over Wi-Fi in a room where Wi-Fi exists, because being offline by design is not the same as being unable to connect.</p><p>Our business model puts this in the recurring line: the device is sold once, the content and support annually. That line is what keeps the answers correct.</p></div>
+<div class="qa"><p class="q">Who buys it? ASHAs have no budget.</p><p>Correct, and that is why she is not the customer. NHM or the district health society buys, the ASHA uses, the mother and newborn benefit &mdash; three different parties, deliberately. ASHAs are an existing cadre with an existing budget line for kits and training.</p><p>NGO and CSR deployments are the same product on a different purchase order, and are how the first pilots get paid for.</p></div>
+<div class="qa"><p class="q">What is defensible here? Anyone can put a model on a board.</p><p>Not the models &mdash; they are public, and they should be. What took the time is everything between them: making four models coexist in 8&nbsp;GB, closing the gap between the Hindi a worker speaks and the English a government manual is written in, and making the thing refuse.</p><p>Our engineering issues document lists sixteen problems with the measurement for each. That list is the moat, and it is why we published it.</p></div>
+<h2>The user journey<span class="cnt">three questions</span></h2>
+<div class="qa"><p class="q">Walk us through what she actually does.</p><p>One button. She presses it, asks her question in Hindi, and stops talking. Recording ends on <span class="num">3.5 s</span> of silence, or on a second press. The question appears on the screen in Devanagari, the answer follows underneath, and the device speaks it.</p><p>There is no menu, no login, no typing and no language selection &mdash; a worker who asks in Hindi sees and hears only Hindi.</p></div>
+<div class="qa"><p class="q">Why a toggle and not hold-to-talk? Hold is more natural.</p><p>Because this board cannot do hold-to-talk, and we found that by measuring rather than assuming. The trigger pin drops low after about <span class="num">7.8 s</span> while the button is still physically held.</p><p>Every question longer than eight seconds was being cut off, and one cut removed a <i>not</i> from a question about a doctor being absent, which inverted the answer. The production carrier fixes the pin properly; the interaction works either way.</p></div>
+<div class="qa"><p class="q">What if she cannot read the screen?</p><p>She does not need to. The screen is confirmation, not the channel &mdash; the answer is spoken. The screen exists so she can see that it heard her correctly, which is the one thing speech gets wrong.</p></div>
+<h2>Hardware and enclosure<span class="cnt">four questions</span></h2>
+<div class="qa"><p class="q">How long does it run on a charge?</p><p>The prototype has <b>no battery</b> &mdash; it runs from the barrel jack, and we are not going to pretend otherwise. The production unit specifies a 37&nbsp;Wh cell: about <span class="num">6 hours</span> of continuous querying at 5.1&nbsp;W, and a full shift at a realistic duty cycle since the board idles at 3.4&nbsp;W.</p><p>A 2&nbsp;A charger is specified so it refills overnight; a 1&nbsp;A part would need more than ten hours, which is the difference between a device that works tomorrow and one that does not.</p></div>
+<div class="qa"><p class="q">That enclosure is a plastic project box.</p><p>It is, and it is listed in the bill of materials as exactly that &mdash; <b>not field-rated</b>. The production enclosure is a moulded IP54 case with a speaker grille and a sealed button.</p><p>We did not tool a case before the software was finished, for the same reason we did not spin a board: the button turned out to need input conditioning the reference carrier does not provide, and we would have tooled that mistake in.</p></div>
+<div class="qa"><p class="q">Why is there a camera if you do not use it?</p><p>Because the capability is cheap now and the approval is slow. The sensor is idle in the shipping build; the screening we want &mdash; newborn jaundice from skin colour, which an ASHA judges by eye in poor light &mdash; needs Ministry of Health approval and clinical validation.</p><p>It is on the roadmap as a populate option on the production carrier, and we are not claiming it works today.</p></div>
+<div class="qa"><p class="q">What happens when one breaks in a village?</p><p>Production moves storage from a microSD card to on-module eMMC, which removes the commonest field failure on SD-booted devices. Beyond that it is a swap unit against the annual support line, not a field repair &mdash; there is nothing in it a block office should be opening.</p></div>
+<h2>Competition<span class="cnt">three questions</span></h2>
+<div class="qa"><p class="q">How is this different from TeCHO+ or the other ASHA apps?</p><p>They schedule the visit and capture the data &mdash; they tell her <i>who</i> to see and record what happened. This answers the clinical question at the doorstep: what to do once she is there.</p><p>It assists her; it replaces neither her nor what is already deployed. A state running TeCHO+ loses nothing by adding this.</p></div>
+<div class="qa"><p class="q">Why would anyone buy this when ChatGPT is free?</p><p>Three reasons, in order. It works with no network, which is where she is. It answers only from the manual the Government gave her, and refuses everything else, which a general assistant cannot do. And it costs <span class="num">&#8377;0</span> per question forever, where a hosted assistant bills for every answer it ever gives.</p><p>There is a fourth: nothing about the mother or child leaves the device.</p></div>
+<div class="qa"><p class="q">What stops a large company doing this next quarter?</p><p>Nothing, and that would be a good outcome for ASHAs. What is not quick is the part that is not the model: the vocabulary gap between spoken Hindi and a written English manual, the refusal behaviour, and the memory work to make four models coexist on a &#8377;7,000 board.</p><p>We have that written down with measurements. A team starting now starts at 42 answered out of 52, which is where we were before any of it.</p></div>
+  <div class="note">
+    <p class="hd">Three things to say if the answer is not going well</p>
+    <p><b>&ldquo;We measured that, and here is the number.&rdquo;</b> Every claim in this project has a
+    measurement behind it and most have a commit message explaining why the obvious alternative was
+    worse. Reach for the number, not the adjective.</p>
+    <p><b>&ldquo;That is a real weakness. Here is what we would do about it.&rdquo;</b> One module of seven,
+    no field deployment, a non-commercial voice, a project-box enclosure, two wrong answers in 52. All
+    of it is already written down in our own documents. Conceding a weakness we have already published
+    costs nothing and buys the rest.</p>
+    <p><b>&ldquo;Ask it.&rdquo;</b> The test sheet has 52 questions from every page of the manual, and the
+    jury has the manual. The strongest answer to a question about accuracy is to hand them the device.</p>
+  </div>
+</div>
