@@ -935,7 +935,38 @@ class HearTheWorld(BaseApplication):
                      best_per_term, self.MIN_RELEVANCE)
             return []
         log.info("Retrieval relevance %.2f per term", best_per_term)
-        return [self.knowledge_chunks[i] for score, i in scores[:top_k] if score > 0]
+        chosen = [self.knowledge_chunks[i] for score, i in scores[:top_k] if score > 0]
+        return self._not_from_the_wrong_book(query, chosen, log)
+
+    # This module is about children, and the only pregnant woman in it is one
+    # who has malaria, one on TB treatment, and one on a list for her tetanus
+    # shot. It has no antenatal care in it at all. But it has ten pages on
+    # preventing pregnancy, and those pages answer to "pregnant woman" loudly
+    # enough to win - so asked what a pregnant woman with anaemia should watch
+    # for, the device said she should avoid an IUCD because anaemia is a
+    # contraindication for insertion; asked what checkups she needs in her
+    # first months, that she needs a monthly pelvic exam to check the IUCD is
+    # in place; and asked which tablet prevents anaemia, that it is Mala N or
+    # Mala D - an oral contraceptive. All three were spoken with no hedging.
+    #
+    # A page about how not to become pregnant cannot answer a question about a
+    # woman who already is, so it is not allowed to. Everything else about her
+    # that the manual does cover - the malaria pages, the TB pages - is
+    # untouched, and so is every question that does not mention her: none of
+    # the 52 page-by-page questions contains the word.
+    _ASKS_ABOUT_PREGNANCY = re.compile(r'pregnan\w*', re.I)
+    _ABOUT_PREVENTING_IT = re.compile(
+        r'contracept|IUCD|sterilis|steriliz|condom|oral pill|Mala\s*[ND]', re.I)
+
+    @classmethod
+    def _not_from_the_wrong_book(cls, query, chunks, log=None):
+        if not chunks or not cls._ASKS_ABOUT_PREGNANCY.search(query or ''):
+            return chunks
+        kept = [c for c in chunks if not cls._ABOUT_PREVENTING_IT.search(c)]
+        if len(kept) != len(chunks) and log:
+            log.info("Asked about a pregnant woman: dropped %d family-planning "
+                     "passage(s) from the context", len(chunks) - len(kept))
+        return kept
 
     def ui_cb(self, msg):
         if msg == 'Reset':
